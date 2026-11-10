@@ -90,10 +90,7 @@
   min-width: 0;
   margin-left: 275px;
   width: calc(100% - 275px);
-}
-
-.page-switcher-bar {
-  margin-left: 275px;
+  padding-top: 76px;
 }
 
 .portal-topbar {
@@ -104,9 +101,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1020;
+  left: 275px;
+  right: 0;
+  z-index: 1030;
+  box-shadow: 0 4px 16px rgba(40, 54, 24, 0.08);
 }
 
 /* KPI Summary Cards */
@@ -391,9 +391,10 @@
   .portal-main-content {
     margin-left: 0;
     width: 100%;
+    padding-top: 76px;
   }
-  .page-switcher-bar {
-    margin-left: 0;
+  .portal-topbar {
+    left: 0;
   }
   .sidebar-backdrop.show {
     display: block;

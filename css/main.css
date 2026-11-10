@@ -50,6 +50,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 88px;
 }
 
 body {
@@ -206,14 +207,26 @@ textarea:focus-visible,
   color: var(--dark-green);
 }
 
-/* 4. PUBLIC NAVBAR (Dark Green #283618 with Cream Text #FEFAE0) */
+/* 4. PUBLIC FIXED TOP NAVBAR (Dark Green #283618 with Cream Text #FEFAE0) */
+header:has(.perda-navbar) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1035;
+}
+
+header:has(.perda-navbar) + main {
+  margin-top: 75px;
+}
+
 .perda-navbar {
   background-color: var(--dark-green);
   border-bottom: 3px solid var(--sand);
   padding: 0.75rem 0;
-  position: sticky;
-  top: 0;
-  z-index: 1030;
+  width: 100%;
+  z-index: 1035;
   box-shadow: 0 4px 20px rgba(40, 54, 24, 0.25);
 }
 
