@@ -1,0 +1,266 @@
+/* ==========================================================================
+   Page 1: Landing & Search Styles (landing.css)
+   Hero Section, Quick Search Bar, Homestay Cards, Availability Calendar
+   ========================================================================== */
+
+/* Hero Section with Village & Paddy Field Backdrop */
+.hero-section {
+  position: relative;
+  background: linear-gradient(
+      180deg,
+      rgba(40, 54, 24, 0.72) 0%,
+      rgba(40, 54, 24, 0.58) 55%,
+      rgba(40, 54, 24, 0.85) 100%
+    ),
+    url('../images/hero-village.svg') center/cover no-repeat;
+  color: var(--cream);
+  padding: 4.5rem 0 5.5rem;
+  border-bottom: 4px solid var(--sand);
+}
+
+.hero-badge {
+  background-color: rgba(221, 161, 94, 0.22);
+  border: 1.5px solid var(--sand);
+  color: var(--cream);
+  padding: 0.45rem 1.15rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.84rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.hero-title {
+  color: var(--cream);
+  font-size: clamp(2rem, 4.2vw, 3.35rem);
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 16px rgba(40, 54, 24, 0.5);
+}
+
+.hero-subtitle {
+  color: var(--cream);
+  opacity: 0.94;
+  font-size: 1.08rem;
+  max-width: 680px;
+  margin: 0 auto 2.25rem;
+}
+
+/* Quick Search Bar Card */
+.quick-search-card {
+  background-color: var(--cream);
+  border: 2.5px solid var(--sand);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  box-shadow: 0 18px 45px rgba(40, 54, 24, 0.35);
+  color: var(--dark-green);
+}
+
+/* Homestay Result Cards */
+.homestay-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--white);
+  border: 1.5px solid var(--sand);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  transition: var(--transition-base);
+}
+
+.homestay-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--burnt-orange);
+}
+
+.homestay-card-img-wrap {
+  position: relative;
+  height: 215px;
+  overflow: hidden;
+  background-color: var(--dark-green);
+}
+
+.homestay-card-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+
+.homestay-card:hover .homestay-card-img-wrap img {
+  transform: scale(1.05);
+}
+
+.homestay-district-tag {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background-color: var(--dark-green);
+  color: var(--cream);
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid var(--sand);
+}
+
+.homestay-price-tag {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  background-color: var(--cream);
+  color: var(--dark-green);
+  padding: 0.38rem 0.95rem;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 2px solid var(--burnt-orange);
+  box-shadow: 0 4px 12px rgba(40, 54, 24, 0.25);
+}
+
+.homestay-facility-pill {
+  background-color: var(--cream);
+  border: 1px solid var(--sand);
+  color: var(--dark-green);
+  border-radius: var(--radius-pill);
+  padding: 0.24rem 0.7rem;
+  font-size: 0.76rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Homestay Details View & Gallery */
+.details-showcase-card {
+  background-color: var(--white);
+  border: 2px solid var(--sand);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+  padding: 1.75rem;
+}
+
+.gallery-main-img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--sand);
+}
+
+.gallery-thumb-btn {
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  overflow: hidden;
+  height: 68px;
+  width: 100%;
+  cursor: pointer;
+  background: none;
+  transition: var(--transition-base);
+}
+
+.gallery-thumb-btn.active,
+.gallery-thumb-btn:hover {
+  border-color: var(--burnt-orange);
+  transform: translateY(-2px);
+}
+
+.gallery-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Real-Time Availability Calendar
+   Available = Olive Green (#606C38)
+   Unavailable/Blocked = Neutral Grey
+   Selected = Burnt Orange (#BC6C25) */
+.availability-calendar-box {
+  background-color: var(--cream);
+  border: 1.5px solid var(--sand);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+}
+
+.calendar-grid-header,
+.calendar-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+
+.calendar-grid-header span {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--dark-green);
+  padding: 0.35rem 0;
+}
+
+.cal-day {
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+  transition: var(--transition-base);
+  user-select: none;
+}
+
+/* Available dates in Olive Green (#606C38) */
+.cal-day.available {
+  background-color: var(--olive);
+  color: var(--cream);
+  cursor: pointer;
+}
+
+.cal-day.available:hover {
+  background-color: var(--dark-green);
+  border-color: var(--sand);
+  transform: scale(1.04);
+}
+
+/* Unavailable / Blocked dates in Grey */
+.cal-day.unavailable {
+  background-color: var(--grey-200);
+  color: var(--grey-500);
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* Selected dates in Burnt Orange (#BC6C25) */
+.cal-day.selected {
+  background-color: var(--burnt-orange);
+  color: var(--cream);
+  border-color: var(--dark-green);
+  box-shadow: 0 4px 10px rgba(188, 108, 37, 0.35);
+  cursor: pointer;
+}
+
+.cal-day.empty {
+  background: transparent;
+  pointer-events: none;
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Tourist Registration Section */
+.registration-section {
+  background: linear-gradient(135deg, rgba(96, 108, 56, 0.12), rgba(221, 161, 94, 0.18));
+  border-top: 2px solid var(--sand);
+  border-bottom: 2px solid var(--sand);
+  padding: 4rem 0;
+}
+

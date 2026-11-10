@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#BC6C25"/>
+      <stop offset="50%" stop-color="#DDA15E"/>
+      <stop offset="100%" stop-color="#606C38"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="540" fill="url(#bg3)"/>
+  <circle cx="180" cy="120" r="65" fill="#FEFAE0" opacity="0.35"/>
+  <path d="M0 350 Q380 300 800 360 L800 540 L0 540 Z" fill="#283618"/>
+  <!-- Heritage Courtyard Home -->
+  <g transform="translate(185, 155)">
+    <rect x="20" y="90" width="390" height="105" rx="10" fill="#FEFAE0" stroke="#283618" stroke-width="4"/>
+    <polygon points="0,95 215,5 430,95" fill="#283618"/>
+    <polygon points="20,92 215,15 410,92" fill="#606C38"/>
+    <rect x="65" y="115" width="60" height="50" rx="6" fill="#DDA15E"/>
+    <rect x="180" y="110" width="70" height="85" rx="6" fill="#BC6C25"/>
+    <rect x="305" y="115" width="60" height="50" rx="6" fill="#DDA15E"/>
+  </g>
+  <rect x="24" y="24" width="235" height="36" rx="18" fill="#283618" opacity="0.85"/>
+  <text x="42" y="47" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="#FEFAE0">Balik Pulau • Hilltop Retreat</text>
+</svg>
+

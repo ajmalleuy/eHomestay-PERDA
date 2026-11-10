@@ -1,0 +1,40 @@
+/* ==========================================================================
+   Page 6: Officer Reports & Analytics Styles (reports.css)
+   Filter Bar, Bar & Pie Charts, District Data Table, PDF/Excel Exports
+   ========================================================================== */
+
+.report-filter-card {
+  background-color: var(--white);
+  border: 2px solid var(--sand);
+  border-radius: var(--radius-card);
+  padding: 1.4rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.chart-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 290px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Print / Export PDF Optimization */
+@media print {
+  .portal-sidebar,
+  .portal-topbar,
+  .page-switcher-bar,
+  .no-print {
+    display: none !important;
+  }
+  .portal-main-content {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body {
+    background-color: var(--white) !important;
+  }
+}
+

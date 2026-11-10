@@ -1,0 +1,116 @@
+/* ==========================================================================
+   Page 3: Unified Internal Login Styles (login.css)
+   Operators & BPE PERDA Officers (Admin) Portal Authentication
+   ========================================================================== */
+
+.login-page-wrapper {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background: linear-gradient(
+      135deg,
+      rgba(40, 54, 24, 0.88) 0%,
+      rgba(96, 108, 56, 0.82) 100%
+    ),
+    url('../images/hero-village.svg') center/cover no-repeat;
+}
+
+.login-shell-card {
+  background-color: var(--cream);
+  border: 2.5px solid var(--sand);
+  border-radius: var(--radius-card);
+  box-shadow: 0 22px 55px rgba(40, 54, 24, 0.45);
+  overflow: hidden;
+  max-width: 960px;
+  width: 100%;
+}
+
+.login-brand-panel {
+  background-color: var(--dark-green);
+  color: var(--cream);
+  padding: 2.75rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 2px solid var(--sand);
+}
+
+.login-form-panel {
+  padding: 2.75rem 2.25rem;
+  background-color: var(--cream);
+}
+
+/* Role Switcher Tabs (Operator vs BPE PERDA Officer) */
+.role-selector-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  background-color: var(--white);
+  padding: 0.4rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--sand);
+  margin-bottom: 1.5rem;
+}
+
+.role-tab-btn {
+  min-height: 44px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--dark-green);
+  font-weight: 600;
+  font-size: 0.86rem;
+  transition: var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.role-tab-btn.active {
+  background-color: var(--olive);
+  color: var(--cream);
+  box-shadow: 0 4px 12px rgba(96, 108, 56, 0.3);
+}
+
+/* Show / Hide Password Toggle */
+.password-input-group {
+  position: relative;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 38px;
+  min-width: 44px;
+  border: none;
+  background: transparent;
+  color: var(--olive);
+  border-radius: var(--radius-pill);
+}
+
+.password-toggle-btn:hover {
+  color: var(--burnt-orange);
+}
+
+.login-error-banner {
+  background-color: var(--burnt-orange);
+  color: var(--cream);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.15rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  display: none;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.login-error-banner.show {
+  display: flex;
+}
+

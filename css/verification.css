@@ -1,0 +1,110 @@
+/* ==========================================================================
+   Page 5: Operator Verification & Approval Styles (verification.css)
+   24-Hour Countdown Timer, Receipt Preview, Notification Bell & Approval Modal
+   ========================================================================== */
+
+/* 24-Hour Verification Countdown Timer Pill */
+.countdown-badge {
+  background-color: var(--cream);
+  border: 1.5px solid var(--burnt-orange);
+  color: var(--dark-green);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.85rem;
+  font-family: 'Poppins', monospace;
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.countdown-badge.urgent {
+  background-color: var(--burnt-orange);
+  color: var(--cream);
+  animation: pulseUrgent 1.8s infinite;
+}
+
+@keyframes pulseUrgent {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(188, 108, 37, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(188, 108, 37, 0);
+  }
+}
+
+/* Notification Bell & Dropdown */
+.notif-bell-btn {
+  position: relative;
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: var(--radius-pill);
+  background-color: var(--cream);
+  border: 1.5px solid var(--sand);
+  color: var(--dark-green);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-count-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: var(--burnt-orange);
+  color: var(--cream);
+  font-size: 0.72rem;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--white);
+}
+
+.notif-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 340px;
+  background-color: var(--white);
+  border: 2px solid var(--sand);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-hover);
+  z-index: 1050;
+  display: none;
+  overflow: hidden;
+}
+
+.notif-dropdown-panel.show {
+  display: block;
+}
+
+/* Receipt Preview Frame */
+.receipt-preview-frame {
+  background-color: var(--cream);
+  border: 2px solid var(--sand);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+}
+
+.receipt-preview-frame img {
+  max-width: 100%;
+  max-height: 420px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-soft);
+}
+
+.verification-row {
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.verification-row:hover,
+.verification-row.selected-row {
+  background-color: rgba(221, 161, 94, 0.18) !important;
+}
+

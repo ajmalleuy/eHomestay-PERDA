@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" fill="none">
+  <!-- Rounded Emblem Background -->
+  <rect x="2" y="4" width="56" height="56" rx="16" fill="#606C38" stroke="#DDA15E" stroke-width="2.5"/>
+  <!-- Traditional Malay Kampung Roof & Nature Motif -->
+  <path d="M12 34L30 16L48 34" stroke="#FEFAE0" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 31V47H42V31" stroke="#FEFAE0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="26" y="36" width="8" height="11" rx="2" fill="#DDA15E"/>
+  <!-- Sun / Warmth Accent -->
+  <circle cx="42" cy="18" r="4" fill="#BC6C25"/>
+  <!-- Leaf Flourish -->
+  <path d="M10 49C20 45 40 45 50 49" stroke="#DDA15E" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Brand Text -->
+  <text x="68" y="31" font-family="'Playfair Display', Georgia, serif" font-size="23" font-weight="700" fill="#FEFAE0">e-Homestay</text>
+  <text x="69" y="49" font-family="'Poppins', sans-serif" font-size="10.5" font-weight="600" letter-spacing="2" fill="#DDA15E">PERDA INAP DESA</text>
+</svg>
+

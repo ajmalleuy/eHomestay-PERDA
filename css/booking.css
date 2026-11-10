@@ -1,0 +1,127 @@
+/* ==========================================================================
+   Page 2: Booking Form & Status Tracking Styles (booking.css)
+   Booking Summary, Payment Upload (JPG/PNG/PDF <=5MB), Reference Tracker
+   ========================================================================== */
+
+.booking-header-banner {
+  background-color: var(--dark-green);
+  color: var(--cream);
+  padding: 2.5rem 0;
+  border-bottom: 3px solid var(--sand);
+}
+
+.booking-summary-card {
+  background-color: var(--cream);
+  border: 2px solid var(--sand);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  position: sticky;
+  top: 96px;
+  box-shadow: var(--shadow-soft);
+}
+
+.summary-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0;
+  border-bottom: 1px dashed var(--sand);
+  font-size: 0.92rem;
+}
+
+.summary-total-box {
+  background-color: var(--dark-green);
+  color: var(--cream);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Payment Proof Upload Dropzone */
+.payment-upload-zone {
+  background-color: var(--cream);
+  border: 2.5px dashed var(--olive);
+  border-radius: var(--radius-card);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.payment-upload-zone:hover,
+.payment-upload-zone.dragover {
+  background-color: var(--white);
+  border-color: var(--burnt-orange);
+}
+
+.payment-upload-zone.upload-error {
+  border-color: var(--burnt-orange);
+  background-color: rgba(188, 108, 37, 0.08);
+}
+
+.file-error-alert {
+  background-color: var(--burnt-orange);
+  color: var(--cream);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.15rem;
+  margin-top: 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: none;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.file-error-alert.show {
+  display: flex;
+}
+
+.upload-preview-card {
+  background-color: var(--white);
+  border: 1.5px solid var(--olive);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.1rem;
+  margin-top: 0.85rem;
+  display: none;
+}
+
+.upload-preview-card.show {
+  display: block;
+}
+
+/* Booking Confirmation View */
+.confirmation-screen {
+  background-color: var(--white);
+  border: 2.5px solid var(--olive);
+  border-radius: var(--radius-card);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-hover);
+}
+
+.reference-code-pill {
+  background-color: var(--dark-green);
+  color: var(--cream);
+  border: 2px solid var(--sand);
+  border-radius: var(--radius-pill);
+  padding: 0.75rem 1.75rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+/* Booking Status Tracking Section */
+.tracking-result-card {
+  background-color: var(--cream);
+  border: 2px solid var(--sand);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+}
+

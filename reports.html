@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BPE PERDA Officer Reports &amp; Analytics — e-Homestay PERDA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/reports.css">
+</head>
+<body>
+  <a href="#mainContent" class="skip-link">Skip to main content</a>
+
+  <!-- Quick 6-Page Platform Switcher Strip -->
+  <div class="page-switcher-bar no-print">
+    <div class="container-fluid px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <span><i class="fa-solid fa-compass me-1" style="color: var(--sand);"></i> <strong>e-Homestay Platform Pages:</strong></span>
+      <div class="d-flex flex-wrap gap-1">
+        <a href="index.html">1. Landing &amp; Search</a>
+        <a href="booking.html">2. Booking &amp; Track</a>
+        <a href="login.html">3. Staff/Operator Login</a>
+        <a href="dashboard.html">4. Dashboard</a>
+        <a href="verification.html">5. Verification (24h)</a>
+        <a href="reports.html" class="active-page">6. Officer Reports</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+  <div class="portal-layout">
+    <!-- Collapsible Dark Green Sidebar -->
+    <aside id="portalSidebar" class="portal-sidebar" aria-label="Portal Sidebar Navigation">
+      <div class="sidebar-brand-header">
+        <a href="index.html" class="d-flex align-items-center">
+          <img src="images/logo.svg" alt="e-Homestay PERDA Logo" style="height: 44px;">
+        </a>
+        <button type="button" id="sidebarCloseBtn" class="btn btn-sand btn-sm d-lg-none px-2" aria-label="Close sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <ul class="sidebar-nav-list">
+        <li class="sidebar-nav-item">
+          <a href="dashboard.html" class="sidebar-nav-link">
+            <i class="fa-solid fa-gauge-high"></i> Dashboard Overview
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="dashboard.html?role=operator" class="sidebar-nav-link">
+            <i class="fa-solid fa-house-chimney-window"></i> Homestay Units &amp; Block Dates
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="verification.html" class="sidebar-nav-link">
+            <i class="fa-solid fa-file-circle-check"></i> Verification &amp; Approval
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="reports.html" class="sidebar-nav-link active">
+            <i class="fa-solid fa-chart-pie"></i> Officer Reports &amp; Export
+          </a>
+        </li>
+        <li class="sidebar-nav-item mt-3 pt-3 border-top" style="border-color: rgba(221, 161, 94, 0.3) !important;">
+          <a href="index.html" class="sidebar-nav-link">
+            <i class="fa-solid fa-globe"></i> Public Tourist View
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="login.html" class="sidebar-nav-link">
+            <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Reports Content -->
+    <div class="portal-main-content">
+      <header class="portal-topbar">
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" id="sidebarToggleBtn" class="btn btn-olive d-lg-none px-3" aria-label="Open sidebar menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <h1 class="h5 font-heading mb-0">BPE PERDA Officer Executive Reports &amp; Analytics</h1>
+            <span class="small fw-semibold" style="color: var(--olive);">
+              <i class="fa-solid fa-building-columns me-1"></i> Bahagian Pembangunan Ekonomi (BPE) • Rural Homestay Performance
+            </span>
+          </div>
+        </div>
+
+        <!-- Export Buttons: "Export PDF" & "Export Excel" -->
+        <div class="d-flex flex-wrap align-items-center gap-2 no-print">
+          <button type="button" id="exportPdfBtn" class="btn btn-cta btn-sm">
+            <i class="fa-solid fa-file-pdf"></i> Export PDF
+          </button>
+          <button type="button" id="exportExcelBtn" class="btn btn-olive btn-sm">
+            <i class="fa-solid fa-file-excel"></i> Export Excel
+          </button>
+        </div>
+      </header>
+
+      <main id="mainContent" class="p-3 p-md-4">
+        <!-- 1. FILTER BAR: Date Range, District, and Homestay -->
+        <div class="report-filter-card mb-4 no-print">
+          <form id="reportFilterForm" novalidate>
+            <div class="row g-3 align-items-end">
+              <div class="col-sm-6 col-lg-2">
+                <label for="reportStartDate" class="form-label small">Start Date</label>
+                <input type="date" id="reportStartDate" class="form-control" value="2026-06-01">
+              </div>
+              <div class="col-sm-6 col-lg-2">
+                <label for="reportEndDate" class="form-label small">End Date</label>
+                <input type="date" id="reportEndDate" class="form-control" value="2026-11-30">
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <label for="reportDistrictFilter" class="form-label small">Filter by PERDA District</label>
+                <select id="reportDistrictFilter" class="form-select">
+                  <option value="ALL">All PERDA Districts</option>
+                  <option value="Kepala Batas">Kepala Batas (SPU)</option>
+                  <option value="Tasek Gelugor">Tasek Gelugor (SPU)</option>
+                  <option value="Kubang Semang">Kubang Semang (SPT)</option>
+                  <option value="Balik Pulau">Balik Pulau (Barat Daya)</option>
+                  <option value="Nibong Tebal">Nibong Tebal (SPS)</option>
+                  <option value="Pulau Aman">Pulau Aman (SPS)</option>
+                </select>
+              </div>
+              <div class="col-sm-6 col-lg-3">
+                <label for="reportHomestayFilter" class="form-label small">Filter by Homestay Unit</label>
+                <select id="reportHomestayFilter" class="form-select">
+                  <option value="ALL">All Homestay Units</option>
+                  <option value="hs-101">Inap Desa Kampung Agung Harmoni</option>
+                  <option value="hs-102">Teratak Dusun Mengkuang Titi</option>
+                  <option value="hs-103">Anjung Bendang Pulau Betong</option>
+                  <option value="hs-104">Villa Muara Sungai Acheh</option>
+                  <option value="hs-105">Desa Damai Chalet Pulau Aman</option>
+                  <option value="hs-106">Laman Agro Lahar Yooi</option>
+                </select>
+              </div>
+              <div class="col-12 col-lg-2 d-flex gap-2">
+                <button type="submit" class="btn btn-cta w-100">
+                  <i class="fa-solid fa-filter"></i> Apply
+                </button>
+                <button type="button" id="resetReportFilterBtn" class="btn btn-sand px-3" title="Reset Filters" aria-label="Reset report filters">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- 2. STATISTICS SUMMARY CARDS: Monthly Rental Collection, Total Tourist Volume, Bookings by District -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="kpi-card kpi-accent">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="small fw-semibold text-uppercase" style="color: var(--burnt-orange);">Monthly Rental Collection</div>
+                  <div id="statMonthlyCollection" class="h2 font-heading my-1">RM 43,630.00</div>
+                  <span class="badge-pill badge-approved"><i class="fa-solid fa-coins"></i> Verified Receipts Total</span>
+                </div>
+                <div class="kpi-icon-circle" style="color: var(--burnt-orange);"><i class="fa-solid fa-sack-dollar"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kpi-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="small fw-semibold text-uppercase" style="color: var(--olive);">Total Tourist Volume</div>
+                  <div id="statTouristVolume" class="h2 font-heading my-1">466 Guests</div>
+                  <span class="badge-pill badge-pending"><i class="fa-solid fa-person-walking-luggage"></i> Domestic &amp; International</span>
+                </div>
+                <div class="kpi-icon-circle"><i class="fa-solid fa-users"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kpi-card kpi-sand">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="small fw-semibold text-uppercase" style="color: var(--olive);">Bookings by District</div>
+                  <div id="statTotalDistrictBookings" class="h2 font-heading my-1">101 Bookings</div>
+                  <span class="badge-pill badge-approved"><i class="fa-solid fa-map-pin"></i> Top: Balik Pulau (21)</span>
+                </div>
+                <div class="kpi-icon-circle"><i class="fa-solid fa-map-location-dot"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. CHARTS: BAR CHART & PIE CHART (Using Exact PERDA Palette Colors) -->
+        <div class="row g-4 mb-4">
+          <div class="col-lg-7">
+            <div class="perda-card p-4 h-100">
+              <h2 class="h5 font-heading mb-1">
+                <i class="fa-solid fa-chart-column me-2" style="color: var(--olive);"></i>
+                Rental Collection by District (Bar Chart — RM)
+              </h2>
+              <p class="small mb-3" style="color: var(--olive);">
+                Compares total homestay rental revenue generated across PERDA rural districts.
+              </p>
+              <div class="chart-canvas-wrapper">
+                <canvas id="reportsBarChartCanvas" aria-label="Rental Collection Bar Chart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="perda-card p-4 h-100">
+              <h2 class="h5 font-heading mb-1">
+                <i class="fa-solid fa-chart-pie me-2" style="color: var(--burnt-orange);"></i>
+                Bookings Share by District (Pie Chart)
+              </h2>
+              <p class="small mb-3" style="color: var(--olive);">
+                Proportion of total tourist bookings distributed across PERDA clusters.
+              </p>
+              <div class="chart-canvas-wrapper">
+                <canvas id="reportsPieChartCanvas" aria-label="Bookings Share Pie Chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. DETAILED REPORT DATA TABLE -->
+        <div class="perda-card p-4">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+              <h2 class="h5 font-heading mb-0">
+                <i class="fa-solid fa-table me-2" style="color: var(--olive);"></i>
+                PERDA Inap Desa Performance Breakdown Table
+              </h2>
+              <p class="small mb-0" style="color: var(--olive);">
+                Detailed monthly performance metrics by homestay unit and district.
+              </p>
+            </div>
+            <span class="badge-pill badge-pending">Official BPE Audit Record</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table align-middle table-mobile-cards mb-0">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--sand);">
+                  <th>Period</th>
+                  <th>Homestay Unit</th>
+                  <th>PERDA District</th>
+                  <th>Total Bookings</th>
+                  <th>Tourist Volume</th>
+                  <th>Occupancy</th>
+                  <th>Rental Collection (RM)</th>
+                </tr>
+              </thead>
+              <tbody id="reportDataTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/charts.js"></script>
+</body>
+</html>
+

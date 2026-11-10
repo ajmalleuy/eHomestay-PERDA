@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Homestay &amp; Track Status — e-Homestay PERDA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/booking.css">
+</head>
+<body>
+  <a href="#mainContent" class="skip-link">Skip to main content</a>
+
+  <!-- Quick 6-Page Platform Switcher Strip -->
+  <div class="page-switcher-bar">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <span><i class="fa-solid fa-compass me-1" style="color: var(--sand);"></i> <strong>e-Homestay Platform Pages:</strong></span>
+      <div class="d-flex flex-wrap gap-1">
+        <a href="index.html">1. Landing &amp; Search</a>
+        <a href="booking.html" class="active-page">2. Booking &amp; Track</a>
+        <a href="login.html">3. Staff/Operator Login</a>
+        <a href="dashboard.html">4. Dashboard</a>
+        <a href="verification.html">5. Verification (24h)</a>
+        <a href="reports.html">6. Officer Reports</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Public Header / Navbar -->
+  <header>
+    <nav class="navbar navbar-expand-lg perda-navbar" aria-label="Main Navigation">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+          <img src="images/logo.svg" alt="e-Homestay PERDA Logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#publicNavbarCollapse" aria-controls="publicNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="publicNavbarCollapse">
+          <ul class="navbar-nav ms-auto align-items-lg-center gap-1 mt-3 mt-lg-0">
+            <li class="nav-item"><a class="nav-link" href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+            <li class="nav-item"><a class="nav-link active" href="booking.html"><i class="fa-solid fa-calendar-check"></i> Book Now</a></li>
+            <li class="nav-item"><a class="nav-link" href="#trackingSection"><i class="fa-solid fa-magnifying-glass-location"></i> Track Booking</a></li>
+            <li class="nav-item ms-lg-2">
+              <a class="btn btn-sand" href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login / Portal</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="mainContent">
+    <!-- Page Header Banner -->
+    <section class="booking-header-banner">
+      <div class="container">
+        <span class="badge-pill badge-pending mb-2">
+          <i class="fa-solid fa-shield-heart"></i> Direct &amp; Verified Inap Desa Reservation
+        </span>
+        <h1 class="font-heading mb-1" style="color: var(--cream);">Complete Your Homestay Booking</h1>
+        <p class="mb-0" style="color: var(--cream); opacity: 0.9;">
+          Fill in your guest details, upload your bank transfer / DuitNow payment proof (max 5MB), and receive your instant booking reference number.
+        </p>
+      </div>
+    </section>
+
+    <!-- 1. BOOKING FORM & SUMMARY SECTION -->
+    <section class="py-5">
+      <div class="container">
+        <!-- Form & Summary Wrapper (Hidden once confirmed) -->
+        <div id="bookingFormContainer" class="row g-4">
+          <!-- Left Column: Tourist Booking Form & Payment Upload -->
+          <div class="col-lg-7">
+            <div class="perda-card p-4 p-md-5">
+              <h2 class="h4 font-heading mb-4">
+                <i class="fa-solid fa-file-signature me-2" style="color: var(--olive);"></i>
+                1. Stay Selection &amp; Guest Details
+              </h2>
+
+              <form id="touristBookingForm" novalidate>
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label for="bookingHomestaySelect" class="form-label">Selected PERDA Homestay Unit *</label>
+                    <select id="bookingHomestaySelect" class="form-select"></select>
+                  </div>
+                  <div class="col-sm-4">
+                    <label for="bookingCheckIn" class="form-label">Check-In Date *</label>
+                    <input type="date" id="bookingCheckIn" class="form-control" value="2026-11-14" required>
+                  </div>
+                  <div class="col-sm-4">
+                    <label for="bookingCheckOut" class="form-label">Check-Out Date *</label>
+                    <input type="date" id="bookingCheckOut" class="form-control" value="2026-11-16" required>
+                    <div id="bookingDatesErr" class="invalid-feedback-custom"></div>
+                  </div>
+                  <div class="col-sm-4">
+                    <label for="bookingGuests" class="form-label">Number of Guests *</label>
+                    <input type="number" id="bookingGuests" class="form-control" min="1" max="12" value="4" required>
+                    <div id="bookingGuestsErr" class="invalid-feedback-custom"></div>
+                  </div>
+
+                  <hr class="my-3" style="border-color: var(--sand);">
+
+                  <div class="col-md-6">
+                    <label for="touristFullName" class="form-label">Full Name *</label>
+                    <input type="text" id="touristFullName" class="form-control" placeholder="e.g., Nurul Izzah binti Razak" required>
+                    <div id="touristFullNameErr" class="invalid-feedback-custom"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="touristPhone" class="form-label">Phone Number *</label>
+                    <input type="tel" id="touristPhone" class="form-control" placeholder="e.g., +60 12-489 3310" required>
+                    <div id="touristPhoneErr" class="invalid-feedback-custom"></div>
+                  </div>
+                  <div class="col-12">
+                    <label for="touristEmail" class="form-label">Email Address (for booking reference &amp; receipt) *</label>
+                    <input type="email" id="touristEmail" class="form-control" placeholder="e.g., nurul.izzah@gmail.com" required>
+                    <div id="touristEmailErr" class="invalid-feedback-custom"></div>
+                  </div>
+                  <div class="col-12">
+                    <label for="touristSpecialRequests" class="form-label">Special Requests (Optional)</label>
+                    <textarea id="touristSpecialRequests" class="form-control" rows="3" placeholder="e.g., Ground floor room preference, estimated arrival time, BBQ pit setup..."></textarea>
+                  </div>
+
+                  <!-- Payment Proof Upload Box (JPG/PNG/PDF only, max 5MB) -->
+                  <div class="col-12 mt-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                      <label for="paymentProofInput" class="form-label mb-0">
+                        <i class="fa-solid fa-receipt me-1" style="color: var(--olive);"></i>
+                        2. Upload Payment Proof (JPG / PNG / PDF only, Max 5MB) *
+                      </label>
+                      <!-- Quick Demo Test Buttons for File Validation -->
+                      <div class="d-flex flex-wrap gap-1">
+                        <button type="button" id="loadSampleReceiptBtn" class="btn btn-sand btn-sm py-1 px-3" style="min-height: 34px; font-size: 0.78rem;">
+                          <i class="fa-solid fa-check"></i> Load Sample Valid Receipt (248 KB)
+                        </button>
+                        <button type="button" id="simulateOversizeFileBtn" class="btn btn-outline-olive btn-sm py-1 px-3" style="min-height: 34px; font-size: 0.78rem;">
+                          <i class="fa-solid fa-weight-hanging"></i> Test &gt;5MB File Error
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="p-3 rounded-3 mb-3 small" style="background-color: var(--cream); border: 1px solid var(--sand);">
+                      <strong>Bank Transfer Details:</strong> Bank Islam Malaysia Berhad • Account No: <strong>0701-6010-084921</strong> (Koperasi Inap Desa PERDA Berhad)
+                    </div>
+
+                    <div id="paymentUploadZone" class="payment-upload-zone" tabindex="0" role="button" aria-label="Upload payment proof receipt">
+                      <input type="file" id="paymentProofInput" class="d-none" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf">
+                      <i class="fa-solid fa-cloud-arrow-up fa-2x mb-2" style="color: var(--olive);"></i>
+                      <h5 class="font-heading mb-1">Drag &amp; Drop Payment Receipt Here</h5>
+                      <p class="small mb-2">or click to browse from your device</p>
+                      <span class="badge-pill badge-pending">Accepted: JPG, PNG, PDF • Maximum Size: 5.00 MB</span>
+                    </div>
+
+                    <!-- File-Size / Format Validation Error Alert -->
+                    <div id="paymentFileErrorBox" class="file-error-alert" role="alert">
+                      <i class="fa-solid fa-triangle-exclamation fs-5"></i>
+                      <span id="paymentFileErrorText">File size exceeds the 5.00 MB maximum limit!</span>
+                    </div>
+
+                    <!-- Valid Uploaded File Preview -->
+                    <div id="paymentUploadPreviewCard" class="upload-preview-card">
+                      <div class="d-flex justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-3">
+                          <i class="fa-solid fa-file-circle-check fa-2x" style="color: var(--olive);"></i>
+                          <div>
+                            <div id="previewFileName" class="fw-bold small">duitnow_receipt.png</div>
+                            <div id="previewFileSize" class="small" style="color: var(--olive);">248 KB • Verified Format</div>
+                          </div>
+                        </div>
+                        <button type="button" id="removeUploadedFileBtn" class="btn btn-sand btn-sm py-1 px-3">
+                          <i class="fa-solid fa-trash-can"></i> Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-cta w-100 py-3 fs-6">
+                      <i class="fa-solid fa-paper-plane"></i> Submit Booking &amp; Payment Proof
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Right Column: Sticky Booking Summary Card -->
+          <div class="col-lg-5">
+            <aside class="booking-summary-card" aria-label="Booking Summary">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 font-heading mb-0">Booking Summary</h3>
+                <span class="badge-pill badge-approved"><i class="fa-solid fa-lock"></i> Rate Locked</span>
+              </div>
+
+              <img id="summaryHomestayImg" src="images/homestay-1.svg" alt="Selected Homestay Preview" class="w-100 rounded-4 mb-3" style="height: 175px; object-fit: cover; border: 1.5px solid var(--sand);">
+
+              <h4 id="summaryHomestayName" class="h5 font-heading mb-1">Inap Desa Kampung Agung Harmoni</h4>
+              <p id="summaryDistrictName" class="small mb-3" style="color: var(--olive);">Seberang Perai Utara (Kepala Batas)</p>
+
+              <div class="summary-price-row">
+                <span><i class="fa-regular fa-calendar-check me-2" style="color: var(--olive);"></i> Check-In Date</span>
+                <strong id="summaryCheckInDate">2026-11-14</strong>
+              </div>
+              <div class="summary-price-row">
+                <span><i class="fa-regular fa-calendar-minus me-2" style="color: var(--olive);"></i> Check-Out Date</span>
+                <strong id="summaryCheckOutDate">2026-11-16</strong>
+              </div>
+              <div class="summary-price-row">
+                <span><i class="fa-solid fa-moon me-2" style="color: var(--olive);"></i> Duration</span>
+                <strong id="summaryNightsCount">2 Night(s)</strong>
+              </div>
+              <div class="summary-price-row">
+                <span><i class="fa-solid fa-users me-2" style="color: var(--olive);"></i> Guests</span>
+                <strong id="summaryGuestsCount">4 Guest(s)</strong>
+              </div>
+              <div class="summary-price-row">
+                <span><i class="fa-solid fa-tag me-2" style="color: var(--olive);"></i> Nightly Rate</span>
+                <strong id="summaryRatePerNight">RM 220.00</strong>
+              </div>
+              <div class="summary-price-row">
+                <span><i class="fa-solid fa-hand-holding-heart me-2" style="color: var(--olive);"></i> PERDA Service Fee</span>
+                <strong>RM 0.00 (Waived)</strong>
+              </div>
+
+              <div class="summary-total-box">
+                <div>
+                  <div class="small" style="color: var(--sand);">Total Payable</div>
+                  <div class="small opacity-75">Inclusive of village community tax</div>
+                </div>
+                <div id="summaryTotalPrice" class="h3 font-heading mb-0" style="color: var(--cream);">RM 440.00</div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- Confirmation Screen (Displayed after form submission) -->
+        <div id="bookingConfirmationScreen" class="confirmation-screen d-none my-4" aria-live="polite">
+          <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle" style="width: 72px; height: 72px; background-color: var(--olive); color: var(--cream);">
+            <i class="fa-solid fa-check fa-2x"></i>
+          </div>
+          <span class="badge-pill badge-pending mb-2">Awaiting Operator Verification (24h SLA)</span>
+          <h2 class="font-heading mb-2">Booking Request &amp; Payment Proof Received!</h2>
+          <p class="mb-2">Please save your official PERDA Booking Reference Number below to track your verification status:</p>
+
+          <div class="reference-code-pill">
+            <i class="fa-solid fa-ticket" style="color: var(--sand);"></i>
+            <span id="confirmedRefCode">PERDA-2026-84920</span>
+          </div>
+
+          <div class="row g-3 justify-content-center text-start my-3 mx-auto" style="max-width: 720px;">
+            <div class="col-sm-6">
+              <div class="p-3 rounded-3" style="background-color: var(--cream); border: 1px solid var(--sand);">
+                <div class="small" style="color: var(--olive);">Guest Name</div>
+                <div id="confirmedGuestName" class="fw-bold">Nurul Izzah binti Razak</div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="p-3 rounded-3" style="background-color: var(--cream); border: 1px solid var(--sand);">
+                <div class="small" style="color: var(--olive);">Homestay Unit</div>
+                <div id="confirmedHomestayName" class="fw-bold">Inap Desa Kampung Agung Harmoni</div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="p-3 rounded-3" style="background-color: var(--cream); border: 1px solid var(--sand);">
+                <div class="small" style="color: var(--olive);">Stay Dates</div>
+                <div id="confirmedDatesText" class="fw-bold">2026-11-14 to 2026-11-16 (2 Nights)</div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="p-3 rounded-3" style="background-color: var(--cream); border: 1px solid var(--sand);">
+                <div class="small" style="color: var(--olive);">Total Amount Paid</div>
+                <div id="confirmedTotalPaid" class="fw-bold" style="color: var(--burnt-orange);">RM 440.00</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+            <a href="#trackingSection" class="btn btn-olive">
+              <i class="fa-solid fa-magnifying-glass-location"></i> View Live Status Below
+            </a>
+            <a href="verification.html" class="btn btn-cta">
+              <i class="fa-solid fa-user-check"></i> Open Operator Verification Page
+            </a>
+            <button type="button" class="btn btn-sand" onclick="document.getElementById('bookingConfirmationScreen').classList.add('d-none'); document.getElementById('bookingFormContainer').classList.remove('d-none');">
+              <i class="fa-solid fa-plus"></i> Make Another Booking
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. BOOKING STATUS TRACKING SECTION -->
+    <section id="trackingSection" class="py-5" style="background-color: rgba(96, 108, 56, 0.1); border-top: 2px solid var(--sand);">
+      <div class="container">
+        <div class="perda-card p-4 p-md-5">
+          <div class="row g-4 align-items-center mb-4">
+            <div class="col-lg-6">
+              <span class="badge-pill badge-approved mb-2">
+                <i class="fa-solid fa-satellite-dish"></i> Real-Time Status Tracker
+              </span>
+              <h2 class="font-heading mb-1">Track Your Booking Status</h2>
+              <p class="mb-0">
+                Enter your booking reference number to check whether your payment receipt is <strong>Pending</strong>, <strong>Approved</strong>, or <strong>Rejected</strong>.
+              </p>
+            </div>
+            <div class="col-lg-6">
+              <form id="bookingTrackForm" novalidate>
+                <label for="trackRefInput" class="form-label">Booking Reference Number</label>
+                <div class="d-flex flex-wrap flex-sm-nowrap gap-2">
+                  <input type="text" id="trackRefInput" class="form-control" value="PERDA-2026-84920" placeholder="e.g., PERDA-2026-84920">
+                  <button type="submit" class="btn btn-cta flex-shrink-0">
+                    <i class="fa-solid fa-magnifying-glass"></i> Track Status
+                  </button>
+                </div>
+                <div id="trackRefErr" class="invalid-feedback-custom"></div>
+              </form>
+              <!-- Sample Clickable Reference Pills for Pending, Approved, Rejected -->
+              <div class="d-flex flex-wrap align-items-center gap-2 mt-2 small">
+                <span class="fw-semibold">Try sample references:</span>
+                <button type="button" class="badge-pill badge-pending border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-84920')">
+                  PERDA-2026-84920 (Pending)
+                </button>
+                <button type="button" class="badge-pill badge-approved border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-61209')">
+                  PERDA-2026-61209 (Approved)
+                </button>
+                <button type="button" class="badge-pill badge-rejected border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-49012')">
+                  PERDA-2026-49012 (Rejected)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Tracking Result Card populated by js/validation.js -->
+          <div id="trackingResultContainer" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared Footer -->
+  <footer class="perda-footer">
+    <div class="container">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <img src="images/logo.svg" alt="e-Homestay PERDA Logo" style="height: 42px;">
+          <span class="small">&copy; 2026 Lembaga Kemajuan Wilayah Pulau Pinang (PERDA). Official Inap Desa Booking System.</span>
+        </div>
+        <div class="d-flex gap-3 small">
+          <a href="index.html">Home</a>
+          <a href="login.html">Operator Login</a>
+          <a href="dashboard.html">Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/file-upload.js"></script>
+  <script src="js/validation.js"></script>
+</body>
+</html>
+

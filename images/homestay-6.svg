@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 540">
+  <defs>
+    <linearGradient id="bg6" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#606C38"/>
+      <stop offset="50%" stop-color="#283618"/>
+      <stop offset="100%" stop-color="#DDA15E"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="540" fill="url(#bg6)"/>
+  <path d="M0 365 Q300 320 800 370 L800 540 L0 540 Z" fill="#606C38"/>
+  <path d="M0 430 Q400 400 800 435 L800 540 L0 540 Z" fill="#283618"/>
+  <g transform="translate(195, 160)">
+    <rect x="35" y="90" width="340" height="100" rx="8" fill="#DDA15E" stroke="#FEFAE0" stroke-width="4"/>
+    <polygon points="10,95 205,12 400,95" fill="#BC6C25" stroke="#FEFAE0" stroke-width="3"/>
+    <rect x="80" y="118" width="58" height="46" rx="5" fill="#283618"/>
+    <rect x="175" y="115" width="60" height="75" rx="5" fill="#FEFAE0"/>
+    <rect x="272" y="118" width="58" height="46" rx="5" fill="#283618"/>
+  </g>
+  <rect x="24" y="24" width="230" height="36" rx="18" fill="#283618" opacity="0.85"/>
+  <text x="42" y="47" font-family="Poppins, sans-serif" font-size="14" font-weight="600" fill="#FEFAE0">Tasek Gelugor • Agro Stay</text>
+</svg>
+

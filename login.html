@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internal Portal Login (Operators &amp; BPE PERDA Officers) — e-Homestay PERDA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+  <a href="#mainContent" class="skip-link">Skip to main content</a>
+
+  <!-- Quick 6-Page Platform Switcher Strip -->
+  <div class="page-switcher-bar">
+    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <span><i class="fa-solid fa-compass me-1" style="color: var(--sand);"></i> <strong>e-Homestay Platform Pages:</strong></span>
+      <div class="d-flex flex-wrap gap-1">
+        <a href="index.html">1. Landing &amp; Search</a>
+        <a href="booking.html">2. Booking &amp; Track</a>
+        <a href="login.html" class="active-page">3. Staff/Operator Login</a>
+        <a href="dashboard.html">4. Dashboard</a>
+        <a href="verification.html">5. Verification (24h)</a>
+        <a href="reports.html">6. Officer Reports</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Public Header -->
+  <header>
+    <nav class="navbar navbar-expand-lg perda-navbar" aria-label="Main Navigation">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+          <img src="images/logo.svg" alt="e-Homestay PERDA Logo">
+        </a>
+        <div class="ms-auto">
+          <a href="index.html" class="btn btn-outline-cream">
+            <i class="fa-solid fa-arrow-left"></i> Back to Tourist Portal
+          </a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="mainContent" class="login-page-wrapper">
+    <div class="login-shell-card">
+      <div class="row g-0">
+        <!-- Left Branding & Security Policy Column -->
+        <div class="col-lg-5 login-brand-panel">
+          <div>
+            <img src="images/logo.svg" alt="e-Homestay PERDA Logo" class="mb-4" style="height: 52px;">
+            <span class="badge-pill badge-pending mb-3">
+              <i class="fa-solid fa-lock"></i> Internal Management Gateway
+            </span>
+            <h1 class="h3 font-heading mb-3" style="color: var(--cream);">
+              Unified Portal for Operators &amp; BPE PERDA Officers
+            </h1>
+            <p class="small mb-4" style="color: var(--cream); opacity: 0.9;">
+              Manage homestay units, verify guest payment receipts within the 24-hour window, block maintenance dates, and generate official district performance reports.
+            </p>
+
+            <div class="p-3 rounded-4 mb-3" style="background-color: rgba(254, 250, 224, 0.1); border: 1px solid var(--sand);">
+              <div class="fw-bold small mb-1" style="color: var(--sand);">
+                <i class="fa-solid fa-user-shield me-1"></i> Official Admin Verification Policy
+              </div>
+              <p class="small mb-0" style="color: var(--cream); font-size: 0.8rem;">
+                BPE PERDA Officer (Admin) login strictly requires a registered and verified official <code>@perda.gov.my</code> administrator email address.
+              </p>
+            </div>
+          </div>
+
+          <!-- Quick Demo Account Buttons for Testing -->
+          <div class="pt-3 border-top" style="border-color: rgba(221, 161, 94, 0.35) !important;">
+            <div class="small fw-semibold mb-2" style="color: var(--sand);">
+              <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Quick-Fill Demo Credentials:
+            </div>
+            <div class="d-grid gap-2">
+              <button type="button" class="btn btn-sand btn-sm justify-content-start text-start" onclick="fillLoginDemo('operator', 'operator@homestayperda.my', 'Operator2026!')">
+                <i class="fa-solid fa-house-user"></i>
+                <span><strong>Homestay Operator:</strong> operator@homestayperda.my</span>
+              </button>
+              <button type="button" class="btn btn-olive btn-sm justify-content-start text-start" onclick="fillLoginDemo('admin', 'officer.bpe@perda.gov.my', 'PerdaAdmin2026!')">
+                <i class="fa-solid fa-user-shield"></i>
+                <span><strong>Verified BPE Officer:</strong> officer.bpe@perda.gov.my</span>
+              </button>
+              <button type="button" class="btn btn-outline-cream btn-sm justify-content-start text-start" onclick="fillLoginDemo('admin', 'unverified.staff@gmail.com', 'WrongPass123')">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span><strong>Test Unverified Admin Error:</strong> unverified.staff@gmail.com</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Login Form Column -->
+        <div class="col-lg-7 login-form-panel">
+          <div class="mb-4">
+            <h2 class="h3 font-heading mb-1">Sign In to e-Homestay Portal</h2>
+            <p class="small mb-0" style="color: var(--olive);">
+              Select your internal user role below and enter your registered credentials.
+            </p>
+          </div>
+
+          <!-- Role Selector Tabs -->
+          <div class="role-selector-group" role="tablist" aria-label="Select Internal User Role">
+            <button type="button" id="roleTabOperator" class="role-tab-btn active" role="tab" aria-selected="true">
+              <i class="fa-solid fa-house-user"></i> Homestay Operator
+            </button>
+            <button type="button" id="roleTabAdmin" class="role-tab-btn" role="tab" aria-selected="false">
+              <i class="fa-solid fa-user-shield"></i> BPE PERDA Officer (Admin)
+            </button>
+          </div>
+
+          <!-- Role Policy Info Box -->
+          <div id="loginRolePolicyText" class="p-3 rounded-3 small mb-3" style="background-color: var(--white); border: 1.5px solid var(--sand);">
+            <i class="fa-solid fa-house-user me-1" style="color: var(--olive);"></i>
+            <strong>Homestay Operator Portal:</strong> Sign in with your registered PERDA Inap Desa operator email to manage units &amp; verify bookings.
+          </div>
+
+          <!-- Clear Error Alert Banner for Invalid Login / Unverified Admin Email -->
+          <div id="loginErrorBanner" class="login-error-banner" role="alert" aria-live="assertive">
+            <i class="fa-solid fa-triangle-exclamation fs-5 mt-1"></i>
+            <div id="loginErrorBannerText">Invalid login credentials.</div>
+          </div>
+
+          <form id="internalLoginForm" novalidate>
+            <div class="mb-3">
+              <label for="loginEmail" class="form-label">Official / Registered Email Address *</label>
+              <input type="email" id="loginEmail" class="form-control" value="operator@homestayperda.my" placeholder="operator@homestayperda.my" required>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <label for="loginPassword" class="form-label mb-1">Password *</label>
+                <a href="#forgotPasswordModal" data-bs-toggle="modal" class="small fw-semibold">
+                  Forgot password?
+                </a>
+              </div>
+              <div class="password-input-group">
+                <input type="password" id="loginPassword" class="form-control pe-5" value="Operator2026!" placeholder="Enter your password" required>
+                <button type="button" id="togglePasswordBtn" class="password-toggle-btn" aria-label="Show password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="form-check">
+                <input type="checkbox" id="rememberDeviceCheck" class="form-check-input" style="accent-color: var(--olive);" checked>
+                <label for="rememberDeviceCheck" class="form-check-label small">Keep me signed in on this workstation</label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-cta w-100 py-3">
+              <i class="fa-solid fa-right-to-bracket"></i> Sign In to Internal Portal
+            </button>
+          </form>
+
+          <div class="mt-4 pt-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2 small" style="border-color: var(--sand) !important;">
+            <span>Looking to book a village stay? <a href="index.html#registerSection" class="fw-bold">Register as Tourist</a></span>
+            <a href="dashboard.html" class="fw-bold"><i class="fa-solid fa-gauge-high me-1"></i> Preview Dashboard Directly</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content perda-card-cream p-2">
+        <div class="modal-header border-bottom" style="border-color: var(--sand) !important;">
+          <h5 class="modal-title font-heading" id="forgotPasswordModalLabel">
+            <i class="fa-solid fa-key me-2" style="color: var(--olive);"></i> Reset Internal Portal Password
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small">
+            Enter your registered Homestay Operator email or verified <code>@perda.gov.my</code> officer email to receive a password reset link.
+          </p>
+          <form id="forgotPasswordForm" novalidate>
+            <label for="resetPasswordEmail" class="form-label">Registered Email Address</label>
+            <input type="email" id="resetPasswordEmail" class="form-control mb-3" placeholder="e.g., officer.bpe@perda.gov.my" required>
+            <button type="submit" class="btn btn-olive w-100">
+              <i class="fa-solid fa-paper-plane"></i> Send Reset Instructions
+            </button>
+            <div id="forgotPasswordFeedback" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/validation.js"></script>
+</body>
+</html>
+

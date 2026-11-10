@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#283618"/>
+      <stop offset="48%" stop-color="#606C38"/>
+      <stop offset="82%" stop-color="#DDA15E"/>
+      <stop offset="100%" stop-color="#FEFAE0"/>
+    </linearGradient>
+    <linearGradient id="hillFar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#606C38" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#283618" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="paddyField" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#606C38"/>
+      <stop offset="60%" stop-color="#283618"/>
+      <stop offset="100%" stop-color="#1d2811"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Warm Golden-Hour Sky -->
+  <rect width="1600" height="900" fill="url(#skyGrad)"/>
+
+  <!-- Golden Sun Setting Over Penang Rural Hills -->
+  <circle cx="1180" cy="270" r="110" fill="#FEFAE0" opacity="0.28"/>
+  <circle cx="1180" cy="270" r="72" fill="#DDA15E" opacity="0.55"/>
+
+  <!-- Distant Hills (Bukit Mertajam & Balik Pulau Range) -->
+  <path d="M0 520 Q260 360 560 470 T1120 430 T1600 490 L1600 900 L0 900 Z" fill="url(#hillFar)"/>
+  <path d="M0 590 Q420 460 850 560 T1600 540 L1600 900 L0 900 Z" fill="#283618" opacity="0.88"/>
+
+  <!-- Lush Paddy Fields (Sawah Padi Kepala Batas) -->
+  <path d="M0 670 Q480 610 960 680 T1600 650 L1600 900 L0 900 Z" fill="url(#paddyField)"/>
+  <!-- Paddy Field Perspective Lines -->
+  <path d="M150 900 L520 655 M420 900 L680 665 M740 900 L860 675 M1080 900 L1050 675 M1400 900 L1240 665" stroke="#DDA15E" stroke-width="2" stroke-opacity="0.28"/>
+
+  <!-- Traditional Malay Kampung House on Stilts (Right Foreground) -->
+  <g transform="translate(980, 430)">
+    <!-- Stilts -->
+    <rect x="45" y="165" width="10" height="65" fill="#283618"/>
+    <rect x="135" y="165" width="10" height="65" fill="#283618"/>
+    <rect x="225" y="165" width="10" height="65" fill="#283618"/>
+    <rect x="295" y="165" width="10" height="65" fill="#283618"/>
+    <!-- Wooden Body -->
+    <rect x="30" y="95" width="290" height="75" rx="4" fill="#BC6C25"/>
+    <rect x="38" y="102" width="274" height="61" fill="#DDA15E" opacity="0.9"/>
+    <!-- Illuminated Warm Windows -->
+    <rect x="65" y="114" width="38" height="34" rx="3" fill="#FEFAE0"/>
+    <rect x="125" y="114" width="38" height="34" rx="3" fill="#FEFAE0"/>
+    <rect x="235" y="114" width="38" height="34" rx="3" fill="#FEFAE0"/>
+    <!-- Verandah (Anjung) & Stairs -->
+    <rect x="178" y="110" width="42" height="58" fill="#BC6C25"/>
+    <path d="M182 168 L162 230 L204 230 L218 168 Z" fill="#DDA15E"/>
+    <!-- Bumbung Perak / Traditional Gable Roof -->
+    <polygon points="10,98 175,18 340,98" fill="#283618"/>
+    <polygon points="22,95 175,26 328,95" fill="#BC6C25"/>
+    <line x1="175" y1="6" x2="175" y2="26" stroke="#FEFAE0" stroke-width="4"/>
+  </g>
+
+  <!-- Coconut Palms Silhouette (Left & Right) -->
+  <g fill="#283618">
+    <path d="M180 720 Q195 540 235 400 L247 402 Q212 540 198 720 Z"/>
+    <path d="M240 402 Q170 375 130 415 Q185 398 240 402 Z"/>
+    <path d="M240 402 Q195 345 150 355 Q200 365 240 402 Z"/>
+    <path d="M240 402 Q265 340 315 360 Q275 365 240 402 Z"/>
+    <path d="M240 402 Q300 375 335 420 Q285 395 240 402 Z"/>
+  </g>
+</svg>
+

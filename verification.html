@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Verification &amp; 24-Hour Approval — e-Homestay PERDA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/verification.css">
+</head>
+<body>
+  <a href="#mainContent" class="skip-link">Skip to main content</a>
+
+  <!-- Quick 6-Page Platform Switcher Strip -->
+  <div class="page-switcher-bar">
+    <div class="container-fluid px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <span><i class="fa-solid fa-compass me-1" style="color: var(--sand);"></i> <strong>e-Homestay Platform Pages:</strong></span>
+      <div class="d-flex flex-wrap gap-1">
+        <a href="index.html">1. Landing &amp; Search</a>
+        <a href="booking.html">2. Booking &amp; Track</a>
+        <a href="login.html">3. Staff/Operator Login</a>
+        <a href="dashboard.html">4. Dashboard</a>
+        <a href="verification.html" class="active-page">5. Verification (24h)</a>
+        <a href="reports.html">6. Officer Reports</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+  <div class="portal-layout">
+    <!-- Collapsible Dark Green Sidebar -->
+    <aside id="portalSidebar" class="portal-sidebar" aria-label="Portal Sidebar Navigation">
+      <div class="sidebar-brand-header">
+        <a href="index.html" class="d-flex align-items-center">
+          <img src="images/logo.svg" alt="e-Homestay PERDA Logo" style="height: 44px;">
+        </a>
+        <button type="button" id="sidebarCloseBtn" class="btn btn-sand btn-sm d-lg-none px-2" aria-label="Close sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <ul class="sidebar-nav-list">
+        <li class="sidebar-nav-item">
+          <a href="dashboard.html" class="sidebar-nav-link">
+            <i class="fa-solid fa-gauge-high"></i> Dashboard Overview
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="dashboard.html?role=operator" class="sidebar-nav-link">
+            <i class="fa-solid fa-house-chimney-window"></i> Homestay Units &amp; Block Dates
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="verification.html" class="sidebar-nav-link active">
+            <i class="fa-solid fa-file-circle-check"></i> Verification &amp; Approval
+            <span id="pendingVerificationCount" class="badge-pill badge-rejected ms-auto py-1 px-2" style="font-size: 0.7rem;">3</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="reports.html" class="sidebar-nav-link">
+            <i class="fa-solid fa-chart-pie"></i> Officer Reports &amp; Export
+          </a>
+        </li>
+        <li class="sidebar-nav-item mt-3 pt-3 border-top" style="border-color: rgba(221, 161, 94, 0.3) !important;">
+          <a href="index.html" class="sidebar-nav-link">
+            <i class="fa-solid fa-globe"></i> Public Tourist View
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a href="login.html" class="sidebar-nav-link">
+            <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Verification Content -->
+    <div class="portal-main-content">
+      <!-- Topbar with Notification Bell for New Booking Alerts -->
+      <header class="portal-topbar">
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" id="sidebarToggleBtn" class="btn btn-olive d-lg-none px-3" aria-label="Open sidebar menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <h1 class="h5 font-heading mb-0">Payment Verification &amp; Booking Approval</h1>
+            <span class="small fw-semibold" style="color: var(--olive);">
+              <i class="fa-regular fa-clock me-1"></i> Operators must verify incoming payment proofs within 24 hours
+            </span>
+          </div>
+        </div>
+
+        <!-- Notification Bell with Dropdown New Booking Alerts -->
+        <div class="d-flex align-items-center gap-3 position-relative">
+          <button type="button" id="notifBellBtn" class="notif-bell-btn" aria-expanded="false" aria-label="New booking alerts">
+            <i class="fa-solid fa-bell fs-5"></i>
+            <span id="notifCountBadge" class="notif-count-dot">3</span>
+          </button>
+
+          <div id="notifDropdownPanel" class="notif-dropdown-panel" role="region" aria-label="Booking Notification Alerts">
+            <div class="p-3 d-flex justify-content-between align-items-center" style="background-color: var(--dark-green); color: var(--cream);">
+              <span class="fw-bold small"><i class="fa-solid fa-bell me-1" style="color: var(--sand);"></i> New Booking Alerts</span>
+              <span class="badge-pill badge-rejected py-1 px-2" style="font-size: 0.7rem;">3 Action Required</span>
+            </div>
+            <div class="p-2 d-grid gap-2" style="max-height: 310px; overflow-y: auto;">
+              <div class="p-2 rounded-3 small" style="background-color: var(--cream); border-left: 4px solid var(--burnt-orange); cursor: pointer;" onclick="selectBookingForVerification('PERDA-2026-73105')">
+                <div class="fw-bold">Urgent SLA: PERDA-2026-73105</div>
+                <div>Ahmad Firdaus uploaded RM 555.00 receipt (&lt; 4 hrs left)</div>
+              </div>
+              <div class="p-2 rounded-3 small" style="background-color: var(--cream); border-left: 4px solid var(--olive); cursor: pointer;" onclick="selectBookingForVerification('PERDA-2026-84920')">
+                <div class="fw-bold">New Receipt: PERDA-2026-84920</div>
+                <div>Nurul Izzah uploaded RM 440.00 Maybank2u receipt</div>
+              </div>
+              <div class="p-2 rounded-3 small" style="background-color: var(--cream); border-left: 4px solid var(--olive); cursor: pointer;" onclick="selectBookingForVerification('PERDA-2026-90318')">
+                <div class="fw-bold">New Receipt: PERDA-2026-90318</div>
+                <div>Siti Sarah uploaded RM 340.00 RHB receipt</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-none d-sm-flex align-items-center gap-2">
+            <span class="badge-pill badge-pending">
+              <i class="fa-solid fa-house-user"></i> Puan Siti Hajar (Operator)
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <main id="mainContent" class="p-3 p-md-4">
+        <div class="row g-4">
+          <!-- Left Column: Incoming Bookings Table with Status Filter & 24h Timers -->
+          <div class="col-xl-7">
+            <div class="perda-card p-4 h-100">
+              <div class="row g-2 align-items-end justify-content-between mb-3">
+                <div class="col-md-5">
+                  <label for="verificationStatusFilter" class="form-label small mb-1">Filter by Verification Status</label>
+                  <select id="verificationStatusFilter" class="form-select">
+                    <option value="ALL">All Incoming Bookings</option>
+                    <option value="Pending">Pending Verification (24h SLA)</option>
+                    <option value="Approved">Approved Bookings</option>
+                    <option value="Rejected">Rejected Bookings</option>
+                  </select>
+                </div>
+                <div class="col-md-7">
+                  <label for="verificationSearchInput" class="form-label small mb-1">Search by Ref No., Guest Name or Homestay</label>
+                  <input type="search" id="verificationSearchInput" class="form-control" placeholder="e.g., PERDA-2026-84920 or Nurul Izzah...">
+                </div>
+              </div>
+
+              <div class="small mb-2" style="color: var(--olive);">
+                <i class="fa-solid fa-hand-pointer me-1"></i> Click any booking row below to inspect its uploaded payment receipt on the right.
+              </div>
+
+              <div class="table-responsive">
+                <table class="table align-middle table-mobile-cards mb-0">
+                  <thead>
+                    <tr style="border-bottom: 2px solid var(--sand);">
+                      <th>Ref No.</th>
+                      <th>Guest</th>
+                      <th>Homestay</th>
+                      <th>Dates</th>
+                      <th>Amount</th>
+                      <th>24h Countdown</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="verificationTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Booking Detail View & Uploaded Payment Receipt Preview -->
+          <div class="col-xl-5">
+            <div class="perda-card p-4">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pb-3 mb-3 border-bottom" style="border-color: var(--sand) !important;">
+                <div>
+                  <span class="small text-uppercase fw-bold" style="color: var(--olive);">Selected Booking Inspection</span>
+                  <h2 id="detailVerifyRef" class="h4 font-heading mb-0">PERDA-2026-84920</h2>
+                </div>
+                <span id="detailVerifyStatusBadge" class="badge-pill badge-pending">Pending</span>
+              </div>
+
+              <!-- 24-Hour Verification Countdown Banner -->
+              <div class="p-3 rounded-4 mb-3 d-flex justify-content-between align-items-center" style="background-color: var(--cream); border: 1.5px solid var(--burnt-orange);">
+                <div class="small fw-semibold">
+                  <i class="fa-solid fa-stopwatch me-1" style="color: var(--burnt-orange);"></i>
+                  Operator 24h Verification Timer:
+                </div>
+                <div id="detailCountdownTimerText" class="fw-bold" style="color: var(--burnt-orange);">
+                  19h : 00m : 20s remaining
+                </div>
+              </div>
+
+              <!-- Guest & Stay Metadata -->
+              <div class="row g-2 small mb-3">
+                <div class="col-sm-6">
+                  <div class="p-2 rounded-3" style="background-color: var(--cream);">
+                    <div style="color: var(--olive);">Guest Name</div>
+                    <div id="detailVerifyGuest" class="fw-bold">Nurul Izzah binti Razak</div>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="p-2 rounded-3" style="background-color: var(--cream);">
+                    <div style="color: var(--olive);">Total Amount Paid</div>
+                    <div id="detailVerifyAmount" class="fw-bold" style="color: var(--burnt-orange);">RM 440.00</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="p-2 rounded-3" style="background-color: var(--cream);">
+                    <div style="color: var(--olive);">Contact Details</div>
+                    <div id="detailVerifyContact" class="fw-semibold">+60 12-489 3310 • nurul.izzah@gmail.com</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="p-2 rounded-3" style="background-color: var(--cream);">
+                    <div style="color: var(--olive);">Homestay &amp; Stay Dates</div>
+                    <div id="detailVerifyHomestay" class="fw-bold">Inap Desa Kampung Agung Harmoni</div>
+                    <div id="detailVerifyDates" class="fw-semibold">2026-11-14 to 2026-11-16 (2 Nights, 4 Guests)</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="p-2 rounded-3" style="background-color: var(--cream);">
+                    <div style="color: var(--olive);">Tourist Special Requests</div>
+                    <div id="detailVerifyRequests">Requesting ground floor bedroom for elderly parents.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Uploaded Payment Receipt Preview -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold small">
+                    <i class="fa-solid fa-file-invoice me-1" style="color: var(--olive);"></i>
+                    Uploaded Payment Proof Preview
+                  </span>
+                  <span id="detailReceiptFilename" class="badge-pill badge-pending">maybank2u_receipt_84920.png</span>
+                </div>
+                <div class="receipt-preview-frame">
+                  <img src="images/sample-receipt.svg" alt="Uploaded Tourist Payment Receipt Preview">
+                </div>
+              </div>
+
+              <!-- Approve / Reject Buttons (Triggers Confirmation Popup Modal) -->
+              <div class="d-flex flex-wrap gap-2 mt-3">
+                <button type="button" class="btn btn-olive flex-grow-1" onclick="openDecisionModal('Approved')">
+                  <i class="fa-solid fa-circle-check"></i> Approve Booking
+                </button>
+                <button type="button" class="btn btn-cta flex-grow-1" onclick="openDecisionModal('Rejected')">
+                  <i class="fa-solid fa-circle-xmark"></i> Reject Booking
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Approve / Reject Confirmation Popup Modal -->
+  <div class="modal fade" id="verifyDecisionModal" tabindex="-1" aria-labelledby="decisionModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content perda-card-cream p-2">
+        <div class="modal-header border-bottom" style="border-color: var(--sand) !important;">
+          <h5 class="modal-title font-heading" id="decisionModalTitle">Confirm Booking Verification</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="decisionModalDescription" class="small mb-3">
+            Are you sure you want to update this booking status?
+          </p>
+          <label for="decisionModalNotes" class="form-label small">Operator Verification Notes / Rejection Reason (Optional)</label>
+          <textarea id="decisionModalNotes" class="form-control" rows="2" placeholder="e.g., Payment verified against Bank Islam statement ref DN20261106884192..."></textarea>
+        </div>
+        <div class="modal-footer border-top" style="border-color: var(--sand) !important;">
+          <button type="button" class="btn btn-sand" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="confirmDecisionModalBtn" class="btn btn-olive">
+            <i class="fa-solid fa-check"></i> Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/validation.js"></script>
+</body>
+</html>
+

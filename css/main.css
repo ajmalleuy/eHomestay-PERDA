@@ -1,0 +1,508 @@
+/* ==========================================================================
+   e-Homestay PERDA (Inap Desa) - Main Stylesheet (main.css)
+   Centralized Online System for Searching, Booking & Managing Homestays
+   ========================================================================== */
+
+/* 1. COLOR PALETTE & DESIGN TOKENS (Exact PERDA Village & Nature Palette) */
+:root {
+  /* Required Core Palette */
+  --olive: #606C38;         /* Primary buttons, links, icons, active states */
+  --dark-green: #283618;    /* Navbar, footer, headings, sidebar, main text */
+  --cream: #FEFAE0;         /* Page background, cards, form backgrounds */
+  --sand: #DDA15E;          /* Secondary buttons, borders, highlights, badges, hover states */
+  --burnt-orange: #BC6C25;  /* Call-to-action buttons (Book Now, Search), important alerts, accents */
+
+  /* Allowed Neutrals (White & Neutral Grey only) */
+  --white: #FFFFFF;
+  --grey-100: #F4F4F0;
+  --grey-200: #E2E2DC;
+  --grey-300: #C8C8C0;
+  --grey-500: #7A7A72;
+  --grey-700: #4A4A44;
+
+  /* Bootstrap 5 Variable Overrides */
+  --bs-primary: #606C38;
+  --bs-primary-rgb: 96, 108, 56;
+  --bs-secondary: #DDA15E;
+  --bs-secondary-rgb: 221, 161, 94;
+  --bs-dark: #283618;
+  --bs-dark-rgb: 40, 54, 24;
+  --bs-light: #FEFAE0;
+  --bs-light-rgb: 254, 250, 224;
+  --bs-body-bg: #FEFAE0;
+  --bs-body-color: #283618;
+  --bs-font-sans-serif: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Layout & Elevation */
+  --radius-pill: 999px;
+  --radius-card: 22px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --shadow-soft: 0 10px 30px rgba(40, 54, 24, 0.08);
+  --shadow-hover: 0 16px 38px rgba(40, 54, 24, 0.15);
+  --transition-base: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. GLOBAL RESET & TYPOGRAPHY */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--dark-green);
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.96rem;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--dark-green);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+a {
+  color: var(--olive);
+  text-decoration: none;
+  transition: var(--transition-base);
+}
+
+a:hover {
+  color: var(--burnt-orange);
+}
+
+/* Accessible Focus States */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--burnt-orange);
+  outline-offset: 2px;
+}
+
+/* Skip to Content Link for Keyboard Users */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--burnt-orange);
+  color: var(--cream);
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  z-index: 9999;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 16px;
+  color: var(--cream);
+}
+
+/* 3. TOUCH-FRIENDLY PILL BUTTONS (Minimum 44px Height) */
+.btn {
+  min-height: 44px;
+  padding: 0.6rem 1.45rem;
+  border-radius: var(--radius-pill);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: var(--transition-base);
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+/* Primary Button: Olive Green (#606C38) */
+.btn-olive,
+.btn-primary {
+  background-color: var(--olive);
+  border-color: var(--olive);
+  color: var(--cream);
+}
+
+.btn-olive:hover,
+.btn-olive:focus,
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--dark-green);
+  border-color: var(--dark-green);
+  color: var(--cream);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(40, 54, 24, 0.22);
+}
+
+/* Call-to-Action Button: Burnt Orange (#BC6C25) */
+.btn-cta {
+  background-color: var(--burnt-orange);
+  border-color: var(--burnt-orange);
+  color: var(--cream);
+}
+
+.btn-cta:hover,
+.btn-cta:focus {
+  background-color: var(--dark-green);
+  border-color: var(--sand);
+  color: var(--cream);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(188, 108, 37, 0.32);
+}
+
+/* Secondary Button: Sand (#DDA15E) */
+.btn-sand,
+.btn-secondary {
+  background-color: var(--sand);
+  border-color: var(--sand);
+  color: var(--dark-green);
+}
+
+.btn-sand:hover,
+.btn-sand:focus,
+.btn-secondary:hover,
+.btn-secondary:focus {
+  background-color: var(--burnt-orange);
+  border-color: var(--burnt-orange);
+  color: var(--cream);
+  transform: translateY(-2px);
+}
+
+/* Outline Buttons */
+.btn-outline-olive {
+  background-color: transparent;
+  border-color: var(--olive);
+  color: var(--olive);
+}
+
+.btn-outline-olive:hover {
+  background-color: var(--olive);
+  color: var(--cream);
+}
+
+.btn-outline-cream {
+  background-color: transparent;
+  border-color: var(--cream);
+  color: var(--cream);
+}
+
+.btn-outline-cream:hover {
+  background-color: var(--sand);
+  border-color: var(--sand);
+  color: var(--dark-green);
+}
+
+/* 4. PUBLIC NAVBAR (Dark Green #283618 with Cream Text #FEFAE0) */
+.perda-navbar {
+  background-color: var(--dark-green);
+  border-bottom: 3px solid var(--sand);
+  padding: 0.75rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  box-shadow: 0 4px 20px rgba(40, 54, 24, 0.25);
+}
+
+.perda-navbar .navbar-brand img {
+  height: 46px;
+  width: auto;
+}
+
+.perda-navbar .nav-link {
+  color: var(--cream) !important;
+  font-weight: 500;
+  padding: 0.55rem 1.05rem !important;
+  border-radius: var(--radius-pill);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: var(--transition-base);
+}
+
+.perda-navbar .nav-link:hover {
+  background-color: rgba(221, 161, 94, 0.2);
+  color: var(--sand) !important;
+}
+
+.perda-navbar .nav-link.active {
+  background-color: var(--olive);
+  color: var(--cream) !important;
+  font-weight: 600;
+}
+
+.perda-navbar .navbar-toggler {
+  border: 2px solid var(--sand);
+  color: var(--cream);
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.65rem;
+}
+
+/* Quick Page Switcher Strip for Easy Demo Evaluation */
+.page-switcher-bar {
+  background-color: rgba(40, 54, 24, 0.94);
+  border-bottom: 1px solid rgba(221, 161, 94, 0.35);
+  color: var(--cream);
+  font-size: 0.78rem;
+  padding: 0.38rem 0;
+}
+
+.page-switcher-bar a {
+  color: var(--cream);
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(221, 161, 94, 0.4);
+  text-decoration: none;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.page-switcher-bar a:hover,
+.page-switcher-bar a.active-page {
+  background-color: var(--burnt-orange);
+  border-color: var(--burnt-orange);
+  color: var(--cream);
+}
+
+/* 5. CARDS, FORMS & BADGES */
+.perda-card {
+  background-color: var(--white);
+  border: 1.5px solid var(--sand);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition-base);
+  overflow: hidden;
+}
+
+.perda-card-cream {
+  background-color: var(--cream);
+  border: 1.5px solid var(--sand);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+}
+
+.perda-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.form-label {
+  color: var(--dark-green);
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 0.4rem;
+}
+
+.form-control,
+.form-select {
+  min-height: 46px;
+  background-color: var(--cream);
+  border: 1.5px solid var(--sand);
+  border-radius: var(--radius-md);
+  color: var(--dark-green);
+  padding: 0.6rem 1rem;
+  font-size: 0.93rem;
+  transition: var(--transition-base);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--white);
+  border-color: var(--olive);
+  box-shadow: 0 0 0 3px rgba(96, 108, 56, 0.2);
+  color: var(--dark-green);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--burnt-orange);
+  background-image: none;
+}
+
+.invalid-feedback-custom {
+  color: var(--burnt-orange);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 0.3rem;
+  display: none;
+}
+
+.invalid-feedback-custom.show {
+  display: block;
+}
+
+/* Status & Highlight Badges (Using Only Palette Colors) */
+.badge-pill {
+  padding: 0.42rem 0.95rem;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  letter-spacing: 0.3px;
+}
+
+/* Approved -> Olive Green (#606C38) */
+.badge-approved {
+  background-color: var(--olive);
+  color: var(--cream);
+}
+
+/* Pending -> Sand (#DDA15E) */
+.badge-pending {
+  background-color: var(--sand);
+  color: var(--dark-green);
+}
+
+/* Rejected / Urgent Alert -> Burnt Orange (#BC6C25) */
+.badge-rejected {
+  background-color: var(--burnt-orange);
+  color: var(--cream);
+}
+
+/* Blocked / Unavailable -> Neutral Grey */
+.badge-blocked {
+  background-color: var(--grey-200);
+  color: var(--grey-700);
+}
+
+/* 6. FOOTER (Dark Green #283618 with Cream Text #FEFAE0) */
+.perda-footer {
+  background-color: var(--dark-green);
+  color: var(--cream);
+  border-top: 4px solid var(--sand);
+  padding: 3.5rem 0 2rem;
+  margin-top: auto;
+}
+
+.perda-footer h5 {
+  color: var(--sand);
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 1.1rem;
+}
+
+.perda-footer p,
+.perda-footer li {
+  color: var(--cream);
+  opacity: 0.92;
+  font-size: 0.9rem;
+}
+
+.perda-footer a {
+  color: var(--cream);
+  opacity: 0.9;
+}
+
+.perda-footer a:hover {
+  color: var(--sand);
+  opacity: 1;
+}
+
+.footer-divider {
+  border-color: rgba(221, 161, 94, 0.3);
+  margin: 2rem 0 1.25rem;
+}
+
+/* 7. TOAST / NOTIFICATION BANNER */
+.perda-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  max-width: 380px;
+}
+
+.perda-toast {
+  background-color: var(--dark-green);
+  color: var(--cream);
+  border-left: 6px solid var(--burnt-orange);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 12px 30px rgba(40, 54, 24, 0.35);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  animation: slideInUp 0.3s ease forwards;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 8. MOBILE-FIRST RESPONSIVE GRID & TABLE HELPERS */
+.homestay-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .homestay-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .homestay-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Responsive Table that turns into Stacked Cards on Mobile (<768px) */
+@media (max-width: 767.98px) {
+  .table-mobile-cards thead {
+    display: none;
+  }
+  .table-mobile-cards tbody tr {
+    display: block;
+    background: var(--white);
+    border: 1.5px solid var(--sand);
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    padding: 0.85rem;
+    box-shadow: var(--shadow-soft);
+  }
+  .table-mobile-cards tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0.25rem;
+    border-bottom: 1px dashed var(--grey-200);
+    text-align: right;
+  }
+  .table-mobile-cards tbody td:last-child {
+    border-bottom: none;
+  }
+  .table-mobile-cards tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--dark-green);
+    text-align: left;
+    padding-right: 0.75rem;
+  }
+}
+
