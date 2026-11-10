@@ -511,10 +511,11 @@ function initInternalLoginPage() {
       }
 
       errorBanner?.classList.remove('show');
+      setActiveOperatorByEmail(operatorAcc.email);
       try {
         localStorage.setItem('perda_active_role', 'operator');
       } catch (err) {}
-      showPerdaToast('Operator Login Successful', `Welcome back, ${operatorAcc.name}! Redirecting to your dashboard...`, 'fa-house-laptop');
+      showPerdaToast('Operator Login Successful', `Welcome back, ${operatorAcc.name} (${operatorAcc.unitName})! Redirecting to your dashboard...`, 'fa-house-laptop');
       setTimeout(() => {
         window.location.href = 'dashboard.html?role=operator';
       }, 900);
@@ -584,14 +585,50 @@ function initDashboardPage() {
   switchOfficerBtn?.addEventListener('click', () => setDashboardRole('officer'));
   switchOperatorBtn?.addEventListener('click', () => setDashboardRole('operator'));
 
-  // Render Operator's Managed Units Table & Add/Edit Form
-  renderOperatorHomestaysList();
+  // Populate Operator Account Switcher (1 Operator = 1 Homestay Ownership)
+  const opSelect = document.getElementById('activeOperatorAccountSelect');
+  if (opSelect) {
+    const activeOp = getActiveOperator();
+    opSelect.innerHTML = REGISTERED_OPERATOR_ACCOUNTS.map(
+      (op) =>
+        `<option value="${op.email}" ${op.email === activeOp.email ? 'selected' : ''}>
+          ${op.name} — Owns: ${op.unitName}
+        </option>`
+    ).join('');
+
+    opSelect.addEventListener('change', () => {
+      setActiveOperatorByEmail(opSelect.value);
+      const newOp = getActiveOperator();
+      syncOperatorSingleHomestayView();
+      showPerdaToast(
+        'Switched Operator Account',
+        `Now signed in as ${newOp.name}. You can only edit and block dates for "${newOp.unitName}".`,
+        'fa-user-lock'
+      );
+    });
+  }
+
+  // Initialize Operator's Owned Homestay Form, Block Calendar & Directory Table
+  syncOperatorSingleHomestayView();
 
   const unitForm = document.getElementById('operatorHomestayForm');
   if (unitForm) {
     unitForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const editId = document.getElementById('unitEditId').value;
+      const activeOp = getActiveOperator();
+      const myUnit = getOperatorOwnedHomestay();
+      const editId = document.getElementById('unitEditId').value || myUnit.id;
+
+      // Enforce 1-Operator-1-Homestay Ownership Security Rule
+      if (editId !== activeOp.homestayId) {
+        showPerdaToast(
+          'Ownership Permission Denied',
+          `You can only edit your own homestay (${myUnit.name}), not units owned by other operators.`,
+          'fa-lock'
+        );
+        return;
+      }
+
       const nameEl = document.getElementById('unitNameInput');
       const districtEl = document.getElementById('unitDistrictInput');
       const capacityEl = document.getElementById('unitCapacityInput');
@@ -629,48 +666,41 @@ function initDashboardPage() {
       if (!ok) return;
 
       const list = getHomestays();
-      if (editId) {
-        const target = list.find((u) => u.id === editId);
-        if (target) {
-          target.name = nameEl.value.trim();
-          target.shortDistrict = districtEl.value;
-          target.district = districtEl.value;
-          target.maxGuests = cap;
-          target.pricePerNight = price;
-          target.image = imageEl.value;
-          target.description = descEl.value.trim();
-        }
-        showPerdaToast('Homestay Unit Updated', `"${nameEl.value.trim()}" has been updated.`, 'fa-pen-to-square');
-      } else {
-        const newUnit = {
-          id: `hs-${Math.floor(200 + Math.random() * 799)}`,
-          name: nameEl.value.trim(),
-          district: districtEl.value,
-          shortDistrict: districtEl.value,
-          location: `${districtEl.value}, Pulau Pinang`,
-          pricePerNight: price,
-          maxGuests: cap,
-          bedrooms: Math.max(1, Math.round(cap / 2)),
-          bathrooms: 2,
-          rating: 5.0,
-          reviewsCount: 1,
-          operatorName: 'Puan Siti Hajar binti Mansor',
-          operatorEmail: 'operator@homestayperda.my',
-          image: imageEl.value,
-          gallery: [imageEl.value, 'images/homestay-1.svg', 'images/homestay-2.svg'],
-          facilities: ['Free Wi-Fi', 'Air Conditioning', 'Halal Kitchen', 'Private Parking'],
-          description: descEl.value.trim(),
-          blockedDates: []
-        };
-        list.unshift(newUnit);
-        showPerdaToast('New Homestay Unit Added', `"${newUnit.name}" is now live on e-Homestay PERDA.`, 'fa-house-medical');
+      const target = list.find((u) => u.id === activeOp.homestayId);
+      if (target) {
+        target.name = nameEl.value.trim();
+        target.shortDistrict = districtEl.value;
+        target.district = districtEl.value;
+        target.maxGuests = cap;
+        target.pricePerNight = price;
+        target.image = imageEl.value;
+        target.description = descEl.value.trim();
       }
 
       saveHomestays(list);
-      renderOperatorHomestaysList();
-      initOperatorBlockCalendar();
-      resetOperatorUnitForm();
+      syncOperatorSingleHomestayView();
+      showPerdaToast(
+        'Your Homestay Updated',
+        `Changes to "${nameEl.value.trim()}" have been saved.`,
+        'fa-circle-check'
+      );
     });
+  }
+}
+
+function syncOperatorSingleHomestayView() {
+  const activeOp = getActiveOperator();
+  const myUnit = getOperatorOwnedHomestay();
+
+  const bannerName = document.getElementById('activeOperatorBannerName');
+  const bannerUnit = document.getElementById('activeOperatorBannerUnit');
+  if (bannerName) bannerName.textContent = `${activeOp.name} (${activeOp.email})`;
+  if (bannerUnit) bannerUnit.textContent = myUnit.name;
+
+  loadUnitForEdit(myUnit.id, false);
+  renderOperatorHomestaysList();
+  if (typeof initOperatorBlockCalendar === 'function') {
+    initOperatorBlockCalendar();
   }
 }
 
@@ -678,59 +708,103 @@ function renderOperatorHomestaysList() {
   const tbody = document.getElementById('operatorUnitsTableBody');
   if (!tbody) return;
 
+  const activeOp = getActiveOperator();
   const list = getHomestays();
-  tbody.innerHTML = list
-    .map(
-      (u) => `
-      <tr>
+
+  // Sort so the logged-in operator's own unit appears first
+  const sorted = [...list].sort((a, b) => {
+    if (a.id === activeOp.homestayId) return -1;
+    if (b.id === activeOp.homestayId) return 1;
+    return 0;
+  });
+
+  tbody.innerHTML = sorted
+    .map((u) => {
+      const isMine = u.id === activeOp.homestayId;
+      return `
+      <tr style="${isMine ? 'background-color: rgba(96, 108, 56, 0.12);' : 'opacity: 0.82;'}">
         <td data-label="Homestay Unit">
           <div class="d-flex align-items-center gap-2">
-            <img src="${u.image}" alt="${u.name}" style="width: 54px; height: 40px; object-fit: cover; border-radius: 8px; border: 1px solid var(--sand);">
+            <img src="${u.image}" alt="${u.name}" style="width: 54px; height: 40px; object-fit: cover; border-radius: 8px; border: 1.5px solid ${isMine ? 'var(--olive)' : 'var(--sand)'};">
             <div class="text-start">
-              <div class="fw-bold">${u.name}</div>
-              <small style="color: var(--olive);">${u.shortDistrict}</small>
+              <div class="fw-bold d-flex align-items-center gap-2 flex-wrap">
+                <span>${u.name}</span>
+                ${
+                  isMine
+                    ? '<span class="badge-pill badge-approved py-0 px-2" style="font-size: 0.7rem;"><i class="fa-solid fa-user-check"></i> My Homestay</span>'
+                    : ''
+                }
+              </div>
+              <small style="color: var(--olive);">${u.shortDistrict} • Owner: <strong>${u.operatorName}</strong></small>
             </div>
           </div>
         </td>
         <td data-label="Max Capacity"><span class="badge-pill badge-pending">${u.maxGuests} Guests</span></td>
         <td data-label="Price / Night" class="fw-bold">RM ${Number(u.pricePerNight).toFixed(2)}</td>
         <td data-label="Blocked Dates">${u.blockedDates.length} date(s)</td>
-        <td data-label="Action">
-          <button type="button" class="btn btn-sand btn-sm py-1 px-3" onclick="loadUnitForEdit('${u.id}')">
-            <i class="fa-solid fa-pen"></i> Edit Unit
-          </button>
+        <td data-label="Ownership & Action">
+          ${
+            isMine
+              ? `<button type="button" class="btn btn-olive btn-sm py-1 px-3" onclick="loadUnitForEdit('${u.id}', true)">
+                   <i class="fa-solid fa-pen-to-square"></i> Edit My Homestay
+                 </button>`
+              : `<span class="badge-pill badge-blocked" title="Owned by ${u.operatorName}. You can only edit your own homestay.">
+                   <i class="fa-solid fa-lock"></i> Locked (Owned by ${u.operatorName.split(' ')[0]} ${u.operatorName.split(' ')[1] || ''})
+                 </span>`
+          }
         </td>
       </tr>
-    `
-    )
+    `;
+    })
     .join('');
 }
 
-function loadUnitForEdit(unitId) {
-  const unit = getHomestays().find((u) => u.id === unitId);
+function loadUnitForEdit(unitId, scrollToForm = true) {
+  const activeOp = getActiveOperator();
+  const myUnit = getOperatorOwnedHomestay();
+
+  // Strictly block editing any homestay that does not belong to the logged-in operator
+  if (unitId !== activeOp.homestayId) {
+    showPerdaToast(
+      'Access Restricted',
+      `You can only edit your own assigned homestay ("${myUnit.name}"). Other operators' homestays are read-only.`,
+      'fa-lock'
+    );
+    return;
+  }
+
+  const unit = getHomestays().find((u) => u.id === unitId) || myUnit;
   if (!unit) return;
 
-  document.getElementById('unitEditId').value = unit.id;
-  document.getElementById('unitNameInput').value = unit.name;
-  document.getElementById('unitDistrictInput').value = unit.shortDistrict;
-  document.getElementById('unitCapacityInput').value = unit.maxGuests;
-  document.getElementById('unitPriceInput').value = unit.pricePerNight;
-  document.getElementById('unitImageSelect').value = unit.image;
-  document.getElementById('unitDescInput').value = unit.description;
+  const editIdEl = document.getElementById('unitEditId');
+  if (editIdEl) editIdEl.value = unit.id;
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  };
+  setVal('unitNameInput', unit.name);
+  setVal('unitDistrictInput', unit.shortDistrict);
+  setVal('unitCapacityInput', unit.maxGuests);
+  setVal('unitPriceInput', unit.pricePerNight);
+  setVal('unitImageSelect', unit.image);
+  setVal('unitDescInput', unit.description);
 
   const formTitle = document.getElementById('unitFormHeading');
-  if (formTitle) formTitle.innerHTML = `<i class="fa-solid fa-pen-to-square me-2" style="color: var(--burnt-orange);"></i> Edit Homestay: ${unit.name}`;
+  if (formTitle) {
+    formTitle.innerHTML = `<i class="fa-solid fa-house-lock me-2" style="color: var(--olive);"></i> Edit My Assigned Homestay`;
+  }
 
-  document.getElementById('operatorHomestayForm')?.scrollIntoView({ behavior: 'smooth' });
+  if (scrollToForm) {
+    document.getElementById('operatorHomestayForm')?.scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
 function resetOperatorUnitForm() {
-  const form = document.getElementById('operatorHomestayForm');
-  if (form) form.reset();
-  const editId = document.getElementById('unitEditId');
-  if (editId) editId.value = '';
-  const formTitle = document.getElementById('unitFormHeading');
-  if (formTitle) formTitle.innerHTML = `<i class="fa-solid fa-plus-circle me-2" style="color: var(--olive);"></i> Add / Edit Homestay Unit`;
+  const myUnit = getOperatorOwnedHomestay();
+  if (myUnit) {
+    loadUnitForEdit(myUnit.id, false);
+    showPerdaToast('Reverted Changes', `Form reset to saved details for "${myUnit.name}".`, 'fa-rotate-left');
+  }
 }
 
 /**

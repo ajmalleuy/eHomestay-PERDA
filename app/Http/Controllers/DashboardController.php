@@ -44,12 +44,12 @@ class DashboardController extends Controller
     }
 
     /**
-     * Operator: Add or Update a Homestay Unit.
+     * Operator: Update ONLY their own assigned Homestay Unit (1 Operator = 1 Homestay).
      */
     public function saveHomestay(Request $request)
     {
         $validated = $request->validate([
-            'homestay_id'     => ['nullable', 'exists:homestays,id'],
+            'homestay_id'     => ['required', 'exists:homestays,id'],
             'name'            => ['required', 'string', 'min:4', 'max:150'],
             'district'        => ['required', 'string', 'max:100'],
             'max_guests'      => ['required', 'integer', 'min:1', 'max:25'],
@@ -58,29 +58,33 @@ class DashboardController extends Controller
             'description'     => ['required', 'string', 'min:15'],
         ]);
 
-        Homestay::updateOrCreate(
-            ['id' => $validated['homestay_id'] ?? null],
-            [
-                'operator_id'      => Auth::id() ?? 1,
-                'name'             => $validated['name'],
-                'slug'             => Str::slug($validated['name']),
-                'district'         => $validated['district'],
-                'location_address' => $validated['district'] . ', Pulau Pinang',
-                'max_guests'       => $validated['max_guests'],
-                'price_per_night'  => $validated['price_per_night'],
-                'cover_image'      => $validated['cover_image'],
-                'description'      => $validated['description'],
-                'is_active'        => true,
-            ]
+        $homestay = Homestay::findOrFail($validated['homestay_id']);
+
+        // Enforce 1-Operator-1-Homestay Ownership Policy
+        abort_if(
+            Auth::check() && $homestay->operator_id !== Auth::id(),
+            403,
+            'Access Restricted: You can only edit your own assigned homestay unit.'
         );
+
+        $homestay->update([
+            'name'             => $validated['name'],
+            'slug'             => Str::slug($validated['name']),
+            'district'         => $validated['district'],
+            'location_address' => $validated['district'] . ', Pulau Pinang',
+            'max_guests'       => $validated['max_guests'],
+            'price_per_night'  => $validated['price_per_night'],
+            'cover_image'      => $validated['cover_image'],
+            'description'      => $validated['description'],
+        ]);
 
         return redirect()
             ->route('dashboard', ['role' => 'operator'])
-            ->with('success', 'Homestay unit saved successfully.');
+            ->with('success', 'Your assigned homestay unit has been updated.');
     }
 
     /**
-     * Operator: Toggle a Blocked Date on the Block Calendar tool (maintenance / personal use).
+     * Operator: Toggle a Blocked Date on ONLY their own homestay's Block Calendar.
      */
     public function toggleBlockedDate(Request $request)
     {
@@ -89,6 +93,14 @@ class DashboardController extends Controller
             'blocked_date' => ['required', 'date'],
             'reason'       => ['required', 'string', 'max:120'],
         ]);
+
+        $homestay = Homestay::findOrFail($validated['homestay_id']);
+
+        abort_if(
+            Auth::check() && $homestay->operator_id !== Auth::id(),
+            403,
+            'Access Restricted: You can only block dates on your own homestay unit.'
+        );
 
         $existing = BlockedDate::where('homestay_id', $validated['homestay_id'])
             ->where('blocked_date', $validated['blocked_date'])

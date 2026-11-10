@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('homestays', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('operator_id')->constrained('users')->cascadeOnDelete();
+            // 1 Operator owns strictly 1 Homestay (unique foreign key)
+            $table->foreignId('operator_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->string('name', 150);
             $table->string('slug', 160)->unique();
             $table->string('district', 100)->index();

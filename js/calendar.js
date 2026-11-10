@@ -377,10 +377,9 @@ function updateSelectedStaySummary(unit) {
 /**
  * ============================================================================
  * PART B: OPERATOR "BLOCK CALENDAR" TOOL (PAGE 4: DASHBOARD)
- * Allows operators to block/unblock dates for maintenance or personal use
+ * Strictly locked to the logged-in operator's single owned homestay (1-to-1).
  * ============================================================================
  */
-let operatorActiveUnitId = 'hs-102';
 let operatorCalMonth = 10; // November (0-indexed)
 let operatorCalYear = 2026;
 
@@ -389,19 +388,9 @@ function initOperatorBlockCalendar() {
   const unitSelect = document.getElementById('blockCalHomestaySelect');
   if (!grid || !unitSelect) return;
 
-  // Populate unit dropdown
-  const units = getHomestays();
-  unitSelect.innerHTML = units
-    .map((u) => `<option value="${u.id}" ${u.id === operatorActiveUnitId ? 'selected' : ''}>${u.name} (${u.shortDistrict})</option>`)
-    .join('');
-
-  if (!unitSelect.dataset.bound) {
-    unitSelect.addEventListener('change', () => {
-      operatorActiveUnitId = unitSelect.value;
-      renderOperatorBlockCalendar();
-    });
-    unitSelect.dataset.bound = 'true';
-  }
+  const myUnit = getOperatorOwnedHomestay();
+  unitSelect.innerHTML = `<option value="${myUnit.id}" selected>${myUnit.name} (${myUnit.shortDistrict}) — Owned by ${myUnit.operatorName}</option>`;
+  unitSelect.disabled = true;
 
   renderOperatorBlockCalendar();
 }
@@ -425,8 +414,7 @@ function renderOperatorBlockCalendar() {
   const chipsContainer = document.getElementById('operatorBlockedChipsList');
   if (!grid) return;
 
-  const units = getHomestays();
-  const unit = units.find((u) => u.id === operatorActiveUnitId) || units[0];
+  const unit = getOperatorOwnedHomestay();
   if (!unit) return;
 
   const monthNames = [
@@ -515,8 +503,9 @@ function renderOperatorBlockCalendar() {
 }
 
 function toggleOperatorBlockedDate(isoDate) {
+  const activeOp = getActiveOperator();
   const units = getHomestays();
-  const unit = units.find((u) => u.id === operatorActiveUnitId);
+  const unit = units.find((u) => u.id === activeOp.homestayId);
   if (!unit) return;
 
   const reasonSelect = document.getElementById('blockReasonSelect');
@@ -548,8 +537,9 @@ function toggleOperatorBlockedDate(isoDate) {
 }
 
 function clearAllUnitBlockedDates() {
+  const activeOp = getActiveOperator();
   const units = getHomestays();
-  const unit = units.find((u) => u.id === operatorActiveUnitId);
+  const unit = units.find((u) => u.id === activeOp.homestayId);
   if (!unit) return;
   unit.blockedDates = [];
   saveHomestays(units);

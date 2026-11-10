@@ -248,15 +248,42 @@
              VIEW B: HOMESTAY OPERATOR DASHBOARD, UNIT MANAGER & BLOCK CALENDAR
              ================================================================ -->
         <div id="operatorDashboardView" class="d-none">
+          <!-- 1-Operator-1-Homestay Ownership Bar & Account Switcher for Testing -->
+          <div class="perda-card p-3 mb-4" style="background-color: var(--white); border-left: 6px solid var(--olive);">
+            <div class="row g-3 align-items-center justify-content-between">
+              <div class="col-lg-7">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                  <span class="badge-pill badge-approved">
+                    <i class="fa-solid fa-user-lock"></i> 1 Operator = 1 Homestay Policy
+                  </span>
+                  <span class="small fw-semibold" style="color: var(--olive);">
+                    Signed in as: <strong id="activeOperatorBannerName">Puan Siti Hajar binti Mansor</strong>
+                  </span>
+                </div>
+                <div class="small">
+                  You have exclusive edit &amp; calendar control over your assigned homestay:
+                  <strong id="activeOperatorBannerUnit" style="color: var(--burnt-orange);">Teratak Dusun Mengkuang Titi</strong>.
+                  Other operators' homestays are locked (read-only).
+                </div>
+              </div>
+              <div class="col-lg-5">
+                <label for="activeOperatorAccountSelect" class="form-label small mb-1">
+                  <i class="fa-solid fa-users-gear me-1" style="color: var(--olive);"></i> Switch Logged-In Operator (Test Ownership):
+                </label>
+                <select id="activeOperatorAccountSelect" class="form-select form-select-sm"></select>
+              </div>
+            </div>
+          </div>
+
           <!-- Operator Summary Row: Own Bookings, Pending Approvals, Upcoming Stays -->
           <div class="row g-3 mb-4">
             <div class="col-md-4">
               <div class="kpi-card">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <div class="small fw-semibold text-uppercase" style="color: var(--olive);">My Total Bookings</div>
-                    <div class="h2 font-heading my-1">34 Stays</div>
-                    <span class="badge-pill badge-approved">RM 8,420 Earned</span>
+                    <div class="small fw-semibold text-uppercase" style="color: var(--olive);">My Homestay Bookings</div>
+                    <div class="h2 font-heading my-1">15 Stays</div>
+                    <span class="badge-pill badge-approved">RM 5,550 Earned</span>
                   </div>
                   <div class="kpi-icon-circle"><i class="fa-solid fa-suitcase"></i></div>
                 </div>
@@ -267,7 +294,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
                     <div class="small fw-semibold text-uppercase" style="color: var(--burnt-orange);">Pending Approvals</div>
-                    <div class="h2 font-heading my-1" style="color: var(--burnt-orange);">3 Receipts</div>
+                    <div class="h2 font-heading my-1" style="color: var(--burnt-orange);">1 Receipt</div>
                     <a href="verification.html" class="badge-pill badge-rejected text-decoration-none">Verify Now (24h SLA)</a>
                   </div>
                   <div class="kpi-icon-circle" style="color: var(--burnt-orange);"><i class="fa-solid fa-bell"></i></div>
@@ -279,7 +306,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
                     <div class="small fw-semibold text-uppercase" style="color: var(--olive);">Upcoming Stays (Next 7 Days)</div>
-                    <div class="h2 font-heading my-1">4 Check-Ins</div>
+                    <div class="h2 font-heading my-1">2 Check-Ins</div>
                     <span class="badge-pill badge-pending">Next: 14 Nov 2026</span>
                   </div>
                   <div class="kpi-icon-circle"><i class="fa-solid fa-calendar-day"></i></div>
@@ -290,16 +317,16 @@
 
           <!-- Homestay Management & Block Calendar Tool -->
           <div id="operatorUnitsSection" class="row g-4">
-            <!-- Left Column: Add / Edit Homestay Unit Form -->
+            <!-- Left Column: Edit My Assigned Homestay Unit Form (Strictly Locked to Operator's Own Unit) -->
             <div class="col-lg-6">
               <div class="perda-card p-4 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <h2 id="unitFormHeading" class="h5 font-heading mb-0">
-                    <i class="fa-solid fa-plus-circle me-2" style="color: var(--olive);"></i>
-                    Add / Edit Homestay Unit
+                    <i class="fa-solid fa-house-lock me-2" style="color: var(--olive);"></i>
+                    Edit My Assigned Homestay
                   </h2>
                   <button type="button" class="btn btn-sand btn-sm py-1 px-3" onclick="resetOperatorUnitForm()">
-                    <i class="fa-solid fa-rotate-left"></i> New Form
+                    <i class="fa-solid fa-rotate-left"></i> Revert Changes
                   </button>
                 </div>
 
@@ -307,7 +334,7 @@
                   <input type="hidden" id="unitEditId" value="">
                   <div class="row g-3">
                     <div class="col-md-7">
-                      <label for="unitNameInput" class="form-label">Homestay Unit Name *</label>
+                      <label for="unitNameInput" class="form-label">My Homestay Unit Name *</label>
                       <input type="text" id="unitNameInput" class="form-control" placeholder="e.g., Teratak Dusun Mengkuang Titi" required>
                       <div id="unitNameErr" class="invalid-feedback-custom"></div>
                     </div>
@@ -350,7 +377,7 @@
                     </div>
                     <div class="col-12">
                       <button type="submit" class="btn btn-cta w-100">
-                        <i class="fa-solid fa-floppy-disk"></i> Save Homestay Unit
+                        <i class="fa-solid fa-floppy-disk"></i> Update My Homestay Unit
                       </button>
                     </div>
                   </div>

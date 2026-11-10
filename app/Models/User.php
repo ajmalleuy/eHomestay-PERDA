@@ -54,11 +54,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Relationship: A Homestay Operator can manage multiple Homestay units.
+     * Relationship: 1 Homestay Operator owns strictly 1 Homestay unit (1-to-1).
      */
-    public function homestays()
+    public function homestay()
     {
-        return $this->hasMany(Homestay::class, 'operator_id');
+        return $this->hasOne(Homestay::class, 'operator_id');
     }
 
     /**

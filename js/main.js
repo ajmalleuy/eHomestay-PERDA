@@ -73,7 +73,7 @@ const DEFAULT_HOMESTAYS = [
     rating: 4.95,
     reviewsCount: 62,
     operatorName: 'Encik Roslan bin Kassim',
-    operatorEmail: 'operator@homestayperda.my',
+    operatorEmail: 'roslan.betong@homestayperda.my',
     image: 'images/homestay-3.svg',
     gallery: ['images/homestay-3.svg', 'images/homestay-4.svg', 'images/homestay-1.svg'],
     facilities: ['Hill & Countryside View', 'Spacious Verandah', 'Air Conditioning', 'Halal Kitchen', 'Free Wi-Fi', 'Gazebo'],
@@ -132,8 +132,8 @@ const DEFAULT_HOMESTAYS = [
     bathrooms: 2,
     rating: 4.75,
     reviewsCount: 33,
-    operatorName: 'Puan Siti Hajar binti Mansor',
-    operatorEmail: 'operator@homestayperda.my',
+    operatorName: 'Encik Azman bin Daud',
+    operatorEmail: 'azman@homestayperda.my',
     image: 'images/homestay-6.svg',
     gallery: ['images/homestay-6.svg', 'images/homestay-1.svg', 'images/homestay-2.svg'],
     facilities: ['Agro-Tourism Garden', 'Air Conditioning', 'Halal Kitchen', 'Free Wi-Fi', 'Family BBQ Area', 'Ample Parking'],
@@ -293,16 +293,46 @@ const VERIFIED_ADMIN_ACCOUNTS = [
   }
 ];
 
+/**
+ * 1-to-1 Operator Ownership Directory:
+ * Strictly 1 Operator owns 1 Homestay Unit.
+ */
 const REGISTERED_OPERATOR_ACCOUNTS = [
   {
     email: 'operator@homestayperda.my',
     name: 'Puan Siti Hajar binti Mansor',
-    unitName: 'Teratak Dusun Mengkuang Titi & Laman Agro'
+    homestayId: 'hs-102',
+    unitName: 'Teratak Dusun Mengkuang Titi'
   },
   {
     email: 'ismail.agung@homestayperda.my',
     name: 'Haji Ismail bin Ahmad',
+    homestayId: 'hs-101',
     unitName: 'Inap Desa Kampung Agung Harmoni'
+  },
+  {
+    email: 'roslan.betong@homestayperda.my',
+    name: 'Encik Roslan bin Kassim',
+    homestayId: 'hs-103',
+    unitName: 'Anjung Bendang Pulau Betong'
+  },
+  {
+    email: 'kamarul@homestayperda.my',
+    name: 'Encik Kamarul Zaman',
+    homestayId: 'hs-104',
+    unitName: 'Villa Muara Sungai Acheh'
+  },
+  {
+    email: 'noraini@homestayperda.my',
+    name: 'Puan Noraini binti Saad',
+    homestayId: 'hs-105',
+    unitName: 'Desa Damai Chalet Pulau Aman'
+  },
+  {
+    email: 'azman@homestayperda.my',
+    name: 'Encik Azman bin Daud',
+    homestayId: 'hs-106',
+    unitName: 'Laman Agro Lahar Yooi'
   }
 ];
 
@@ -311,7 +341,7 @@ const REGISTERED_OPERATOR_ACCOUNTS = [
  */
 function getHomestays() {
   try {
-    const saved = localStorage.getItem('perda_homestays_v1');
+    const saved = localStorage.getItem('perda_homestays_v2');
     if (saved) return JSON.parse(saved);
   } catch (e) {
     console.warn('localStorage read fallback', e);
@@ -321,10 +351,41 @@ function getHomestays() {
 
 function saveHomestays(list) {
   try {
-    localStorage.setItem('perda_homestays_v1', JSON.stringify(list));
+    localStorage.setItem('perda_homestays_v2', JSON.stringify(list));
   } catch (e) {
     console.warn('localStorage write fallback', e);
   }
+}
+
+function getActiveOperator() {
+  try {
+    const savedEmail = localStorage.getItem('perda_active_operator_email');
+    if (savedEmail) {
+      const found = REGISTERED_OPERATOR_ACCOUNTS.find(
+        (op) => op.email.toLowerCase() === savedEmail.toLowerCase()
+      );
+      if (found) return found;
+    }
+  } catch (e) {}
+  return REGISTERED_OPERATOR_ACCOUNTS[0]; // Default: Puan Siti Hajar (hs-102)
+}
+
+function setActiveOperatorByEmail(email) {
+  try {
+    localStorage.setItem('perda_active_operator_email', email);
+  } catch (e) {}
+}
+
+function getOperatorOwnedHomestay() {
+  const activeOp = getActiveOperator();
+  const units = getHomestays();
+  return (
+    units.find(
+      (u) =>
+        u.id === activeOp.homestayId ||
+        u.operatorEmail.toLowerCase() === activeOp.email.toLowerCase()
+    ) || units[0]
+  );
 }
 
 function getBookings() {
