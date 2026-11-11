@@ -41,9 +41,6 @@
             <li class="nav-item">
               <a class="nav-link" href="booking.html#trackingSection"><i class="fa-solid fa-magnifying-glass-location"></i> Track Booking</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#registerSection"><i class="fa-solid fa-user-plus"></i> Tourist Register</a>
-            </li>
             <li class="nav-item ms-lg-2">
               <a class="btn btn-sand" href="login.html">
                 <i class="fa-solid fa-right-to-bracket"></i> Login / Portal
@@ -257,78 +254,6 @@
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. TOURIST REGISTRATION SECTION WITH PERDA PROMOTIONAL EMAIL OPT-IN -->
-    <section id="registerSection" class="registration-section">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-8">
-            <div class="perda-card p-4 p-md-5">
-              <div class="text-center mb-4">
-                <span class="badge-pill badge-pending mb-2">
-                  <i class="fa-solid fa-user-plus"></i> Tourist Membership
-                </span>
-                <h2 class="font-heading mb-2">Create Your Tourist Account</h2>
-                <p class="mb-0">
-                  Register once to save your contact details, receive instant booking updates, and manage your PERDA homestay trips.
-                </p>
-              </div>
-
-              <form id="touristRegisterForm" novalidate>
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label for="regFullName" class="form-label">Full Name (as per IC / Passport) *</label>
-                    <input type="text" id="regFullName" class="form-control" placeholder="e.g., Siti Aisyah binti Kamal" required>
-                    <div id="regFullNameErr" class="invalid-feedback-custom"></div>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="regEmail" class="form-label">Email Address *</label>
-                    <input type="email" id="regEmail" class="form-control" placeholder="e.g., aisyah.kamal@gmail.com" required>
-                    <div id="regEmailErr" class="invalid-feedback-custom"></div>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="regPhone" class="form-label">Mobile Phone Number *</label>
-                    <input type="tel" id="regPhone" class="form-control" placeholder="e.g., +60 12-455 7890" required>
-                    <div id="regPhoneErr" class="invalid-feedback-custom"></div>
-                  </div>
-                  <div class="col-md-3">
-                    <label for="regPassword" class="form-label">Password *</label>
-                    <input type="password" id="regPassword" class="form-control" placeholder="Min. 8 chars" required>
-                    <div id="regPasswordErr" class="invalid-feedback-custom"></div>
-                  </div>
-                  <div class="col-md-3">
-                    <label for="regConfirmPassword" class="form-label">Confirm Password *</label>
-                    <input type="password" id="regConfirmPassword" class="form-control" placeholder="Re-enter password" required>
-                    <div id="regConfirmPasswordErr" class="invalid-feedback-custom"></div>
-                  </div>
-
-                  <!-- Required Promotional Opt-In Checkbox -->
-                  <div class="col-12 mt-3">
-                    <div class="p-3 rounded-3 d-flex align-items-start gap-2" style="background-color: var(--cream); border: 1.5px solid var(--sand);">
-                      <input type="checkbox" id="regPromoOptIn" class="form-check-input mt-1" style="width: 20px; height: 20px; accent-color: var(--olive);" checked>
-                      <label for="regPromoOptIn" class="form-check-label fw-medium" style="cursor: pointer;">
-                        I agree to receive promotional emails from PERDA
-                        <span class="d-block small" style="color: var(--olive);">
-                          Stay informed about seasonal fruit orchard festivals, rural tourism vouchers, and new Inap Desa discounts.
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div class="col-12 mt-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
-                    <span class="small"><i class="fa-solid fa-lock me-1" style="color: var(--olive);"></i> Your personal data is protected under PDPA 2010.</span>
-                    <button type="submit" class="btn btn-olive px-4">
-                      <i class="fa-solid fa-user-check"></i> Register Tourist Account
-                    </button>
-                  </div>
-                </div>
-                <div id="regSuccessBanner" aria-live="polite"></div>
-              </form>
             </div>
           </div>
         </div>
