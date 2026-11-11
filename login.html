@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In | e-Homestay PERDA (Inap Desa)</title>
+  <title>Sign In &amp; Register | e-Homestay PERDA (Inap Desa)</title>
   <!-- Google Fonts: Playfair Display & Poppins -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -68,7 +68,7 @@
     </section>
 
     <!-- 2. COLOURED FLUID PANEL (~60% Width): Morphing Wavy SVG Fluid Body, Faint Icons & Form Card -->
-    <section id="fluidPanel" class="login-fluid-panel" aria-label="Sign In Form Panel">
+    <section id="fluidPanel" class="login-fluid-panel" aria-label="Authentication Form Panel">
 
       <!-- Full-Panel Morphing Liquid SVG (Animated via JS requestAnimationFrame during mode switch) -->
       <svg
@@ -101,120 +101,685 @@
 
       <!-- Form Card & Below-Card Prompt -->
       <div id="fluidFormWrapper" class="fluid-form-wrapper">
-        <div class="login-form-card">
-          <!-- Small Heading and Subheading -->
-          <h2 id="formCardHeading" class="form-card-heading">Sign in</h2>
-          <p id="formCardSubheading" class="form-card-subheading">to book your homestay</p>
+        <div id="loginFormCard" class="login-form-card">
 
-          <!-- Staff Sub-Role Toggle (Visible when in ADMIN / OPERATOR Staff Mode) -->
-          <div class="staff-role-Selector" role="group" aria-label="Select Staff Role">
-            <button type="button" id="staffRoleOperatorBtn" class="staff-role-pill active">
-              <i class="fa-solid fa-house-user me-1"></i> Homestay Operator
+          <!-- STAFF ONLY: Segmented Role Toggle ("Operator" vs "Admin") at Top of Card -->
+          <div id="staffSegmentedToggle" class="staff-segmented-toggle" role="radiogroup" aria-label="Staff Role Selector" hidden>
+            <div id="staffSegmentThumb" class="staff-segment-thumb" aria-hidden="true"></div>
+            <button
+              type="button"
+              id="staffRoleOperatorBtn"
+              class="staff-segment-btn active"
+              role="radio"
+              aria-checked="true"
+              data-staff-role="operator"
+            >
+              <i class="fa-solid fa-house-user me-1"></i> Operator
             </button>
-            <button type="button" id="staffRoleOfficerBtn" class="staff-role-pill">
-              <i class="fa-solid fa-user-shield me-1"></i> PERDA Officer
+            <button
+              type="button"
+              id="staffRoleAdminBtn"
+              class="staff-segment-btn"
+              role="radio"
+              aria-checked="false"
+              data-staff-role="admin"
+            >
+              <i class="fa-solid fa-user-shield me-1"></i> Admin
             </button>
           </div>
 
-          <!-- Validation / Login Error Alert -->
-          <div id="loginFeedbackAlert" class="login-feedback-alert" role="alert">
-            <i class="fa-solid fa-triangle-exclamation mt-1"></i>
+          <!-- Small Heading and Subheading -->
+          <div class="card-header-block">
+            <h2 id="formCardHeading" class="form-card-heading">Sign in</h2>
+            <p id="formCardSubheading" class="form-card-subheading">to book your homestay</p>
+          </div>
+
+          <!-- "Login" and "Register" Tabs (Shown for Guest and Operator; Hidden for Admin) -->
+          <div id="authModeTabs" class="auth-mode-tabs" role="tablist" aria-label="Authentication Action Tabs">
+            <button
+              type="button"
+              id="tabBtnLogin"
+              class="auth-tab-btn active"
+              role="tab"
+              aria-selected="true"
+              data-auth-tab="login"
+            >
+              Login
+            </button>
+            <button
+              type="button"
+              id="tabBtnRegister"
+              class="auth-tab-btn"
+              role="tab"
+              aria-selected="false"
+              data-auth-tab="register"
+            >
+              Register
+            </button>
+          </div>
+
+          <!-- Card-Level Error / Status Banner (Used for Wrong Credentials or Approval Notice) -->
+          <div id="loginFeedbackAlert" class="login-feedback-alert" role="alert" aria-live="assertive">
+            <i id="loginFeedbackIcon" class="fa-solid fa-triangle-exclamation mt-1"></i>
             <div id="loginFeedbackText">Invalid login credentials.</div>
           </div>
 
-          <!-- Sign-In Form -->
-          <form id="splitLoginForm" novalidate>
-            <!-- Pill Input 1: Username / Email with Left Icon -->
-            <div class="pill-input-group">
-              <label for="loginIdentityInput" class="visually-hidden">Username or Email Address</label>
-              <i class="fa-regular fa-user pill-input-icon" aria-hidden="true"></i>
-              <input
-                type="text"
-                id="loginIdentityInput"
-                class="pill-input-control"
-                placeholder="Username or email address"
-                autocomplete="username"
-                required
-              >
-            </div>
+          <!-- Smooth Height-Transition Viewport Holding the 5 Role/Action Form Panes -->
+          <div id="cardDynamicViewport" class="card-dynamic-viewport">
 
-            <!-- Pill Input 2: Password with Left Icon & Show/Hide Toggle -->
-            <div class="pill-input-group">
-              <label for="loginPasswordInput" class="visually-hidden">Password</label>
-              <i class="fa-solid fa-lock pill-input-icon" aria-hidden="true"></i>
-              <input
-                type="password"
-                id="loginPasswordInput"
-                class="pill-input-control"
-                placeholder="Password"
-                autocomplete="current-password"
-                required
-              >
-              <button
-                type="button"
-                id="togglePasswordBtn"
-                class="pill-password-toggle"
-                aria-label="Show password"
-                title="Show or hide password"
-              >
-                <i class="fa-solid fa-eye"></i>
+            <!-- ==============================================================
+                 PANE 1: GUEST LOGIN (Default) -> Redirects to Landing Page
+                 ============================================================== -->
+            <form
+              id="guestLoginForm"
+              class="auth-form-pane is-active-pane"
+              action="/login"
+              method="POST"
+              data-pane="guest-login"
+              novalidate
+            >
+              <input type="hidden" name="login_role" value="tourist">
+
+              <!-- Email / Username -->
+              <div class="field-block">
+                <label for="guestLoginIdentity" class="visually-hidden">Email or Username</label>
+                <div class="pill-input-group">
+                  <i class="fa-regular fa-user pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    id="guestLoginIdentity"
+                    name="email"
+                    class="pill-input-control"
+                    placeholder="Email or username"
+                    autocomplete="username"
+                    required
+                  >
+                </div>
+                <div class="field-error-msg" id="guestLoginIdentityError" role="alert"></div>
+              </div>
+
+              <!-- Password -->
+              <div class="field-block">
+                <label for="guestLoginPassword" class="visually-hidden">Password</label>
+                <div class="pill-input-group">
+                  <i class="fa-solid fa-lock pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="password"
+                    id="guestLoginPassword"
+                    name="password"
+                    class="pill-input-control"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required
+                  >
+                  <button
+                    type="button"
+                    class="pill-password-toggle"
+                    data-target="guestLoginPassword"
+                    aria-label="Show password"
+                    title="Show or hide password"
+                  >
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <div class="field-error-msg" id="guestLoginPasswordError" role="alert"></div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="login-submit-btn">
+                <span class="btn-label-text">Login</span>
+                <i class="fa-solid fa-arrow-right-to-bracket btn-label-icon"></i>
               </button>
-            </div>
 
-            <!-- Solid Pill Login Button -->
-            <button type="submit" class="login-submit-btn">
-              <span>Login</span>
-              <i class="fa-solid fa-arrow-right-to-bracket"></i>
-            </button>
-
-            <!-- Small Underlined "Forgot password?" Link -->
-            <div class="forgot-link-wrap">
-              <a
-                href="#forgotPasswordModal"
-                data-bs-toggle="modal"
-                data-bs-target="#forgotPasswordModal"
-                class="forgot-password-link"
-              >
-                Forgot password?
-              </a>
-            </div>
-
-            <!-- Quick Demo Account Selector (Only visible in Staff Mode) -->
-            <div class="staff-demo-helper">
-              <div class="small fw-semibold mb-1" style="color: var(--dark-green); font-size: 0.74rem;">
-                <i class="fa-solid fa-key me-1" style="color: var(--burnt-orange);"></i> Quick Demo Staff Accounts:
+              <!-- Forgot Password Link -->
+              <div class="forgot-link-wrap">
+                <a
+                  href="#forgotPasswordModal"
+                  data-bs-toggle="modal"
+                  data-bs-target="#forgotPasswordModal"
+                  class="forgot-password-link"
+                >
+                  Forgot password?
+                </a>
               </div>
-              <div class="d-flex flex-wrap gap-1">
-                <button
-                  type="button"
-                  class="demo-chip-btn"
-                  onclick="fillStaffDemoCredentials('operator', 'operator@homestayperda.my', 'Operator2026!')"
-                >
-                  Pak Ngah (Villa Bendang)
-                </button>
-                <button
-                  type="button"
-                  class="demo-chip-btn"
-                  onclick="fillStaffDemoCredentials('operator', 'hajah.rohana@homestayperda.my', 'Operator2026!')"
-                >
-                  Hajah Rohana (Sungai Semilang)
-                </button>
-                <button
-                  type="button"
-                  class="demo-chip-btn"
-                  onclick="fillStaffDemoCredentials('officer', 'officer.bpe@perda.gov.my', 'PerdaAdmin2026!')"
-                >
-                  BPE Officer (@perda.gov.my)
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
+            </form>
 
-        <!-- Below the Card: Small Line "New here? Create an account" -->
+            <!-- ==============================================================
+                 PANE 2: GUEST REGISTER -> Optional Tourist Account Registration
+                 ============================================================== -->
+            <form
+              id="guestRegisterForm"
+              class="auth-form-pane"
+              action="/register-tourist"
+              method="POST"
+              data-pane="guest-register"
+              hidden
+              novalidate
+            >
+              <!-- Optional Registration Note -->
+              <div class="optional-booking-note">
+                <i class="fa-solid fa-circle-info me-1" style="color: var(--burnt-orange);"></i>
+                <span>You can also <a href="booking.html">book without an account</a>.</span>
+              </div>
+
+              <!-- Full Name -->
+              <div class="field-block">
+                <label for="guestRegName" class="visually-hidden">Full Name</label>
+                <div class="pill-input-group">
+                  <i class="fa-regular fa-id-card pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    id="guestRegName"
+                    name="name"
+                    class="pill-input-control"
+                    placeholder="Full name"
+                    autocomplete="name"
+                    required
+                  >
+                </div>
+                <div class="field-error-msg" id="guestRegNameError" role="alert"></div>
+              </div>
+
+              <!-- Email -->
+              <div class="field-block">
+                <label for="guestRegEmail" class="visually-hidden">Email Address</label>
+                <div class="pill-input-group">
+                  <i class="fa-regular fa-envelope pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="email"
+                    id="guestRegEmail"
+                    name="email"
+                    class="pill-input-control"
+                    placeholder="Email address"
+                    autocomplete="email"
+                    required
+                  >
+                </div>
+                <div class="field-error-msg" id="guestRegEmailError" role="alert"></div>
+              </div>
+
+              <!-- Phone Number -->
+              <div class="field-block">
+                <label for="guestRegPhone" class="visually-hidden">Phone Number</label>
+                <div class="pill-input-group">
+                  <i class="fa-solid fa-phone pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="tel"
+                    id="guestRegPhone"
+                    name="phone"
+                    class="pill-input-control"
+                    placeholder="Phone number (e.g. 012-345 6789)"
+                    autocomplete="tel"
+                    required
+                  >
+                </div>
+                <div class="field-error-msg" id="guestRegPhoneError" role="alert"></div>
+              </div>
+
+              <!-- Password & Confirm Password (2-column grid on desktop for compact height) -->
+              <div class="row g-2">
+                <div class="col-sm-6">
+                  <div class="field-block">
+                    <label for="guestRegPassword" class="visually-hidden">Password</label>
+                    <div class="pill-input-group">
+                      <i class="fa-solid fa-lock pill-input-icon" aria-hidden="true"></i>
+                      <input
+                        type="password"
+                        id="guestRegPassword"
+                        name="password"
+                        class="pill-input-control"
+                        placeholder="Password"
+                        autocomplete="new-password"
+                        required
+                      >
+                      <button
+                        type="button"
+                        class="pill-password-toggle"
+                        data-target="guestRegPassword"
+                        aria-label="Show password"
+                      >
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="field-error-msg" id="guestRegPasswordError" role="alert"></div>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="field-block">
+                    <label for="guestRegConfirmPassword" class="visually-hidden">Confirm Password</label>
+                    <div class="pill-input-group">
+                      <i class="fa-solid fa-shield-halved pill-input-icon" aria-hidden="true"></i>
+                      <input
+                        type="password"
+                        id="guestRegConfirmPassword"
+                        name="password_confirmation"
+                        class="pill-input-control"
+                        placeholder="Confirm"
+                        autocomplete="new-password"
+                        required
+                      >
+                      <button
+                        type="button"
+                        class="pill-password-toggle"
+                        data-target="guestRegConfirmPassword"
+                        aria-label="Show confirm password"
+                      >
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="field-error-msg" id="guestRegConfirmPasswordError" role="alert"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Terms Checkbox -->
+              <div class="field-block mt-1 mb-2">
+                <div class="form-check custom-perda-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="guestRegTerms"
+                    name="terms"
+                    required
+                  >
+                  <label class="form-check-label small" for="guestRegTerms">
+                    I agree to the PERDA Homestay terms &amp; promotional updates
+                  </label>
+                </div>
+                <div class="field-error-msg" id="guestRegTermsError" role="alert"></div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="login-submit-btn">
+                <span class="btn-label-text">Create Account</span>
+                <i class="fa-solid fa-user-plus btn-label-icon"></i>
+              </button>
+            </form>
+
+            <!-- ==============================================================
+                 PANE 3: OPERATOR LOGIN -> Redirects to Operator Dashboard
+                 ============================================================== -->
+            <form
+              id="operatorLoginForm"
+              class="auth-form-pane"
+              action="/login"
+              method="POST"
+              data-pane="operator-login"
+              hidden
+              novalidate
+            >
+              <input type="hidden" name="login_role" value="operator">
+
+              <!-- Operator Email / Username -->
+              <div class="field-block">
+                <label for="operatorLoginIdentity" class="visually-hidden">Operator Email or Username</label>
+                <div class="pill-input-group">
+                  <i class="fa-solid fa-house-user pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    id="operatorLoginIdentity"
+                    name="email"
+                    class="pill-input-control"
+                    placeholder="operator@homestayperda.my"
+                    autocomplete="username"
+                    required
+                  >
+                </div>
+                <div class="field-error-msg" id="operatorLoginIdentityError" role="alert"></div>
+              </div>
+
+              <!-- Operator Password -->
+              <div class="field-block">
+                <label for="operatorLoginPassword" class="visually-hidden">Password</label>
+                <div class="pill-input-group">
+                  <i class="fa-solid fa-lock pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="password"
+                    id="operatorLoginPassword"
+                    name="password"
+                    class="pill-input-control"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required
+                  >
+                  <button
+                    type="button"
+                    class="pill-password-toggle"
+                    data-target="operatorLoginPassword"
+                    aria-label="Show password"
+                  >
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <div class="field-error-msg" id="operatorLoginPasswordError" role="alert"></div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="login-submit-btn">
+                <span class="btn-label-text">Login</span>
+                <i class="fa-solid fa-arrow-right-to-bracket btn-label-icon"></i>
+              </button>
+
+              <!-- Forgot Password Link -->
+              <div class="forgot-link-wrap">
+                <a
+                  href="#forgotPasswordModal"
+                  data-bs-toggle="modal"
+                  data-bs-target="#forgotPasswordModal"
+                  class="forgot-password-link"
+                >
+                  Forgot password?
+                </a>
+              </div>
+
+              <!-- Quick Demo Operator Accounts -->
+              <div class="staff-demo-helper">
+                <div class="small fw-semibold mb-1" style="color: var(--dark-green); font-size: 0.73rem;">
+                  <i class="fa-solid fa-key me-1" style="color: var(--burnt-orange);"></i> Demo Operators (1 Operator = 1 Homestay):
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    class="demo-chip-btn"
+                    onclick="fillOperatorDemo('operator@homestayperda.my', 'Operator2026!')"
+                  >
+                    Pak Ngah (Villa Bendang)
+                  </button>
+                  <button
+                    type="button"
+                    class="demo-chip-btn"
+                    onclick="fillOperatorDemo('hajah.rohana@homestayperda.my', 'Operator2026!')"
+                  >
+                    Hajah Rohana (Sg. Semilang)
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <!-- ==============================================================
+                 PANE 4: OPERATOR REGISTER -> Pending Review Approval Message
+                 ============================================================== -->
+            <form
+              id="operatorRegisterForm"
+              class="auth-form-pane"
+              action="/login"
+              method="POST"
+              data-pane="operator-register"
+              hidden
+              novalidate
+            >
+              <!-- Owner Full Name -->
+              <div class="field-block">
+                <label for="opRegOwnerName" class="visually-hidden">Owner Full Name</label>
+                <div class="pill-input-group">
+                  <i class="fa-regular fa-user pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    id="opRegOwnerName"
+                    name="owner_name"
+                    class="pill-input-control"
+                    placeholder="Owner full name"
+                    autocomplete="name"
+                    required
+                  >
+                </div>
+                <div class="field-error-msg" id="opRegOwnerNameError" role="alert"></div>
+              </div>
+
+              <!-- Homestay Name & District -->
+              <div class="row g-2">
+                <div class="col-sm-7">
+                  <div class="field-block">
+                    <label for="opRegHomestayName" class="visually-hidden">Homestay Name</label>
+                    <div class="pill-input-group">
+                      <i class="fa-solid fa-house-chimney pill-input-icon" aria-hidden="true"></i>
+                      <input
+                        type="text"
+                        id="opRegHomestayName"
+                        name="homestay_name"
+                        class="pill-input-control"
+                        placeholder="Homestay name"
+                        required
+                      >
+                    </div>
+                    <div class="field-error-msg" id="opRegHomestayNameError" role="alert"></div>
+                  </div>
+                </div>
+                <div class="col-sm-5">
+                  <div class="field-block">
+                    <label for="opRegDistrict" class="visually-hidden">PERDA District</label>
+                    <div class="pill-input-group">
+                      <i class="fa-solid fa-location-dot pill-input-icon" aria-hidden="true"></i>
+                      <select
+                        id="opRegDistrict"
+                        name="district"
+                        class="pill-input-control pill-select-control"
+                        required
+                      >
+                        <option value="">District...</option>
+                        <option value="Kepala Batas">Kepala Batas</option>
+                        <option value="Kubang Semang">Kubang Semang</option>
+                        <option value="Balik Pulau">Balik Pulau</option>
+                        <option value="Sungai Acheh">Sungai Acheh</option>
+                        <option value="Penaga">Penaga</option>
+                        <option value="Teluk Bahang">Teluk Bahang</option>
+                      </select>
+                    </div>
+                    <div class="field-error-msg" id="opRegDistrictError" role="alert"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Phone & Email -->
+              <div class="row g-2">
+                <div class="col-sm-5">
+                  <div class="field-block">
+                    <label for="opRegPhone" class="visually-hidden">Phone Number</label>
+                    <div class="pill-input-group">
+                      <i class="fa-solid fa-phone pill-input-icon" aria-hidden="true"></i>
+                      <input
+                        type="tel"
+                        id="opRegPhone"
+                        name="phone"
+                        class="pill-input-control"
+                        placeholder="Phone number"
+                        autocomplete="tel"
+                        required
+                      >
+                    </div>
+                    <div class="field-error-msg" id="opRegPhoneError" role="alert"></div>
+                  </div>
+                </div>
+                <div class="col-sm-7">
+                  <div class="field-block">
+                    <label for="opRegEmail" class="visually-hidden">Email Address</label>
+                    <div class="pill-input-group">
+                      <i class="fa-regular fa-envelope pill-input-icon" aria-hidden="true"></i>
+                      <input
+                        type="email"
+                        id="opRegEmail"
+                        name="email"
+                        class="pill-input-control"
+                        placeholder="Email address"
+                        autocomplete="email"
+                        required
+                      >
+                    </div>
+                    <div class="field-error-msg" id="opRegEmailError" role="alert"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Password & Confirm Password -->
+              <div class="row g-2">
+                <div class="col-sm-6">
+                  <div class="field-block">
+                    <label for="opRegPassword" class="visually-hidden">Password</label>
+                    <div class="pill-input-group">
+                      <i class="fa-solid fa-lock pill-input-icon" aria-hidden="true"></i>
+                      <input
+                        type="password"
+                        id="opRegPassword"
+                        name="password"
+                        class="pill-input-control"
+                        placeholder="Password"
+                        autocomplete="new-password"
+                        required
+                      >
+                      <button
+                        type="button"
+                        class="pill-password-toggle"
+                        data-target="opRegPassword"
+                        aria-label="Show password"
+                      >
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="field-error-msg" id="opRegPasswordError" role="alert"></div>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="field-block">
+                    <label for="opRegConfirmPassword" class="visually-hidden">Confirm Password</label>
+                    <div class="pill-input-group">
+                      <i class="fa-solid fa-shield-halved pill-input-icon" aria-hidden="true"></i>
+                      <input
+                        type="password"
+                        id="opRegConfirmPassword"
+                        name="password_confirmation"
+                        class="pill-input-control"
+                        placeholder="Confirm"
+                        autocomplete="new-password"
+                        required
+                      >
+                      <button
+                        type="button"
+                        class="pill-password-toggle"
+                        data-target="opRegConfirmPassword"
+                        aria-label="Show confirm password"
+                      >
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                    </div>
+                    <div class="field-error-msg" id="opRegConfirmPasswordError" role="alert"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="login-submit-btn mt-1">
+                <span class="btn-label-text">Register Homestay</span>
+                <i class="fa-solid fa-paper-plane btn-label-icon"></i>
+              </button>
+            </form>
+
+            <!-- ==============================================================
+                 PANE 5: ADMIN LOGIN ONLY -> No Register Tab or Link Anywhere
+                 ============================================================== -->
+            <form
+              id="adminLoginForm"
+              class="auth-form-pane"
+              action="/login"
+              method="POST"
+              data-pane="admin-login"
+              hidden
+              novalidate
+            >
+              <input type="hidden" name="login_role" value="officer">
+
+              <!-- Official Admin Email / Username -->
+              <div class="field-block">
+                <label for="adminLoginIdentity" class="visually-hidden">Official PERDA Admin Email</label>
+                <div class="pill-input-group">
+                  <i class="fa-solid fa-user-shield pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    id="adminLoginIdentity"
+                    name="email"
+                    class="pill-input-control"
+                    placeholder="officer.bpe@perda.gov.my"
+                    autocomplete="username"
+                    required
+                  >
+                </div>
+                <div class="field-error-msg" id="adminLoginIdentityError" role="alert"></div>
+              </div>
+
+              <!-- Admin Password -->
+              <div class="field-block">
+                <label for="adminLoginPassword" class="visually-hidden">Password</label>
+                <div class="pill-input-group">
+                  <i class="fa-solid fa-lock pill-input-icon" aria-hidden="true"></i>
+                  <input
+                    type="password"
+                    id="adminLoginPassword"
+                    name="password"
+                    class="pill-input-control"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required
+                  >
+                  <button
+                    type="button"
+                    class="pill-password-toggle"
+                    data-target="adminLoginPassword"
+                    aria-label="Show password"
+                  >
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <div class="field-error-msg" id="adminLoginPasswordError" role="alert"></div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="login-submit-btn">
+                <span class="btn-label-text">Login</span>
+                <i class="fa-solid fa-arrow-right-to-bracket btn-label-icon"></i>
+              </button>
+
+              <!-- Forgot Password Link -->
+              <div class="forgot-link-wrap">
+                <a
+                  href="#forgotPasswordModal"
+                  data-bs-toggle="modal"
+                  data-bs-target="#forgotPasswordModal"
+                  class="forgot-password-link"
+                >
+                  Forgot password?
+                </a>
+              </div>
+
+              <!-- Quick Demo Admin Account -->
+              <div class="staff-demo-helper">
+                <div class="small fw-semibold mb-1" style="color: var(--dark-green); font-size: 0.73rem;">
+                  <i class="fa-solid fa-shield-halved me-1" style="color: var(--burnt-orange);"></i> Verified BPE PERDA Officer Demo:
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    class="demo-chip-btn"
+                    onclick="fillAdminDemo('officer.bpe@perda.gov.my', 'PerdaAdmin2026!')"
+                  >
+                    officer.bpe@perda.gov.my
+                  </button>
+                  <button
+                    type="button"
+                    class="demo-chip-btn"
+                    onclick="fillAdminDemo('admin.homestay@perda.gov.my', 'PerdaAdmin2026!')"
+                  >
+                    admin.homestay@perda.gov.my
+                  </button>
+                </div>
+              </div>
+            </form>
+
+          </div><!-- /#cardDynamicViewport -->
+        </div><!-- /#loginFormCard -->
+
+        <!-- Below the Card Prompt (Hidden in Admin Mode where no Register link is allowed) -->
         <p id="belowCardPrompt" class="below-card-prompt">
           New here?
-          <button type="button" data-bs-toggle="modal" data-bs-target="#createAccountModal">
+          <button type="button" id="belowCardSwitchTabBtn">
             Create an account
           </button>
         </p>
@@ -225,52 +790,7 @@
   </main>
 
   <!-- ========================================================================
-       MODAL 1: "Create an account" (Tourist Registration with Promotional Opt-In)
-       ======================================================================== -->
-  <div class="modal fade" id="createAccountModal" tabindex="-1" aria-labelledby="createAccountModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="background-color: var(--cream); border: 2px solid var(--sand); border-radius: 24px;">
-        <div class="modal-header border-0 pb-0">
-          <h3 class="h5 modal-title fw-bold" id="createAccountModalLabel" style="font-family: 'Playfair Display', serif; color: var(--dark-green);">
-            <i class="fa-solid fa-user-plus me-2" style="color: var(--burnt-orange);"></i>Create Your Tourist Account
-          </h3>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body pt-2">
-          <p class="small mb-3" style="color: var(--dark-green);">
-            Register to book verified PERDA homestays and track your reservations easily.
-          </p>
-          <form id="modalCreateAccountForm" novalidate>
-            <div class="mb-2">
-              <label for="modalRegName" class="form-label small fw-semibold mb-1">Full Name *</label>
-              <input type="text" id="modalRegName" class="form-control form-control-perda" placeholder="e.g., Nurul Izzah binti Ahmad" required>
-            </div>
-            <div class="mb-2">
-              <label for="modalRegEmail" class="form-label small fw-semibold mb-1">Email Address *</label>
-              <input type="email" id="modalRegEmail" class="form-control form-control-perda" placeholder="name@example.com" required>
-            </div>
-            <div class="mb-3">
-              <label for="modalRegPass" class="form-label small fw-semibold mb-1">Password (Min. 8 characters) *</label>
-              <input type="password" id="modalRegPass" class="form-control form-control-perda" placeholder="Create a password" required>
-            </div>
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="modalRegPromoOptIn" checked>
-              <label class="form-check-label small" for="modalRegPromoOptIn" style="color: var(--dark-green);">
-                I agree to receive promotional emails from PERDA
-              </label>
-            </div>
-            <button type="submit" class="btn btn-cta-orange w-100">
-              <i class="fa-solid fa-user-check me-2"></i>Create Account
-            </button>
-            <div id="modalRegFeedback"></div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================
-       MODAL 2: "Forgot password?" Recovery Modal
+       MODAL: "Forgot password?" Recovery Modal
        ======================================================================== -->
   <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -304,7 +824,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Shared Platform Data & Utilities -->
   <script src="js/main.js"></script>
-  <!-- Dedicated Login Page Logic & Fluid Morph Animation -->
+  <!-- Dedicated Login Page Logic, Validation & Fluid Morph Animation -->
   <script src="js/login.js"></script>
 </body>
 </html>
