@@ -20,16 +20,16 @@
 
   <!-- ========================================================================
        SPLIT-SCREEN FULL VIEWPORT LOGIN STAGE
-       - Default State (data-mode="user"):
+       - Default State (#guest, data-mode="user"):
          Off-white Welcome Panel (40%) on LEFT | Coloured Fluid Panel (60%) on RIGHT
-       - Staff State (data-mode="staff", .is-staff-mode):
+       - Staff State (#staff, data-mode="staff", .is-staff-mode):
          Coloured Fluid Panel (60%) on LEFT | Off-white Welcome Panel (40%) on RIGHT
        ======================================================================== -->
   <main id="loginStage" class="login-split-stage" data-mode="user">
 
     <!-- 1. OFF-WHITE PANEL (~40% Width): Logo, Welcome Heading, Supporting Line & Side Switch -->
-    <section class="login-welcome-panel" aria-label="Welcome & Role Switcher">
-      <div class="welcome-content-inner">
+    <section id="welcomePanel" class="login-welcome-panel" aria-label="Welcome & Role Switcher">
+      <div id="welcomeContentInner" class="welcome-content-inner">
         <!-- Brand Logo -->
         <a href="index.html" class="welcome-logo-link" title="Return to e-Homestay Home">
           <span class="welcome-logo-badge">
@@ -67,24 +67,23 @@
       </div>
     </section>
 
-    <!-- 2. COLOURED FLUID PANEL (~60% Width): Wavy SVG Edge, Faint Line-Art Icons & Form Card -->
-    <section class="login-fluid-panel" aria-label="Sign In Form Panel">
+    <!-- 2. COLOURED FLUID PANEL (~60% Width): Morphing Wavy SVG Fluid Body, Faint Icons & Form Card -->
+    <section id="fluidPanel" class="login-fluid-panel" aria-label="Sign In Form Panel">
 
-      <!-- Hand-Drawn Uneven Wavy SVG Edge for USER Mode (Sits on the LEFT edge of the right fluid panel) -->
-      <div class="fluid-wave-divider fluid-wave-left" aria-hidden="true">
-        <svg viewBox="0 0 120 1000" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path class="wave-fill" d="M0,0 L58,0 C98,105 18,215 74,330 C116,420 26,535 82,665 C118,750 32,875 68,1000 L0,1000 Z"></path>
-          <path class="wave-accent-stroke" d="M58,0 C98,105 18,215 74,330 C116,420 26,535 82,665 C118,750 32,875 68,1000"></path>
-        </svg>
-      </div>
-
-      <!-- Hand-Drawn Uneven Wavy SVG Edge for STAFF Mode (Sits on the RIGHT edge of the left fluid panel) -->
-      <div class="fluid-wave-divider fluid-wave-right" aria-hidden="true">
-        <svg viewBox="0 0 120 1000" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path class="wave-fill" d="M120,0 L62,0 C22,110 102,225 44,340 C6,430 94,545 38,670 C4,755 88,880 52,1000 L120,1000 Z"></path>
-          <path class="wave-accent-stroke" d="M62,0 C22,110 102,225 44,340 C6,430 94,545 38,670 C4,755 88,880 52,1000"></path>
-        </svg>
-      </div>
+      <!-- Full-Panel Morphing Liquid SVG (Animated via JS requestAnimationFrame during mode switch) -->
+      <svg
+        class="fluid-morph-svg"
+        viewBox="0 0 1000 1000"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          id="fluidBodyPath"
+          class="fluid-body-path"
+          d="M75,-8 C148,105 22,215 96,330 C158,425 34,540 112,665 C165,760 42,880 84,1008 L1012,1008 C1012,880 1012,760 1012,665 C1012,540 1012,425 1012,330 C1012,215 1012,105 1012,-8 Z"
+        ></path>
+      </svg>
 
       <!-- Scattered Faint Line-Art Icons in the Background (Keys, Envelopes, House, Location Pin) -->
       <div class="fluid-bg-icons" aria-hidden="true">
@@ -101,7 +100,7 @@
       </div>
 
       <!-- Form Card & Below-Card Prompt -->
-      <div class="fluid-form-wrapper">
+      <div id="fluidFormWrapper" class="fluid-form-wrapper">
         <div class="login-form-card">
           <!-- Small Heading and Subheading -->
           <h2 id="formCardHeading" class="form-card-heading">Sign in</h2>
@@ -305,7 +304,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Shared Platform Data & Utilities -->
   <script src="js/main.js"></script>
-  <!-- Dedicated Login Page Logic -->
+  <!-- Dedicated Login Page Logic & Fluid Morph Animation -->
   <script src="js/login.js"></script>
 </body>
 </html>

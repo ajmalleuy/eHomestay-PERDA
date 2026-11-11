@@ -1,6 +1,7 @@
 /* ==========================================================================
    e-Homestay PERDA (Inap Desa) - Split-Screen Fluid Login Styles (login.css)
    All colors are controlled via CSS variables below for single-place tuning.
+   Includes GPU-accelerated (transform/opacity) fluid glide & content swap.
    ========================================================================== */
 
 :root {
@@ -53,34 +54,52 @@ body.login-body {
   overflow: hidden;
 }
 
-/* ==========================================================================
-   STATE 1 (DEFAULT = USER MODE):
-   - Off-White Welcome Panel (40%) on LEFT
-   - Coloured Fluid Panel (60%) on RIGHT
-   STATE 2 (STAFF = ADMIN / OPERATOR MODE):
-   - Coloured Fluid Panel (60%) on LEFT
-   - Off-White Welcome Panel (40%) on RIGHT
-   ========================================================================== */
-.login-split-stage.is-staff-mode {
-  flex-direction: row-reverse;
+/* Disable switch interactions while fluid animation is in flight */
+.login-split-stage.is-animating .side-switch-link,
+.login-split-stage.is-animating #switchBackGuestInlineBtn {
+  pointer-events: none;
 }
+
+/* ==========================================================================
+   STATE 1 (DEFAULT = USER MODE, #guest):
+   - Off-White Welcome Panel (40%) on LEFT:  translate3d(0%, 0, 0)
+   - Coloured Fluid Panel (60%) on RIGHT:    translate3d(0%, 0, 0)
+
+   STATE 2 (STAFF = ADMIN / OPERATOR MODE, #staff):
+   - Coloured Fluid Panel (60%) glides LEFT: translate3d(-66.6667%, 0, 0)
+   - Off-White Welcome Panel (40%) glides RIGHT: translate3d(150%, 0, 0)
+   Uses ONLY transform for zero-reflow GPU performance.
+   ========================================================================== */
 
 /* 1. OFF-WHITE WELCOME PANEL (~40% Width on Desktop) */
 .login-welcome-panel {
   position: relative;
-  z-index: 3;
+  z-index: 2;
   flex: 0 0 40%;
   max-width: 40%;
-  background-color: var(--login-offwhite-bg);
+  background-color: transparent;
   padding: 3.5rem 3.25rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  transform: translate3d(0%, 0, 0);
+  will-change: transform;
+  transition: transform 0.98s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.login-split-stage.is-staff-mode .login-welcome-panel {
+  transform: translate3d(150%, 0, 0);
 }
 
 .welcome-content-inner {
   max-width: 390px;
   margin: 0 auto;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  transition:
+    opacity 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .welcome-logo-link {
@@ -152,17 +171,17 @@ body.login-body {
   gap: 0.45rem;
   text-align: left;
   border-bottom: 1.5px solid transparent;
-  transition: all 0.25s ease;
+  transition: color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
 
 .side-switch-link:hover {
   color: var(--burnt-orange);
   border-bottom-color: var(--burnt-orange);
-  transform: translateX(3px);
+  transform: translate3d(3px, 0, 0);
 }
 
 .login-split-stage.is-staff-mode .side-switch-link:hover {
-  transform: translateX(-3px);
+  transform: translate3d(-3px, 0, 0);
 }
 
 .welcome-home-return {
@@ -173,73 +192,51 @@ body.login-body {
 }
 
 /* ==========================================================================
-   2. COLOURED FLUID PANEL (~60% Width on Desktop) WITH HAND-DRAWN WAVY EDGE
+   2. COLOURED FLUID PANEL (~60% Width on Desktop) WITH MORPHING SVG LIQUID BODY
    ========================================================================== */
 .login-fluid-panel {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   flex: 0 0 60%;
   max-width: 60%;
-  background-color: var(--login-fluid-user-bg);
+  background-color: transparent;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2.5rem 3rem 5.5rem;
-  transition: background-color 0.35s ease;
+  padding: 3rem 3.5rem 3rem 5.5rem;
+  transform: translate3d(0%, 0, 0);
+  will-change: transform;
+  transition: transform 0.98s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .login-split-stage.is-staff-mode .login-fluid-panel {
-  background-color: var(--login-fluid-staff-bg);
-  padding: 3rem 5.5rem 3rem 2.5rem;
+  transform: translate3d(-66.6667%, 0, 0);
+  padding: 3rem 5.5rem 3rem 3.5rem;
 }
 
-/* Hand-Drawn Organic Wavy SVG Divider along the Fluid Panel Edge */
-.fluid-wave-divider {
+/* Full-Panel Morphing SVG Liquid Canvas */
+.fluid-morph-svg {
   position: absolute;
-  top: -2px;
-  bottom: -2px;
-  width: 115px;
-  height: calc(100% + 4px);
-  z-index: 4;
-  pointer-events: none;
-}
-
-/* In USER mode (fluid panel on RIGHT), wave sits on its LEFT edge */
-.fluid-wave-left {
-  left: -1px;
-  display: block;
-}
-
-.fluid-wave-right {
-  right: -1px;
-  display: none;
-}
-
-/* In STAFF mode (fluid panel on LEFT), wave sits on its RIGHT edge */
-.login-split-stage.is-staff-mode .fluid-wave-left {
-  display: none;
-}
-
-.login-split-stage.is-staff-mode .fluid-wave-right {
-  display: block;
-}
-
-.fluid-wave-divider svg {
+  inset: 0;
   width: 100%;
   height: 100%;
-  display: block;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.fluid-wave-divider .wave-fill {
-  fill: var(--login-offwhite-bg);
-}
-
-.fluid-wave-divider .wave-accent-stroke {
-  fill: none;
+.fluid-body-path {
+  fill: var(--login-fluid-user-bg);
   stroke: var(--sand);
   stroke-width: 2.5;
   stroke-opacity: 0.55;
+  vector-effect: non-scaling-stroke;
+  transition: fill 0.85s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.login-split-stage.is-staff-mode .fluid-body-path {
+  fill: var(--login-fluid-staff-bg);
 }
 
 /* ==========================================================================
@@ -247,10 +244,10 @@ body.login-body {
    ========================================================================== */
 .fluid-bg-icons {
   position: absolute;
-  inset: 0;
+  inset: 0 9%;
   overflow: hidden;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
 
 .fluid-bg-icons .bg-icon {
@@ -262,25 +259,65 @@ body.login-body {
 }
 
 /* Individual scattered positions & organic rotations */
-.bg-icon.ic-1  { top: 8%;    left: 18%;  transform: rotate(-18deg); font-size: 2.6rem; }
-.bg-icon.ic-2  { top: 14%;   right: 12%; transform: rotate(15deg);  font-size: 3.2rem; }
-.bg-icon.ic-3  { top: 32%;   left: 11%;  transform: rotate(12deg);  font-size: 2.3rem; }
-.bg-icon.ic-4  { top: 28%;   right: 20%; transform: rotate(-22deg); font-size: 2.5rem; }
-.bg-icon.ic-5  { top: 52%;   left: 15%;  transform: rotate(-10deg); font-size: 3.1rem; }
-.bg-icon.ic-6  { top: 56%;   right: 10%; transform: rotate(20deg);  font-size: 2.7rem; }
-.bg-icon.ic-7  { bottom: 18%; left: 22%; transform: rotate(16deg);  font-size: 2.5rem; }
-.bg-icon.ic-8  { bottom: 12%; right: 16%; transform: rotate(-14deg); font-size: 3.3rem; }
+.bg-icon.ic-1  { top: 8%;    left: 12%;  transform: rotate(-18deg); font-size: 2.6rem; }
+.bg-icon.ic-2  { top: 14%;   right: 10%; transform: rotate(15deg);  font-size: 3.2rem; }
+.bg-icon.ic-3  { top: 32%;   left: 7%;   transform: rotate(12deg);  font-size: 2.3rem; }
+.bg-icon.ic-4  { top: 28%;   right: 16%; transform: rotate(-22deg); font-size: 2.5rem; }
+.bg-icon.ic-5  { top: 52%;   left: 11%;  transform: rotate(-10deg); font-size: 3.1rem; }
+.bg-icon.ic-6  { top: 56%;   right: 8%;  transform: rotate(20deg);  font-size: 2.7rem; }
+.bg-icon.ic-7  { bottom: 18%; left: 16%; transform: rotate(16deg);  font-size: 2.5rem; }
+.bg-icon.ic-8  { bottom: 12%; right: 13%; transform: rotate(-14deg); font-size: 3.3rem; }
 .bg-icon.ic-9  { top: 75%;   left: 44%;  transform: rotate(-8deg);  font-size: 2.2rem; }
-.bg-icon.ic-10 { top: 11%;   left: 52%;  transform: rotate(19deg);  font-size: 2.4rem; }
+.bg-icon.ic-10 { top: 11%;   left: 50%;  transform: rotate(19deg);  font-size: 2.4rem; }
 
 /* ==========================================================================
-   4. FORM CARD ON THE COLOURED PANEL
+   4. FORM CARD ON THE COLOURED PANEL & CHOREOGRAPHED CONTENT SWAP STATES
    ========================================================================== */
 .fluid-form-wrapper {
   position: relative;
   z-index: 5;
   width: 100%;
   max-width: 430px;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  transition:
+    opacity 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Exit states while fluid panel begins travelling */
+.welcome-content-inner.is-exiting-left,
+.fluid-form-wrapper.is-exiting-left {
+  opacity: 0;
+  transform: translate3d(-36px, 0, 0);
+  transition:
+    opacity 0.22s cubic-bezier(0.4, 0, 1, 1),
+    transform 0.24s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.welcome-content-inner.is-exiting-right,
+.fluid-form-wrapper.is-exiting-right {
+  opacity: 0;
+  transform: translate3d(36px, 0, 0);
+  transition:
+    opacity 0.22s cubic-bezier(0.4, 0, 1, 1),
+    transform 0.24s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Pre-entry staging states (applied while opacity is 0 before delayed fade-in) */
+.welcome-content-inner.is-staging-left,
+.fluid-form-wrapper.is-staging-left {
+  opacity: 0;
+  transform: translate3d(-28px, 0, 0);
+  transition: none !important;
+}
+
+.welcome-content-inner.is-staging-right,
+.fluid-form-wrapper.is-staging-right {
+  opacity: 0;
+  transform: translate3d(28px, 0, 0);
+  transition: none !important;
 }
 
 .login-form-card {
@@ -318,7 +355,7 @@ body.login-body {
   margin-bottom: 1.25rem;
 }
 
-.login-split-stage.is-staff-mode .staff-role-Selector {
+.login-split-stage.is-staff-content .staff-role-Selector {
   display: grid;
 }
 
@@ -331,7 +368,7 @@ body.login-body {
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .staff-role-pill.active {
@@ -366,7 +403,7 @@ body.login-body {
   color: var(--login-text-color);
   font-family: 'Poppins', sans-serif;
   font-size: 0.92rem;
-  transition: all 0.22s ease;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .pill-input-control::placeholder {
@@ -418,13 +455,13 @@ body.login-body {
   gap: 0.5rem;
   cursor: pointer;
   margin-top: 0.35rem;
-  transition: all 0.25s ease;
+  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .login-submit-btn:hover {
   background-color: var(--login-btn-hover-bg);
   border-color: var(--login-btn-hover-bg);
-  transform: translateY(-2px);
+  transform: translate3d(0, -2px, 0);
   box-shadow: 0 8px 20px rgba(40, 54, 24, 0.22);
 }
 
@@ -499,7 +536,7 @@ body.login-body {
   border-top: 1px dashed var(--sand);
 }
 
-.login-split-stage.is-staff-mode .staff-demo-helper {
+.login-split-stage.is-staff-content .staff-demo-helper {
   display: block;
 }
 
@@ -512,7 +549,7 @@ body.login-body {
   font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .demo-chip-btn:hover {
@@ -520,26 +557,57 @@ body.login-body {
 }
 
 /* ==========================================================================
-   5. RESPONSIVE DESIGN (Tablet & Mobile < 992px)
+   5. ACCESSIBILITY: PREFERS-REDUCED-MOTION (Simple Quick Crossfade)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .login-welcome-panel,
+  .login-fluid-panel,
+  .fluid-body-path {
+    transition: none !important;
+  }
+
+  .welcome-content-inner,
+  .fluid-form-wrapper,
+  .welcome-content-inner.is-exiting-left,
+  .welcome-content-inner.is-exiting-right,
+  .fluid-form-wrapper.is-exiting-left,
+  .fluid-form-wrapper.is-exiting-right {
+    transform: none !important;
+    transition: opacity 0.18s ease !important;
+  }
+}
+
+/* ==========================================================================
+   6. RESPONSIVE DESIGN (Tablet & Mobile < 992px)
    ========================================================================== */
 @media (max-width: 991.98px) {
-  .login-split-stage,
-  .login-split-stage.is-staff-mode {
+  .login-split-stage {
     flex-direction: column;
   }
 
+  .login-split-stage.is-staff-mode {
+    flex-direction: column-reverse;
+  }
+
   .login-welcome-panel,
-  .login-fluid-panel {
+  .login-fluid-panel,
+  .login-split-stage.is-staff-mode .login-welcome-panel,
+  .login-split-stage.is-staff-mode .login-fluid-panel {
     flex: 0 0 100%;
     max-width: 100%;
     padding: 2.5rem 1.5rem;
+    transform: none !important;
+  }
+
+  .login-fluid-panel {
+    background-color: var(--login-fluid-user-bg);
   }
 
   .login-split-stage.is-staff-mode .login-fluid-panel {
-    padding: 2.5rem 1.5rem;
+    background-color: var(--login-fluid-staff-bg);
   }
 
-  .fluid-wave-divider {
+  .fluid-morph-svg {
     display: none !important;
   }
 }
