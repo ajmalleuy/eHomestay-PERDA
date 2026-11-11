@@ -1,53 +1,84 @@
 /**
  * ============================================================================
- * e-Homestay PERDA (Inap Desa) - Login & Registration Controller (login.js)
+ * e-Homestay PERDA - 3-Phase Liquid Flood, Gooey Droplets & Login Controller
  * ============================================================================
- * HOW TO ADJUST ANIMATION SPEED & CURVE SHAPE:
- *   Edit the ANIMATION_CONFIG object right below:
- *   - MORPH_DURATION_MS:       Total duration of the SVG wave morph (default: 1050ms)
- *   - CONTENT_SWAP_DELAY_MS:   When hidden text/form swaps mid-flight (default: 240ms)
- *   - CONTENT_FADE_IN_MS:      When new content fades in after arrival (default: 660ms)
- *   - LEAD_BOW_STRENGTH:       How far the leading liquid edge bulges ahead (px in 0..1000 viewBox)
- *   - TRAIL_DRAG_STRENGTH:     How much the back edge lags behind at launch
- *   - SPRING_WOBBLE_STRENGTH:  Amplitude of the arrival overshoot & settle wobble
- *   - SPRING_DAMPING:          Higher = settles faster; Lower = more elastic bounces
- *   - SPRING_FREQUENCY:        Number of wobble oscillations during settle
- *   - GUEST_REST_VEC / STAFF_REST_VEC:
- *       20-number array defining the resting cubic Bezier x-coordinates for
- *       the Left Edge [0..9] and Right Edge [10..19] in a 1000x1000 viewBox.
+ * TIMING CONSTANTS (in seconds — adjust these to tune the transition speed):
+ *   - TIMING_CARD_FADE_OUT:   Fade & slide out of card and welcome text (0.20s)
+ *   - TIMING_PHASE1_FLOOD:    Phase 1 — Dark green fluid floods across screen (0.85s)
+ *   - TIMING_PHASE2_HOLD:     Phase 2 — Solid dark screen hold while DOM swaps (0.10s)
+ *   - TIMING_PHASE3_RETURN:   Phase 3 — Cream returns from opposite edge with
+ *                             irregular gooey droplets & settles (1.00s)
+ *   - TIMING_CARD_FADE_IN:    Card and welcome text fade in + upward slide (0.30s)
+ *   - TIMING_REDUCED_MOTION:  Simple crossfade when prefers-reduced-motion is on (0.30s)
+ *   Total transition time:    ~2.10s
  * ============================================================================
  */
 
-const ANIMATION_CONFIG = {
-  MORPH_DURATION_MS: 1050,
-  CONTENT_SWAP_DELAY_MS: 240,
-  CONTENT_FADE_IN_MS: 660,
-  UNLOCK_DELAY_MS: 1070,
+const TIMING_CARD_FADE_OUT  = 0.20;
+const TIMING_PHASE1_FLOOD   = 0.85;
+const TIMING_PHASE2_HOLD    = 0.10;
+const TIMING_PHASE3_RETURN  = 1.00;
+const TIMING_CARD_FADE_IN   = 0.30;
+const TIMING_REDUCED_MOTION = 0.30;
 
-  // Liquid curve physics (increase for more dramatic wave, decrease for subtler curve)
-  LEAD_BOW_STRENGTH: 76,
-  TRAIL_DRAG_STRENGTH: 60,
-  SPRING_WOBBLE_STRENGTH: 88,
-  SPRING_DAMPING: 4.6,
-  SPRING_FREQUENCY: 2.8,
+/**
+ * WAVE CURVE & PHYSICS CONSTANTS (in 0..1000 SVG viewBox coordinates)
+ */
+const WAVE_CONFIG = {
+  // Resting wavy boundary X-coordinates (10 points from top y=-15 to bottom y=1015)
+  // Guest Mode: Cream on LEFT (0..~445), Dark Fluid on RIGHT (~445..1000)
+  GUEST_REST_X: [438, 492, 398, 456, 504, 408, 466, 508, 414, 444],
 
-  // Resting State 1: GUEST MODE (#guest) — Fluid panel on RIGHT
-  // Indices [0..9] = uneven organic wave on Left edge; [10..19] = flat Right wall (1012)
-  GUEST_REST_VEC: [
-    78, 152, 19, 98, 162, 31, 114, 168, 39, 86,
-    1012, 1012, 1012, 1012, 1012, 1012, 1012, 1012, 1012, 1012
-  ],
+  // Staff Mode: Dark Fluid on LEFT (0..~555), Cream on RIGHT (~555..1000)
+  STAFF_REST_X: [562, 508, 602, 544, 496, 592, 534, 492, 586, 556],
 
-  // Resting State 2: STAFF MODE (#staff) — Fluid panel on LEFT
-  // Indices [0..9] = flat Left wall (-12); [10..19] = uneven organic wave on Right edge
-  STAFF_REST_VEC: [
-    -12, -12, -12, -12, -12, -12, -12, -12, -12, -12,
-    922, 848, 981, 902, 838, 969, 886, 832, 961, 914
-  ],
+  // Tablet offset (shifts resting boundary toward 45% / 55% split on 768px-1023px)
+  TABLET_GUEST_OFFSET: 38,
+  TABLET_STAFF_OFFSET: -38,
 
-  // Vertical weights along the wave edge so each crest deforms unevenly
-  WAVE_WEIGHTS: [0.45, 1.15, 0.85, 1.05, 1.32, 0.88, 1.14, 1.24, 0.78, 0.48]
+  // Mobile resting top wave Y-coordinates (10 points from left x=-15 to right x=1015)
+  MOBILE_REST_Y: [18, 36, 8, 28, 42, 12, 32, 38, 10, 22],
+
+  // Lead/lag weights across the 10 vertical wave points:
+  // Middle points (indices 3..6) lead strongly; top & bottom corners (0, 9) lag behind
+  CENTER_LEAD_WEIGHTS: [0.12, 0.48, 0.78, 0.96, 1.00, 0.98, 0.88, 0.68, 0.42, 0.10],
+
+  // Amplitudes for leading belly bow, traveling wobble, and final settle overshoot
+  FLOOD_CENTER_BOW: 135,
+  FLOOD_WOBBLE_AMP: 28,
+  RETURN_CENTER_BOW: 115,
+  SETTLE_OVERSHOOT_AMP: 38
 };
+
+/**
+ * DESKTOP / TABLET DROPLETS DATA ARRAY (7 irregular droplets for Phase 3)
+ * - type: 'cream-lead' -> Small irregular cream droplets just ahead of the main
+ *   cream edge inside the dark area; stretched & absorbed by the advancing cream wave.
+ * - type: 'dark-trail' -> Irregular dark green blobs left behind inside the cream
+ *   area for a moment, which slowly shrink and merge back into the dark side.
+ */
+const DESKTOP_DROPLETS_DATA = [
+  // 4 Leading Cream Droplets (ahead of the cream wave inside the dark area)
+  { id: 'd1', type: 'cream-lead', pos: 210, rx: 24, ry: 16, skew: 1.35, speed: 1.22, delay: 0.04, dist: 86 },
+  { id: 'd2', type: 'cream-lead', pos: 390, rx: 32, ry: 21, skew: 1.42, speed: 1.08, delay: 0.10, dist: 108 },
+  { id: 'd3', type: 'cream-lead', pos: 585, rx: 20, ry: 14, skew: 1.28, speed: 1.30, delay: 0.07, dist: 78 },
+  { id: 'd4', type: 'cream-lead', pos: 775, rx: 27, ry: 18, skew: 1.38, speed: 1.14, delay: 0.15, dist: 94 },
+
+  // 3 Trailing Dark Green Blobs (break off inside the cream area & merge back into dark side)
+  { id: 'd5', type: 'dark-trail', pos: 295, rx: 34, ry: 23, skew: 0.72, speed: 0.86, delay: 0.12, dist: 95 },
+  { id: 'd6', type: 'dark-trail', pos: 515, rx: 40, ry: 26, skew: 0.68, speed: 0.78, delay: 0.18, dist: 115 },
+  { id: 'd7', type: 'dark-trail', pos: 710, rx: 29, ry: 19, skew: 0.75, speed: 0.92, delay: 0.14, dist: 88 }
+];
+
+/**
+ * MOBILE DROPLETS DATA ARRAY (4 irregular droplets for < 768px vertical sweep)
+ */
+const MOBILE_DROPLETS_DATA = [
+  { id: 'm1', type: 'cream-lead', pos: 260, rx: 22, ry: 30, skew: 1.32, speed: 1.18, delay: 0.06, dist: 90 },
+  { id: 'm2', type: 'cream-lead', pos: 710, rx: 26, ry: 34, skew: 1.38, speed: 1.10, delay: 0.12, dist: 105 },
+  { id: 'm3', type: 'dark-trail', pos: 380, rx: 28, ry: 36, skew: 0.74, speed: 0.84, delay: 0.14, dist: 95 },
+  { id: 'm4', type: 'dark-trail', pos: 640, rx: 24, ry: 32, skew: 0.78, speed: 0.90, delay: 0.18, dist: 85 }
+];
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginStage = document.getElementById('loginStage');
@@ -55,8 +86,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const fluidFormWrapper = document.getElementById('fluidFormWrapper');
   const loginFormCard = document.getElementById('loginFormCard');
   const cardDynamicViewport = document.getElementById('cardDynamicViewport');
-  const fluidBodyPath = document.getElementById('fluidBodyPath');
-  const mobileWavePath = document.getElementById('mobileWavePath');
+
+  // Full-Screen SVG Paths & Droplet Groups
+  const darkFluidMainPath = document.getElementById('darkFluidMainPath');
+  const creamFluidMainPath = document.getElementById('creamFluidMainPath');
+  const darkBridgePath = document.getElementById('darkBridgePath');
+  const creamDropletsGroup = document.getElementById('creamDropletsGroup');
+  const darkTrailingBlobsGroup = document.getElementById('darkTrailingBlobsGroup');
+  const waveBoundaryStrokePath = document.getElementById('waveBoundaryStrokePath');
 
   const sideSwitchBtn = document.getElementById('sideSwitchBtn');
   const mobileSideSwitchBtn = document.getElementById('mobileSideSwitchBtn');
@@ -66,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileWelcomeHeading = document.getElementById('mobileWelcomeHeading');
   const mobileWelcomeSubtext = document.getElementById('mobileWelcomeSubtext');
 
-  // Card Top Controls: Segmented Staff Toggle & Login/Register Tabs
+  // Card Top Controls
   const staffSegmentedToggle = document.getElementById('staffSegmentedToggle');
   const staffRoleOperatorBtn = document.getElementById('staffRoleOperatorBtn');
   const staffRoleAdminBtn = document.getElementById('staffRoleAdminBtn');
@@ -98,141 +135,419 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeGuestTab = 'login';     // 'login' or 'register'
   let activeOperatorTab = 'login';  // 'login' or 'register'
   let isAnimating = false;
-  let activeRafId = null;
+  let activeTimeline = null;
 
   const prefersReducedMotion = () =>
     window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const isMobileViewport = () => window.innerWidth < 768;
-
-  /**
-   * ==========================================================================
-   * 1. DESKTOP/TABLET HORIZONTAL LIQUID SVG PATH MORPH & MOBILE VERTICAL SWEEP
-   * ==========================================================================
-   */
-  function buildDesktopFluidPath(v) {
-    return (
-      `M${v[0].toFixed(1)},-8 ` +
-      `C${v[1].toFixed(1)},102 ${v[2].toFixed(1)},218 ${v[3].toFixed(1)},334 ` +
-      `C${v[4].toFixed(1)},428 ${v[5].toFixed(1)},544 ${v[6].toFixed(1)},668 ` +
-      `C${v[7].toFixed(1)},762 ${v[8].toFixed(1)},882 ${v[9].toFixed(1)},1008 ` +
-      `L${v[19].toFixed(1)},1008 ` +
-      `C${v[18].toFixed(1)},882 ${v[17].toFixed(1)},762 ${v[16].toFixed(1)},668 ` +
-      `C${v[15].toFixed(1)},544 ${v[14].toFixed(1)},428 ${v[13].toFixed(1)},334 ` +
-      `C${v[12].toFixed(1)},218 ${v[11].toFixed(1)},102 ${v[10].toFixed(1)},-8 Z`
-    );
-  }
-
-  // Smooth cubic-bezier(0.65, 0, 0.35, 1) approximation
-  function easeFluidGlide(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  }
+  const isTabletViewport = () => window.innerWidth >= 768 && window.innerWidth < 1024;
 
   function lerp(a, b, t) {
     return a + (b - a) * t;
   }
 
   /**
-   * Computes the 20-point horizontal liquid morph vector at normalized time t in [0, 1].
+   * ==========================================================================
+   * 1. SVG WAVE & IRREGULAR DROPLET PATH BUILDERS
+   * ==========================================================================
    */
-  function computeLiquidMorphVector(t, toStaff) {
-    const {
-      GUEST_REST_VEC,
-      STAFF_REST_VEC,
-      WAVE_WEIGHTS,
-      LEAD_BOW_STRENGTH,
-      TRAIL_DRAG_STRENGTH,
-      SPRING_WOBBLE_STRENGTH,
-      SPRING_DAMPING,
-      SPRING_FREQUENCY
-    } = ANIMATION_CONFIG;
 
-    const out = new Array(20);
-    const leadT = easeFluidGlide(Math.min(1, Math.pow(t, 0.68)));
-    const trailT = easeFluidGlide(Math.pow(t, 1.38));
-
-    const leadBowPhase = t < 0.68 ? Math.sin((t / 0.68) * Math.PI) : 0;
-    const dragImpulse = t < 0.52 ? Math.sin((t / 0.52) * Math.PI) : 0;
-    const settlePhase = t > 0.38 ? (t - 0.38) / 0.62 : 0;
-    const springWobble =
-      settlePhase > 0
-        ? Math.exp(-SPRING_DAMPING * settlePhase) *
-          Math.sin(settlePhase * Math.PI * SPRING_FREQUENCY) *
-          (1 - Math.pow(settlePhase, 3))
-        : 0;
-
-    if (toStaff) {
-      for (let i = 0; i < 10; i++) {
-        const baseL = lerp(GUEST_REST_VEC[i], STAFF_REST_VEC[i], leadT);
-        const surgeLeft = -LEAD_BOW_STRENGTH * leadBowPhase * WAVE_WEIGHTS[i] * (1 - leadT * 0.85);
-        out[i] = baseL + surgeLeft;
-      }
-      for (let i = 0; i < 10; i++) {
-        const idx = 10 + i;
-        const baseR = lerp(GUEST_REST_VEC[idx], STAFF_REST_VEC[idx], trailT);
-        const trailDrag = TRAIL_DRAG_STRENGTH * dragImpulse * WAVE_WEIGHTS[i];
-        const wobbleOffset = -SPRING_WOBBLE_STRENGTH * springWobble * WAVE_WEIGHTS[9 - i];
-        out[idx] = baseR + trailDrag + wobbleOffset;
-      }
-    } else {
-      for (let i = 0; i < 10; i++) {
-        const idx = 10 + i;
-        const baseR = lerp(STAFF_REST_VEC[idx], GUEST_REST_VEC[idx], leadT);
-        const surgeRight = LEAD_BOW_STRENGTH * leadBowPhase * WAVE_WEIGHTS[i] * (1 - leadT * 0.85);
-        out[idx] = baseR + surgeRight;
-      }
-      for (let i = 0; i < 10; i++) {
-        const baseL = lerp(STAFF_REST_VEC[i], GUEST_REST_VEC[i], trailT);
-        const trailDrag = -TRAIL_DRAG_STRENGTH * dragImpulse * WAVE_WEIGHTS[i];
-        const wobbleOffset = SPRING_WOBBLE_STRENGTH * springWobble * WAVE_WEIGHTS[9 - i];
-        out[i] = baseL + trailDrag + wobbleOffset;
-      }
-    }
-    return out;
+  /**
+   * Returns the 10-point resting X-vector for Desktop or Tablet
+   */
+  function getRestingWaveX(staffMode) {
+    const base = staffMode ? WAVE_CONFIG.STAFF_REST_X : WAVE_CONFIG.GUEST_REST_X;
+    const tabletOffset = isTabletViewport()
+      ? staffMode
+        ? WAVE_CONFIG.TABLET_STAFF_OFFSET
+        : WAVE_CONFIG.TABLET_GUEST_OFFSET
+      : 0;
+    return base.map((x) => x + tabletOffset);
   }
 
   /**
-   * Computes the Mobile (< 768px) vertical wave sweep path at normalized time t in [0, 1].
-   * - Guest -> Staff: Wave sweeps UP from bottom (y=1012) to top (y=-12), then clears.
-   * - Staff -> Guest: Wave sweeps DOWN from top (y=-12) to bottom (y=1012), then clears.
+   * Builds a vertical wavy curve string from top (y=-20) to bottom (y=1020)
+   * given 10 X-coordinates [x0..x9].
    */
-  function buildMobileVerticalWavePath(t, toStaff) {
-    if (t <= 0 || t >= 1) {
-      return 'M-8,1012 L-8,1012 C180,1012 340,1012 510,1012 C690,1012 840,1012 1008,1012 L1008,1012 Z';
-    }
-    const coreY = toStaff
-      ? lerp(1012, -12, easeFluidGlide(t))
-      : lerp(-12, 1012, easeFluidGlide(t));
-    const bow = Math.sin(t * Math.PI) * (toStaff ? -115 : 115);
-    const wobble = Math.sin(t * Math.PI * 3) * 35 * (1 - t);
-
-    const c1y = coreY + bow * 0.9 + wobble;
-    const c2y = coreY + bow * 1.25 - wobble * 0.7;
-    const midY = coreY + bow * 0.85;
-    const c3y = coreY + bow * 1.15 + wobble * 0.8;
-    const c4y = coreY + bow * 0.7 - wobble;
-
-    if (toStaff) {
-      // Sweeping UP from bottom (1012)
-      return (
-        `M-8,1012 L-8,${coreY.toFixed(1)} ` +
-        `C180,${c1y.toFixed(1)} 340,${c2y.toFixed(1)} 510,${midY.toFixed(1)} ` +
-        `C690,${c3y.toFixed(1)} 840,${c4y.toFixed(1)} 1008,${coreY.toFixed(1)} ` +
-        `L1008,1012 Z`
-      );
-    }
-    // Sweeping DOWN from top (-12)
+  function buildVerticalWaveCurve(xVec) {
     return (
-      `M-8,-12 L-8,${coreY.toFixed(1)} ` +
-      `C180,${c1y.toFixed(1)} 340,${c2y.toFixed(1)} 510,${midY.toFixed(1)} ` +
-      `C690,${c3y.toFixed(1)} 840,${c4y.toFixed(1)} 1008,${coreY.toFixed(1)} ` +
-      `L1008,-12 Z`
+      `M${xVec[0].toFixed(1)},-20 ` +
+      `C${xVec[1].toFixed(1)},95 ${xVec[2].toFixed(1)},215 ${xVec[3].toFixed(1)},335 ` +
+      `C${xVec[4].toFixed(1)},435 ${xVec[5].toFixed(1)},555 ${xVec[6].toFixed(1)},670 ` +
+      `C${xVec[7].toFixed(1)},775 ${xVec[8].toFixed(1)},895 ${xVec[9].toFixed(1)},1020`
+    );
+  }
+
+  /**
+   * Builds a closed 2D polygon path for a vertical wave edge anchored to either
+   * the RIGHT wall (x=1040) or LEFT wall (x=-40).
+   */
+  function buildHorizontalRegionPath(xVec, anchorSide) {
+    const wallX = anchorSide === 'right' ? 1040 : -40;
+    return (
+      buildVerticalWaveCurve(xVec) +
+      ` L${wallX},1020 L${wallX},-20 Z`
+    );
+  }
+
+  /**
+   * Builds a horizontal wavy curve string from left (x=-20) to right (x=1020)
+   * given 10 Y-coordinates [y0..y9] (for Mobile < 768px).
+   */
+  function buildHorizontalWaveCurve(yVec) {
+    return (
+      `M-20,${yVec[0].toFixed(1)} ` +
+      `C95,${yVec[1].toFixed(1)} 215,${yVec[2].toFixed(1)} 335,${yVec[3].toFixed(1)} ` +
+      `C435,${yVec[4].toFixed(1)} 555,${yVec[5].toFixed(1)} 670,${yVec[6].toFixed(1)} ` +
+      `C775,${yVec[7].toFixed(1)} 895,${yVec[8].toFixed(1)} 1020,${yVec[9].toFixed(1)}`
+    );
+  }
+
+  /**
+   * Builds a closed 2D polygon path for a horizontal wave edge anchored to either
+   * the BOTTOM wall (y=1040) or TOP wall (y=-40) on Mobile.
+   */
+  function buildVerticalRegionPath(yVec, anchorSide) {
+    const wallY = anchorSide === 'bottom' ? 1040 : -40;
+    return (
+      buildHorizontalWaveCurve(yVec) +
+      ` L1020,${wallY} L-20,${wallY} Z`
+    );
+  }
+
+  /**
+   * Generates an irregular, organic liquid blob <path> (not a perfect circle)
+   * around (cx, cy) with radii (rx, ry), asymmetric lobe skew, and wobble.
+   */
+  function buildIrregularDropletPath(cx, cy, rx, ry, skew = 1.25, wobblePhase = 0) {
+    if (rx <= 0.4 || ry <= 0.4) return '';
+
+    const k = 0.552;
+    const rRight = rx * skew;
+    const rLeft = rx * (2 - Math.min(1.5, skew));
+    const rTop = ry * (1 + 0.14 * Math.sin(wobblePhase));
+    const rBot = ry * (1 - 0.12 * Math.cos(wobblePhase));
+
+    const xR = cx + rRight;
+    const xL = cx - rLeft;
+    const yT = cy - rTop;
+    const yB = cy + rBot;
+
+    return (
+      `M${xR.toFixed(1)},${cy.toFixed(1)} ` +
+      `C${xR.toFixed(1)},${(cy + rBot * k).toFixed(1)} ${(cx + rRight * k).toFixed(1)},${yB.toFixed(1)} ${cx.toFixed(1)},${yB.toFixed(1)} ` +
+      `C${(cx - rLeft * k).toFixed(1)},${yB.toFixed(1)} ${xL.toFixed(1)},${(cy + rBot * k).toFixed(1)} ${xL.toFixed(1)},${cy.toFixed(1)} ` +
+      `C${xL.toFixed(1)},${(cy - rTop * k).toFixed(1)} ${(cx - rLeft * k).toFixed(1)},${yT.toFixed(1)} ${cx.toFixed(1)},${yT.toFixed(1)} ` +
+      `C${(cx + rRight * k).toFixed(1)},${yT.toFixed(1)} ${xR.toFixed(1)},${(cy - rTop * k).toFixed(1)} ${xR.toFixed(1)},${cy.toFixed(1)} Z`
     );
   }
 
   /**
    * ==========================================================================
-   * 2. ACTIVE PANE RESOLUTION, SMOOTH CARD HEIGHT & FOCUS MANAGEMENT
+   * 2. RENDER STATIC / RESTING SVG FLUID STATE
+   * ==========================================================================
+   */
+  function renderRestingFluidState(staffMode) {
+    if (creamDropletsGroup) creamDropletsGroup.innerHTML = '';
+    if (darkTrailingBlobsGroup) darkTrailingBlobsGroup.innerHTML = '';
+    if (creamFluidMainPath) creamFluidMainPath.setAttribute('d', '');
+    if (darkBridgePath) darkBridgePath.setAttribute('d', '');
+
+    if (isMobileViewport()) {
+      const yVec = WAVE_CONFIG.MOBILE_REST_Y;
+      if (darkFluidMainPath) {
+        darkFluidMainPath.setAttribute('d', buildVerticalRegionPath(yVec, 'bottom'));
+      }
+      if (waveBoundaryStrokePath) {
+        waveBoundaryStrokePath.setAttribute('d', buildHorizontalWaveCurve(yVec));
+      }
+      return;
+    }
+
+    const restX = getRestingWaveX(staffMode);
+    const anchor = staffMode ? 'left' : 'right';
+    if (darkFluidMainPath) {
+      darkFluidMainPath.setAttribute('d', buildHorizontalRegionPath(restX, anchor));
+    }
+    if (waveBoundaryStrokePath) {
+      waveBoundaryStrokePath.setAttribute('d', buildVerticalWaveCurve(restX));
+    }
+  }
+
+  /**
+   * ==========================================================================
+   * 3. PHASE 1 & PHASE 3 DYNAMIC WAVE + DROPLET FRAME COMPUTATION
+   * ==========================================================================
+   */
+
+  /**
+   * Phase 1 (Flood): Computes the advancing Dark Fluid wave edge as it expands
+   * across the entire screen (0 -> 1).
+   * - Middle of the curve leads; top and bottom lag behind; continuous wobble.
+   */
+  function renderPhase1FloodFrame(progress, toStaff, mobileMode) {
+    const weights = WAVE_CONFIG.CENTER_LEAD_WEIGHTS;
+
+    if (mobileMode) {
+      // Mobile: Dark fluid floods UP from bottom to top (y = -45)
+      const startY = 880;
+      const endY = -45;
+      const yVec = new Array(10);
+
+      for (let i = 0; i < 10; i++) {
+        const w = weights[i];
+        // Center leads faster than corners
+        const localP = Math.min(1, Math.pow(progress, 1 - 0.35 * w));
+        const base = lerp(startY, endY, localP);
+        const bow = -95 * Math.sin(progress * Math.PI) * w;
+        const wobble = Math.sin(progress * Math.PI * 3 + i * 0.85) * 18 * (1 - progress);
+        yVec[i] = base + bow + wobble;
+      }
+
+      if (darkFluidMainPath) {
+        darkFluidMainPath.setAttribute('d', buildVerticalRegionPath(yVec, 'bottom'));
+      }
+      if (waveBoundaryStrokePath) {
+        waveBoundaryStrokePath.setAttribute('d', buildHorizontalWaveCurve(yVec));
+      }
+      return;
+    }
+
+    // Desktop & Tablet:
+    // If toStaff (Guest -> Staff): Dark fluid starts on RIGHT (GUEST_REST_X) & floods LEFT to x = -45
+    // If !toStaff (Staff -> Guest): Dark fluid starts on LEFT (STAFF_REST_X) & floods RIGHT to x = 1045
+    const startVec = getRestingWaveX(!toStaff);
+    const targetWallX = toStaff ? -45 : 1045;
+    const dir = toStaff ? -1 : 1;
+    const anchor = toStaff ? 'right' : 'left';
+    const xVec = new Array(10);
+
+    for (let i = 0; i < 10; i++) {
+      const w = weights[i];
+      // Center leads; top and bottom corners lag behind
+      const localP = Math.min(1, Math.pow(progress, 1.18 - 0.48 * w));
+      const base = lerp(startVec[i], targetWallX, localP);
+      const centerBow = dir * WAVE_CONFIG.FLOOD_CENTER_BOW * Math.sin(progress * Math.PI) * w;
+      const wobble =
+        Math.sin(progress * Math.PI * 3.2 + i * 0.75) *
+        WAVE_CONFIG.FLOOD_WOBBLE_AMP *
+        (1 - progress * 0.85);
+      xVec[i] = base + centerBow + wobble;
+    }
+
+    if (darkFluidMainPath) {
+      darkFluidMainPath.setAttribute('d', buildHorizontalRegionPath(xVec, anchor));
+    }
+    if (waveBoundaryStrokePath) {
+      waveBoundaryStrokePath.setAttribute('d', buildVerticalWaveCurve(xVec));
+    }
+  }
+
+  /**
+   * Ensures SVG <path> nodes exist inside the droplet groups for Phase 3
+   */
+  function ensureDropletElements(dropletsArray) {
+    if (!creamDropletsGroup || !darkTrailingBlobsGroup) return { creamEls: [], darkEls: [] };
+    creamDropletsGroup.innerHTML = '';
+    darkTrailingBlobsGroup.innerHTML = '';
+
+    const creamEls = [];
+    const darkEls = [];
+
+    dropletsArray.forEach((d) => {
+      const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      if (d.type === 'cream-lead') {
+        pathEl.setAttribute('class', 'droplet-cream');
+        creamDropletsGroup.appendChild(pathEl);
+        creamEls.push({ data: d, el: pathEl });
+      } else {
+        pathEl.setAttribute('class', 'droplet-dark');
+        darkTrailingBlobsGroup.appendChild(pathEl);
+        darkEls.push({ data: d, el: pathEl });
+      }
+    });
+
+    return { creamEls, darkEls };
+  }
+
+  /**
+   * Phase 3 (Cream Returns with Droplets & Settles):
+   * - Cream enters from the opposite edge (RIGHT for Guest->Staff; LEFT for Staff->Guest;
+   *   TOP for Mobile) and pushes the dark green back to its final resting position.
+   * - Leading cream droplets appear ahead of the cream edge inside the dark area.
+   * - Trailing dark green blobs stay inside the cream area for a moment and slowly
+   *   shrink and merge back into the dark side via the SVG gooey filter.
+   * - Settles with a small overshoot and rest.
+   */
+  function renderPhase3ReturnFrame(progress, toStaff, mobileMode, dropletNodes) {
+    const weights = WAVE_CONFIG.CENTER_LEAD_WEIGHTS;
+
+    // Smooth arrival curve with a small overshoot and settle at the end
+    const baseEase = 1 - Math.pow(1 - progress, 3);
+    const settlePhase = progress > 0.55 ? (progress - 0.55) / 0.45 : 0;
+    const dampedOvershoot =
+      settlePhase > 0
+        ? Math.exp(-4.2 * settlePhase) *
+          Math.sin(settlePhase * Math.PI * 2.2) *
+          (1 - Math.pow(settlePhase, 2))
+        : 0;
+
+    if (mobileMode) {
+      // Mobile: Cream enters from TOP (y=-40), pushes dark down to y≈240, then settles to MOBILE_REST_Y
+      const restY = WAVE_CONFIG.MOBILE_REST_Y;
+      const yVec = new Array(10);
+
+      for (let i = 0; i < 10; i++) {
+        const w = weights[i];
+        const pushDepth = Math.sin(progress * Math.PI) * 240 * (0.65 + 0.35 * w);
+        const overshoot = dampedOvershoot * 28 * w;
+        yVec[i] = lerp(-35, restY[i], baseEase) + pushDepth + overshoot;
+      }
+
+      const darkPathStr = buildVerticalRegionPath(yVec, 'bottom');
+      const creamPathStr = buildVerticalRegionPath(yVec, 'top');
+
+      if (darkFluidMainPath) darkFluidMainPath.setAttribute('d', darkPathStr);
+      if (darkBridgePath) darkBridgePath.setAttribute('d', darkPathStr);
+      if (creamFluidMainPath) creamFluidMainPath.setAttribute('d', creamPathStr);
+      if (waveBoundaryStrokePath) {
+        waveBoundaryStrokePath.setAttribute('d', buildHorizontalWaveCurve(yVec));
+      }
+
+      // Update Mobile Droplets (3-4 droplets)
+      const midEdgeY = yVec[4];
+      dropletNodes.creamEls.forEach(({ data, el }, idx) => {
+        const localT = Math.max(0, Math.min(1, (progress - data.delay) * data.speed * 1.35));
+        if (localT <= 0 || localT >= 0.92) {
+          el.setAttribute('d', '');
+          return;
+        }
+        const env = Math.sin((localT / 0.92) * Math.PI);
+        const cy = midEdgeY + data.dist * env;
+        const cx = data.pos + Math.sin(localT * Math.PI * 2 + idx) * 14;
+        el.setAttribute(
+          'd',
+          buildIrregularDropletPath(cx, cy, data.rx * env, data.ry * env, data.skew, localT * 6)
+        );
+      });
+
+      dropletNodes.darkEls.forEach(({ data, el }, idx) => {
+        const localT = Math.max(0, Math.min(1, (progress - data.delay) * data.speed * 1.25));
+        if (localT <= 0 || localT >= 0.95) {
+          el.setAttribute('d', '');
+          return;
+        }
+        const shrink = Math.sin((localT / 0.95) * Math.PI);
+        const pullBack = 1 - localT / 0.95;
+        const cy = midEdgeY - data.dist * shrink * pullBack;
+        const cx = data.pos + Math.cos(localT * Math.PI * 2 + idx) * 12;
+        el.setAttribute(
+          'd',
+          buildIrregularDropletPath(cx, cy, data.rx * shrink, data.ry * shrink, data.skew, localT * 5)
+        );
+      });
+      return;
+    }
+
+    // Desktop & Tablet:
+    // If toStaff (Guest -> Staff): Cream enters from RIGHT (1045) & pushes LEFT to STAFF_REST_X (~560)
+    // If !toStaff (Staff -> Guest): Cream enters from LEFT (-45) & pushes RIGHT to GUEST_REST_X (~440)
+    const startWallX = toStaff ? 1045 : -45;
+    const finalRestVec = getRestingWaveX(toStaff);
+    const pushDir = toStaff ? -1 : 1; // Direction Cream is pushing
+    const darkAnchor = toStaff ? 'left' : 'right';
+    const creamAnchor = toStaff ? 'right' : 'left';
+    const xVec = new Array(10);
+
+    for (let i = 0; i < 10; i++) {
+      const w = weights[i];
+      const localEase = 1 - Math.pow(1 - Math.min(1, progress * (0.92 + 0.16 * w)), 3);
+      const base = lerp(startWallX, finalRestVec[i], localEase);
+
+      // Middle of the cream curve leads slightly as it pushes
+      const leadBow =
+        pushDir *
+        WAVE_CONFIG.RETURN_CENTER_BOW *
+        Math.sin(Math.min(1, progress / 0.78) * Math.PI) *
+        (0.35 + 0.65 * w) *
+        (1 - progress * 0.7);
+
+      // Small overshoot and settle at the end
+      const settleOffset =
+        pushDir * WAVE_CONFIG.SETTLE_OVERSHOOT_AMP * dampedOvershoot * (0.4 + 0.6 * w);
+
+      xVec[i] = base + leadBow + settleOffset;
+    }
+
+    const darkPathStr = buildHorizontalRegionPath(xVec, darkAnchor);
+    const creamPathStr = buildHorizontalRegionPath(xVec, creamAnchor);
+
+    if (darkFluidMainPath) darkFluidMainPath.setAttribute('d', darkPathStr);
+    if (darkBridgePath) darkBridgePath.setAttribute('d', darkPathStr);
+    if (creamFluidMainPath) creamFluidMainPath.setAttribute('d', creamPathStr);
+    if (waveBoundaryStrokePath) {
+      waveBoundaryStrokePath.setAttribute('d', buildVerticalWaveCurve(xVec));
+    }
+
+    // Helper to sample the wave's X coordinate at any vertical Y (0..1000)
+    const sampleWaveXAtY = (y) => {
+      const idxFloat = Math.max(0, Math.min(9, (y / 1000) * 9));
+      const idxLow = Math.floor(idxFloat);
+      const idxHigh = Math.min(9, idxLow + 1);
+      return lerp(xVec[idxLow], xVec[idxHigh], idxFloat - idxLow);
+    };
+
+    // 1. Update Leading Cream Droplets (ahead of the cream wave inside the dark area)
+    dropletNodes.creamEls.forEach(({ data, el }, idx) => {
+      const localT = Math.max(0, Math.min(1, (progress - data.delay) * data.speed * 1.45));
+      if (localT <= 0 || localT >= 0.88) {
+        el.setAttribute('d', '');
+        return;
+      }
+      // Bell envelope: droplet emerges ahead of wave, stretches, and is absorbed as wave catches up
+      const lifeEnv = Math.sin((localT / 0.88) * Math.PI);
+      const edgeX = sampleWaveXAtY(data.pos);
+      const leadOffset = pushDir * data.dist * lifeEnv * (1 - localT * 0.45);
+      const cx = edgeX + leadOffset;
+      const cy = data.pos + Math.sin(localT * Math.PI * 2.5 + idx) * 16;
+      const rx = data.rx * (0.55 + 0.65 * lifeEnv);
+      const ry = data.ry * (0.5 + 0.55 * lifeEnv);
+
+      el.setAttribute(
+        'd',
+        buildIrregularDropletPath(cx, cy, rx, ry, data.skew, localT * 6 + idx)
+      );
+    });
+
+    // 2. Update Trailing Dark Green Blobs (inside the cream area behind the edge, shrinking & merging back)
+    dropletNodes.darkEls.forEach(({ data, el }, idx) => {
+      const localT = Math.max(0, Math.min(1, (progress - data.delay) * data.speed * 1.32));
+      if (localT <= 0 || localT >= 0.94) {
+        el.setAttribute('d', '');
+        return;
+      }
+      // Starts inside the cream zone (opposite of pushDir), lingers, then shrinks & pulls back into dark edge
+      const norm = localT / 0.94;
+      const sizeScale = Math.sin(norm * Math.PI) * (1 - norm * 0.35);
+      const pullBackFactor = Math.sin(norm * Math.PI * 0.85) * (1 - Math.pow(norm, 1.6));
+      const edgeX = sampleWaveXAtY(data.pos);
+      const trailOffset = -pushDir * data.dist * pullBackFactor;
+      const cx = edgeX + trailOffset;
+      const cy = data.pos + Math.cos(localT * Math.PI * 2 + idx) * 14;
+      const rx = data.rx * sizeScale;
+      const ry = data.ry * sizeScale;
+
+      el.setAttribute(
+        'd',
+        buildIrregularDropletPath(cx, cy, rx, ry, data.skew, localT * 5 + idx)
+      );
+    });
+  }
+
+  /**
+   * ==========================================================================
+   * 4. ACTIVE PANE RESOLUTION, SMOOTH IN-CARD HEIGHT & FOCUS MANAGEMENT
    * ==========================================================================
    */
   function getTargetPaneKey() {
@@ -257,13 +572,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function setInteractiveControlsDisabled(disabled) {
+    const controls = [
+      sideSwitchBtn,
+      mobileSideSwitchBtn,
+      staffRoleOperatorBtn,
+      staffRoleAdminBtn,
+      tabBtnLogin,
+      tabBtnRegister,
+      document.getElementById('belowCardSwitchTabBtn')
+    ];
+    controls.forEach((btn) => {
+      if (btn) btn.disabled = disabled;
+    });
+  }
+
   /**
    * Synchronizes all headings, specific human copy, tabs & switch buttons
    */
   function syncCardControlsUI() {
     const currentTab = !isStaffMode ? activeGuestTab : activeOperatorTab;
 
-    // 1. Off-white Welcome Panel & Mobile Header Copy (Specific, non-generic copy)
     if (isStaffMode) {
       loginStage.setAttribute('data-mode', 'staff');
       if (welcomeModePill) {
@@ -314,7 +643,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 2. Staff Segmented Toggle ("Operator" | "Admin")
     if (staffSegmentedToggle) {
       staffSegmentedToggle.hidden = !isStaffMode;
       staffSegmentedToggle.classList.toggle('is-admin-selected', activeStaffRole === 'admin');
@@ -327,7 +655,6 @@ document.addEventListener('DOMContentLoaded', () => {
       staffRoleAdminBtn.setAttribute('aria-checked', String(!isOp));
     }
 
-    // 3. Login / Register Tabs (Shown for Guest & Operator; HIDDEN for Admin)
     const showTabs = !isStaffMode || activeStaffRole === 'operator';
     if (authModeTabs) {
       authModeTabs.hidden = !showTabs;
@@ -340,7 +667,6 @@ document.addEventListener('DOMContentLoaded', () => {
       tabBtnRegister.setAttribute('aria-selected', String(!isLoginTab));
     }
 
-    // 4. Card Heading, Subheading & Below-Card Prompt
     if (!isStaffMode) {
       if (activeGuestTab === 'register') {
         if (formCardHeading) formCardHeading.textContent = 'Create an account';
@@ -384,7 +710,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } else {
-      // Admin Mode: LOGIN ONLY — No register tab and no register link anywhere
       if (formCardHeading) formCardHeading.textContent = 'Admin sign in';
       if (formCardSubheading) {
         formCardSubheading.textContent = 'For verified BPE PERDA officers (@perda.gov.my)';
@@ -468,9 +793,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * ==========================================================================
-   * 3. GUEST <-> STAFF FLUID PANEL SWITCHING ANIMATION
-   *    - Desktop & Tablet: Horizontal glide + SVG curve morph
-   *    - Mobile (< 768px): Vertical wave sweep up/down
+   * 5. GSAP SINGLE-TIMELINE 3-PHASE FLUID FLOOD, HOLD & CREAM DROPLET RETURN
    * ==========================================================================
    */
   function syncUrlHash(staffMode, replace = false) {
@@ -486,9 +809,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function setInitialLoginMode(staffMode) {
-    isStaffMode = staffMode;
-    loginStage.classList.toggle('is-staff-mode', staffMode);
+  /**
+   * Performs the hidden DOM swap when the screen is 100% covered in Phase 2
+   */
+  function applyHiddenDomSwap(targetStaffMode) {
+    isStaffMode = targetStaffMode;
+    loginStage.classList.toggle('is-staff-mode', targetStaffMode);
     syncCardControlsUI();
 
     const activeKey = getTargetPaneKey();
@@ -497,25 +823,28 @@ document.addEventListener('DOMContentLoaded', () => {
       p.hidden = k !== activeKey;
       p.classList.toggle('is-active-pane', k === activeKey);
     });
+    if (cardDynamicViewport) cardDynamicViewport.style.height = '';
+  }
 
-    if (fluidBodyPath) {
-      fluidBodyPath.setAttribute(
-        'd',
-        buildDesktopFluidPath(
-          staffMode ? ANIMATION_CONFIG.STAFF_REST_VEC : ANIMATION_CONFIG.GUEST_REST_VEC
-        )
-      );
-    }
+  function setInitialLoginMode(staffMode) {
+    applyHiddenDomSwap(staffMode);
+    renderRestingFluidState(staffMode);
     syncUrlHash(staffMode, true);
     focusFirstActiveField();
   }
 
+  /**
+   * Builds and runs the single GSAP timeline for all 3 phases:
+   *   - PHASE 1: FLOOD (0 to ~0.90s)
+   *   - PHASE 2: HOLD & HIDDEN DOM SWAP (~0.90s to ~1.00s)
+   *   - PHASE 3: CREAM RETURNS WITH GOOEY DROPLETS & SETTLE (~1.00s to ~2.10s)
+   */
   function triggerModeSwitch(targetStaffMode, updateHash = true) {
     if (isAnimating || targetStaffMode === isStaffMode) return;
 
     isAnimating = true;
-    isStaffMode = targetStaffMode;
     loginStage.classList.add('is-animating');
+    setInteractiveControlsDisabled(true);
     hideCardBanner();
     clearAllFieldErrors();
 
@@ -523,144 +852,168 @@ document.addEventListener('DOMContentLoaded', () => {
       syncUrlHash(targetStaffMode, false);
     }
 
-    // Accessibility: prefers-reduced-motion quick crossfade
-    if (prefersReducedMotion()) {
-      welcomeContentInner?.classList.add('is-exiting-left');
-      fluidFormWrapper?.classList.add('is-exiting-left');
+    // Reduced-motion fallback: skip fluid effect and do a simple 0.3s crossfade
+    if (prefersReducedMotion() || typeof window.gsap === 'undefined') {
+      const fadeMs = TIMING_REDUCED_MOTION * 1000;
+      if (welcomeContentInner) welcomeContentInner.style.opacity = '0';
+      if (fluidFormWrapper) fluidFormWrapper.style.opacity = '0';
 
       setTimeout(() => {
-        loginStage.classList.toggle('is-staff-mode', targetStaffMode);
-        syncCardControlsUI();
-        const nextKey = getTargetPaneKey();
-        Object.entries(panes).forEach(([k, p]) => {
-          if (p) p.hidden = k !== nextKey;
-        });
-        if (fluidBodyPath) {
-          fluidBodyPath.setAttribute(
-            'd',
-            buildDesktopFluidPath(
-              targetStaffMode ? ANIMATION_CONFIG.STAFF_REST_VEC : ANIMATION_CONFIG.GUEST_REST_VEC
-            )
-          );
-        }
-        welcomeContentInner?.classList.remove('is-exiting-left');
-        fluidFormWrapper?.classList.remove('is-exiting-left');
+        applyHiddenDomSwap(targetStaffMode);
+        renderRestingFluidState(targetStaffMode);
+        if (welcomeContentInner) welcomeContentInner.style.opacity = '1';
+        if (fluidFormWrapper) fluidFormWrapper.style.opacity = '1';
         loginStage.classList.remove('is-animating');
+        setInteractiveControlsDisabled(false);
         isAnimating = false;
         focusFirstActiveField();
-      }, 190);
+      }, fadeMs);
       return;
     }
 
     const mobileMode = isMobileViewport();
+    const dropletsData = mobileMode ? MOBILE_DROPLETS_DATA : DESKTOP_DROPLETS_DATA;
+    const dropletNodes = ensureDropletElements(dropletsData);
 
-    // 1. Fade & slide out current content (vertical on mobile, horizontal on desktop/tablet)
-    const formExitClass = mobileMode
-      ? targetStaffMode
-        ? 'is-exiting-up'
-        : 'is-exiting-down'
-      : targetStaffMode
-        ? 'is-exiting-left'
-        : 'is-exiting-right';
-    const welcomeExitClass = targetStaffMode ? 'is-exiting-right' : 'is-exiting-left';
-    const formStageClass = mobileMode
-      ? targetStaffMode
-        ? 'is-staging-up'
-        : 'is-staging-down'
-      : targetStaffMode
-        ? 'is-staging-right'
-        : 'is-staging-left';
-    const welcomeStageClass = targetStaffMode ? 'is-staging-left' : 'is-staging-right';
+    const proxy = {
+      floodProgress: 0,
+      returnProgress: 0
+    };
 
-    fluidFormWrapper?.classList.add(formExitClass);
-    welcomeContentInner?.classList.add(welcomeExitClass);
+    const slideDist = targetStaffMode ? -24 : 24;
 
-    if (!mobileMode) {
-      loginStage.classList.toggle('is-staff-mode', targetStaffMode);
-    } else if (mobileWavePath) {
-      mobileWavePath.style.fill = targetStaffMode ? 'var(--dark-green)' : 'var(--olive)';
+    if (activeTimeline) {
+      activeTimeline.kill();
     }
 
-    // 2. Run rAF SVG Path Morph (Desktop horizontal morph OR Mobile vertical wave sweep)
-    const startTime = performance.now();
-    if (activeRafId) cancelAnimationFrame(activeRafId);
-
-    function stepLiquidMorph(now) {
-      const elapsed = now - startTime;
-      const progress = Math.min(1, elapsed / ANIMATION_CONFIG.MORPH_DURATION_MS);
-
-      if (mobileMode) {
-        if (mobileWavePath) {
-          mobileWavePath.setAttribute('d', buildMobileVerticalWavePath(progress, targetStaffMode));
-        }
-      } else if (fluidBodyPath) {
-        const vec = computeLiquidMorphVector(progress, targetStaffMode);
-        fluidBodyPath.setAttribute('d', buildDesktopFluidPath(vec));
+    const tl = gsap.timeline({
+      onComplete: () => {
+        renderRestingFluidState(targetStaffMode);
+        gsap.set([fluidFormWrapper, welcomeContentInner], { clearProps: 'transform,opacity' });
+        loginStage.classList.remove('is-animating');
+        setInteractiveControlsDisabled(false);
+        isAnimating = false;
+        activeTimeline = null;
+        focusFirstActiveField();
       }
+    });
 
-      if (progress < 1) {
-        activeRafId = requestAnimationFrame(stepLiquidMorph);
-      } else {
-        if (fluidBodyPath) {
-          fluidBodyPath.setAttribute(
-            'd',
-            buildDesktopFluidPath(
-              targetStaffMode ? ANIMATION_CONFIG.STAFF_REST_VEC : ANIMATION_CONFIG.GUEST_REST_VEC
-            )
+    activeTimeline = tl;
+
+    // ------------------------------------------------------------------------
+    // PHASE 1: FLOOD (0 to ~0.90s)
+    // - First 0.2s: Form card and cream-side welcome text fade out & slide away
+    // - Dark green fluid expands across the screen with a wavy leading edge
+    // ------------------------------------------------------------------------
+    tl.to(
+      [fluidFormWrapper, welcomeContentInner],
+      {
+        opacity: 0,
+        x: mobileMode ? 0 : slideDist,
+        y: mobileMode ? -18 : 0,
+        duration: TIMING_CARD_FADE_OUT,
+        ease: 'power2.in'
+      },
+      0
+    );
+
+    tl.to(
+      proxy,
+      {
+        floodProgress: 1,
+        duration: TIMING_PHASE1_FLOOD,
+        ease: 'power2.inOut',
+        onUpdate: () => {
+          renderPhase1FloodFrame(proxy.floodProgress, targetStaffMode, mobileMode);
+        }
+      },
+      0.05
+    );
+
+    // ------------------------------------------------------------------------
+    // PHASE 2: HOLD (~0.90s to ~1.00s)
+    // - Whole screen is solid dark green.
+    // - Swap the DOM content & panel sides invisibly while covered.
+    // ------------------------------------------------------------------------
+    const phase2Start = 0.05 + TIMING_PHASE1_FLOOD;
+
+    tl.call(
+      () => {
+        applyHiddenDomSwap(targetStaffMode);
+        // Pre-position incoming card & welcome text slightly below for upward fade-in
+        gsap.set([fluidFormWrapper, welcomeContentInner], {
+          opacity: 0,
+          x: 0,
+          y: 18
+        });
+      },
+      null,
+      phase2Start + TIMING_PHASE2_HOLD * 0.5
+    );
+
+    // ------------------------------------------------------------------------
+    // PHASE 3: CREAM RETURNS WITH DROPLETS & SETTLES (~1.00s to ~2.10s)
+    // - Cream enters from the opposite edge with leading cream droplets and
+    //   trailing dark green blobs, settling into the final wavy shape.
+    // - Card and welcome text fade in (0.3s, small upward slide) once settled.
+    // ------------------------------------------------------------------------
+    const phase3Start = phase2Start + TIMING_PHASE2_HOLD;
+
+    tl.to(
+      proxy,
+      {
+        returnProgress: 1,
+        duration: TIMING_PHASE3_RETURN,
+        ease: 'none',
+        onUpdate: () => {
+          renderPhase3ReturnFrame(
+            proxy.returnProgress,
+            targetStaffMode,
+            mobileMode,
+            dropletNodes
           );
         }
-        if (mobileWavePath) {
-          mobileWavePath.setAttribute('d', buildMobileVerticalWavePath(1, targetStaffMode));
-        }
-        activeRafId = null;
-      }
-    }
+      },
+      phase3Start
+    );
 
-    activeRafId = requestAnimationFrame(stepLiquidMorph);
-
-    // 3. Mid-flight swap while content is hidden
-    setTimeout(() => {
-      if (mobileMode) {
-        loginStage.classList.toggle('is-staff-mode', targetStaffMode);
-      }
-      syncCardControlsUI();
-      const nextKey = getTargetPaneKey();
-      Object.entries(panes).forEach(([k, p]) => {
-        if (!p) return;
-        p.hidden = k !== nextKey;
-        p.classList.toggle('is-active-pane', k === nextKey);
-      });
-      if (cardDynamicViewport) cardDynamicViewport.style.height = '';
-
-      fluidFormWrapper?.classList.remove(formExitClass);
-      welcomeContentInner?.classList.remove(welcomeExitClass);
-      fluidFormWrapper?.classList.add(formStageClass);
-      welcomeContentInner?.classList.add(welcomeStageClass);
-    }, ANIMATION_CONFIG.CONTENT_SWAP_DELAY_MS);
-
-    // 4. Delayed fade-in after panel has mostly arrived
-    setTimeout(() => {
-      void fluidFormWrapper?.offsetWidth;
-      fluidFormWrapper?.classList.remove(formStageClass);
-      welcomeContentInner?.classList.remove(welcomeStageClass);
-    }, ANIMATION_CONFIG.CONTENT_FADE_IN_MS);
-
-    // 5. Unlock interaction & focus first field
-    setTimeout(() => {
-      loginStage.classList.remove('is-animating');
-      isAnimating = false;
-      focusFirstActiveField();
-    }, ANIMATION_CONFIG.UNLOCK_DELAY_MS);
+    tl.to(
+      [fluidFormWrapper, welcomeContentInner],
+      {
+        opacity: 1,
+        x: 0,
+        y: 0,
+        duration: TIMING_CARD_FADE_IN,
+        ease: 'power2.out'
+      },
+      phase3Start + TIMING_PHASE3_RETURN - 0.22
+    );
   }
 
-  // Bind both Desktop/Tablet and Mobile mode switch buttons
+  // Bind Desktop/Tablet and Mobile mode switch buttons
   sideSwitchBtn?.addEventListener('click', () => triggerModeSwitch(!isStaffMode, true));
   mobileSideSwitchBtn?.addEventListener('click', () => triggerModeSwitch(!isStaffMode, true));
 
+  // If the user presses Back/Forward in the browser during the animation,
+  // finish the timeline instantly and then update the state.
   window.addEventListener('hashchange', () => {
     const hashWantsStaff = window.location.hash.toLowerCase() === '#staff';
-    if (hashWantsStaff !== isStaffMode && !isAnimating) {
-      triggerModeSwitch(hashWantsStaff, false);
+    if (activeTimeline && activeTimeline.isActive()) {
+      activeTimeline.progress(1).kill();
+      activeTimeline = null;
+      isAnimating = false;
+      loginStage.classList.remove('is-animating');
+      setInteractiveControlsDisabled(false);
+    }
+    if (hashWantsStaff !== isStaffMode) {
+      setInitialLoginMode(hashWantsStaff);
+    }
+  });
+
+  // Keep resting wave crisp on window resize when not animating
+  window.addEventListener('resize', () => {
+    if (!isAnimating) {
+      renderRestingFluidState(isStaffMode);
     }
   });
 
@@ -694,7 +1047,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * ==========================================================================
-   * 4. SHOW / HIDE PASSWORD TOGGLES
+   * 6. SHOW / HIDE PASSWORD TOGGLES
    * ==========================================================================
    */
   document.querySelectorAll('.pill-password-toggle').forEach((btn) => {
@@ -713,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * ==========================================================================
-   * 5. INLINE FIELD VALIDATION, CARD SHAKE & BUTTON LOADING STATE
+   * 7. INLINE FIELD VALIDATION, CARD SHAKE & BUTTON LOADING STATE
    * ==========================================================================
    */
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -822,7 +1175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * ==========================================================================
-   * 6. FORM SUBMISSIONS (Guest Login/Register, Operator Login/Register, Admin)
+   * 8. FORM SUBMISSIONS (Guest Login/Register, Operator Login/Register, Admin)
    * ==========================================================================
    */
 
@@ -1241,13 +1594,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Social Login Buttons (Guest Mode Only: /auth/google, /auth/facebook, /auth/apple)
-  // If OAuth credentials are not configured yet, show "Not available yet" instead of a broken page.
   document.querySelectorAll('.social-auth-btn').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       const provider = btn.getAttribute('data-social-provider') || 'Social';
       const href = btn.getAttribute('href') || '';
 
-      // If running over HTTP/HTTPS, probe the endpoint first to see if Socialite is configured
       if (window.location.protocol.startsWith('http') && href) {
         try {
           const res = await fetch(href, {
@@ -1258,9 +1609,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = res.url;
             return;
           }
-        } catch (err) {
-          // Fall through to "Not available yet" message
-        }
+        } catch (err) {}
       }
 
       e.preventDefault();

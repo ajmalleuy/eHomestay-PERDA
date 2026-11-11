@@ -20,16 +20,85 @@
 
   <!-- ========================================================================
        SPLIT-SCREEN LOGIN STAGE
-       - Desktop (>= 1024px): 40% Off-white panel | 60% Fluid panel
-       - Tablet (768px - 1023px): 45% Off-white panel | 55% Fluid panel
-       - Mobile (< 768px): Full-screen Fluid background + centered welcome header
-         above card + vertical wave sweep + fixed bottom mode switch link
+       - Final Guest Layout (#guest): Cream Welcome on LEFT | Dark Fluid Card on RIGHT
+       - Final Staff Layout (#staff): Dark Fluid Card on LEFT | Cream Welcome on RIGHT
+       - Transition: 3-Phase GSAP Flood -> Hold & Hidden Swap -> Cream Return with
+         Gooey SVG Droplets & Settle.
        ======================================================================== -->
   <main id="loginStage" class="login-split-stage" data-mode="user">
 
+    <!-- ======================================================================
+         FULL-SCREEN SVG FLUID & CREAM LAYERS WITH GOOEY DROPLET FILTER
+         All colours come strictly from CSS variables in login.css (no hard-coded hex).
+         ====================================================================== -->
+    <div id="fluidCanvasStage" class="fluid-canvas-stage" aria-hidden="true">
+
+      <!-- LAYER 1: Full-Screen Dark Fluid Layer -->
+      <svg
+        id="darkFluidSvg"
+        class="fullscreen-fluid-svg dark-fluid-svg"
+        viewBox="0 0 1000 1000"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <!-- Subtle tonal gradient using CSS variables from :root -->
+          <linearGradient id="fluidUserGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" class="grad-stop-user-start" />
+            <stop offset="100%" class="grad-stop-user-end" />
+          </linearGradient>
+          <linearGradient id="fluidStaffGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" class="grad-stop-staff-start" />
+            <stop offset="100%" class="grad-stop-staff-end" />
+          </linearGradient>
+
+          <!-- SVG Gooey Filter: stretches & merges droplets into the main fluid edge -->
+          <filter id="gooeyLiquidFilter" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="11" result="blur" />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"
+              result="goo"
+            />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+          </filter>
+        </defs>
+
+        <!-- Gooey group holding the main dark fluid shape -->
+        <g filter="url(#gooeyLiquidFilter)">
+          <path id="darkFluidMainPath" class="dark-fluid-path" d=""></path>
+        </g>
+      </svg>
+
+      <!-- LAYER 2: Full-Screen Cream Layer + Leading Cream Droplets + Trailing Dark Blobs -->
+      <svg
+        id="creamFluidSvg"
+        class="fullscreen-fluid-svg cream-fluid-svg"
+        viewBox="0 0 1000 1000"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <!-- Gooey group for the advancing Cream wave & leading Cream droplets -->
+        <g id="creamGooGroup" filter="url(#gooeyLiquidFilter)">
+          <path id="creamFluidMainPath" class="cream-fluid-path" d=""></path>
+          <g id="creamDropletsGroup"></g>
+        </g>
+
+        <!-- Gooey group for trailing Dark blobs that break off inside the Cream zone & merge back -->
+        <g id="darkBlobsGooGroup" filter="url(#gooeyLiquidFilter)">
+          <path id="darkBridgePath" class="dark-fluid-path" d=""></path>
+          <g id="darkTrailingBlobsGroup"></g>
+        </g>
+
+        <!-- Crisp sand accent stroke along the active wave boundary -->
+        <path id="waveBoundaryStrokePath" class="wave-boundary-stroke" d=""></path>
+      </svg>
+
+    </div><!-- /#fluidCanvasStage -->
+
     <!-- 1. OFF-WHITE CREAM PANEL (Desktop & Tablet):
-         Centered horizontally & vertically inside the USABLE cream area
-         (measured from outer screen edge to the narrowest part of the wave). -->
+         Centered horizontally & vertically inside the USABLE cream area -->
     <section id="welcomePanel" class="login-welcome-panel" aria-label="Welcome and Role Switch">
       <div id="welcomeContentInner" class="welcome-content-inner">
         <!-- Brand Logo (Centered) -->
@@ -70,51 +139,8 @@
       </div>
     </section>
 
-    <!-- 2. COLOURED FLUID PANEL: Wavy SVG Edge, Faint Line Icons & Form Card -->
+    <!-- 2. COLOURED FLUID PANEL: Faint Line Icons & Form Card -->
     <section id="fluidPanel" class="login-fluid-panel" aria-label="Sign In and Registration Panel">
-
-      <!-- Desktop & Tablet Morphing Liquid SVG (Horizontal Glide + Curve Morph)
-           Uses the single subtle tonal gradient from the PERDA palette -->
-      <svg
-        id="desktopFluidSvg"
-        class="fluid-morph-svg"
-        viewBox="0 0 1000 1000"
-        preserveAspectRatio="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <defs>
-          <linearGradient id="fluidUserGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="var(--fluid-user-tone-start)" />
-            <stop offset="100%" stop-color="var(--fluid-user-tone-end)" />
-          </linearGradient>
-          <linearGradient id="fluidStaffGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="var(--fluid-staff-tone-start)" />
-            <stop offset="100%" stop-color="var(--fluid-staff-tone-end)" />
-          </linearGradient>
-        </defs>
-        <path
-          id="fluidBodyPath"
-          class="fluid-body-path"
-          d="M78,-8 C152,102 19,218 98,334 C162,428 31,544 114,668 C168,762 39,882 86,1008 L1012,1008 C1012,882 1012,762 1012,668 C1012,544 1012,428 1012,334 C1012,218 1012,102 1012,-8 Z"
-        ></path>
-      </svg>
-
-      <!-- Mobile (< 768px) Vertical Wave Sweep SVG -->
-      <svg
-        id="mobileWaveSvg"
-        class="mobile-wave-svg"
-        viewBox="0 0 1000 1000"
-        preserveAspectRatio="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <path
-          id="mobileWavePath"
-          class="mobile-wave-path"
-          d="M-8,1012 L-8,1012 C180,1012 340,1012 510,1012 C690,1012 840,1012 1008,1012 L1008,1012 Z"
-        ></path>
-      </svg>
 
       <!-- Faint Line-Art Icons Scattered at Low Opacity -->
       <div class="fluid-bg-icons" aria-hidden="true">
@@ -291,22 +317,22 @@
                   <!-- Google -->
                   <a href="/auth/google" class="social-auth-btn" data-social-provider="Google" aria-label="Continue with Google" title="Continue with Google">
                     <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
-                      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/>
-                      <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/>
-                      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+                      <path class="svg-google-blue" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
+                      <path class="svg-google-green" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/>
+                      <path class="svg-google-yellow" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/>
+                      <path class="svg-google-red" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
                     </svg>
                   </a>
                   <!-- Facebook -->
                   <a href="/auth/facebook" class="social-auth-btn" data-social-provider="Facebook" aria-label="Continue with Facebook" title="Continue with Facebook">
                     <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      <path class="svg-facebook-blue" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                     </svg>
                   </a>
                   <!-- Apple -->
                   <a href="/auth/apple" class="social-auth-btn" data-social-provider="Apple" aria-label="Continue with Apple" title="Continue with Apple">
                     <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="#000000" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                      <path class="svg-apple-black" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                     </svg>
                   </a>
                 </div>
@@ -471,22 +497,22 @@
                   <!-- Google -->
                   <a href="/auth/google" class="social-auth-btn" data-social-provider="Google" aria-label="Continue with Google" title="Continue with Google">
                     <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
-                      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/>
-                      <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/>
-                      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+                      <path class="svg-google-blue" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
+                      <path class="svg-google-green" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/>
+                      <path class="svg-google-yellow" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/>
+                      <path class="svg-google-red" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
                     </svg>
                   </a>
                   <!-- Facebook -->
                   <a href="/auth/facebook" class="social-auth-btn" data-social-provider="Facebook" aria-label="Continue with Facebook" title="Continue with Facebook">
                     <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      <path class="svg-facebook-blue" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                     </svg>
                   </a>
                   <!-- Apple -->
                   <a href="/auth/apple" class="social-auth-btn" data-social-provider="Apple" aria-label="Continue with Apple" title="Continue with Apple">
                     <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="#000000" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                      <path class="svg-apple-black" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                     </svg>
                   </a>
                 </div>
@@ -882,12 +908,12 @@
       <div class="modal-content forgot-modal-card">
         <div class="modal-header border-0 pb-0">
           <h3 class="h5 modal-title fw-bold" id="forgotPasswordModalLabel">
-            <i class="fa-solid fa-key me-2" style="color: var(--burnt-orange);"></i>Reset password
+            <i class="fa-solid fa-key me-2"></i>Reset password
           </h3>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body pt-2">
-          <p class="small mb-3" style="color: var(--dark-green);">
+          <p class="small mb-3">
             Enter the email address linked to your account and we will send a password reset link.
           </p>
           <form id="forgotPasswordForm" novalidate>
@@ -908,9 +934,11 @@
 
   <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- GSAP 3 (from cdnjs) for 3-Phase Liquid Flood, Droplets & Settle Timeline -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <!-- Shared Platform Data & Utilities -->
   <script src="js/main.js"></script>
-  <!-- Dedicated Login Page Logic, Validation & Fluid Morph Animation -->
+  <!-- Dedicated Login Page Logic, Validation & GSAP Fluid Flood Animation -->
   <script src="js/login.js"></script>
 </body>
 </html>

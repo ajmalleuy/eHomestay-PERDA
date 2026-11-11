@@ -1,12 +1,11 @@
 /* ==========================================================================
-   e-Homestay PERDA (Inap Desa) - Split-Screen Fluid Login Styles (login.css)
+   e-Homestay PERDA - Split-Screen Fluid Login Styles (login.css)
    --------------------------------------------------------------------------
    PALETTE & DESIGN SYSTEM:
-   - Edit all colors & timing variables in :root below.
-   - Only ONE subtle tonal gradient is used (inside the fluid panel SVG/mobile
-     background). All cards, buttons, badges, and panels are flat solid colors.
-   - Pill radius (999px) is used on inputs, main submit buttons, and social
-     buttons; all other surfaces use 6px–10px radius.
+   - Edit all colors & variables in :root below.
+   - No colours are hard-coded in the SVG markup; every SVG path & stop uses
+     these CSS variables.
+   - Only ONE subtle tonal gradient is used (inside the dark fluid SVG layer).
    ========================================================================== */
 
 :root {
@@ -22,8 +21,8 @@
   /* Single Allowed Subtle Tonal Gradient Shades (Two close tones from palette) */
   --fluid-user-tone-start: #606C38;
   --fluid-user-tone-end: #525D2F;
-  --fluid-staff-tone-start: #283618;
-  --fluid-staff-tone-end: #32421F;
+  --fluid-staff-tone-start: #606C38;
+  --fluid-staff-tone-end: #525D2F;
 
   /* Semantic Login Theme Variables */
   --login-offwhite-bg: var(--cream);
@@ -39,15 +38,19 @@
   --login-btn-text: var(--cream);
   --login-pattern-color: var(--cream);
 
+  /* Brand Icon Variables (Used by inline SVGs so no hex is hard-coded in HTML) */
+  --brand-google-blue: #4285F4;
+  --brand-google-green: #34A853;
+  --brand-google-yellow: #FBBC05;
+  --brand-google-red: #EA4335;
+  --brand-facebook-blue: #1877F2;
+  --brand-apple-black: #000000;
+
   /* Typography (2 Google Fonts: Nunito rounded sans for headings, Poppins for body) */
   --login-font-heading: 'Nunito', sans-serif;
   --login-font-body: 'Poppins', sans-serif;
 
-  /* Animation Timing Variables (Adjust speed & easing here) */
-  --panel-glide-duration: 0.98s;
-  --panel-glide-easing: cubic-bezier(0.65, 0, 0.35, 1);
-  --content-fade-in-duration: 0.34s;
-  --content-fade-out-duration: 0.22s;
+  /* In-Card Height Transition Duration */
   --card-height-duration: 0.3s;
 }
 
@@ -73,17 +76,87 @@ body.login-body {
   overflow: hidden;
 }
 
-/* Block clicks on mode switch links while transition is running */
+/* Disable switch link, role toggle & tab buttons while GSAP timeline is running */
 .login-split-stage.is-animating .side-switch-link,
 .login-split-stage.is-animating .mobile-bottom-switch-btn,
+.login-split-stage.is-animating .staff-segment-btn,
+.login-split-stage.is-animating .auth-tab-btn,
 .login-split-stage.is-animating #belowCardSwitchTabBtn {
   pointer-events: none;
 }
 
 /* ==========================================================================
+   FULL-SCREEN SVG FLUID & CREAM LAYERS (Animated via GSAP Timeline)
+   ========================================================================== */
+.fluid-canvas-stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.fullscreen-fluid-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.dark-fluid-svg {
+  z-index: 1;
+}
+
+.cream-fluid-svg {
+  z-index: 2;
+}
+
+/* SVG Gradient Stops & Path Fills Driven by CSS Variables */
+.grad-stop-user-start  { stop-color: var(--fluid-user-tone-start); }
+.grad-stop-user-end    { stop-color: var(--fluid-user-tone-end); }
+.grad-stop-staff-start { stop-color: var(--fluid-staff-tone-start); }
+.grad-stop-staff-end   { stop-color: var(--fluid-staff-tone-end); }
+
+.dark-fluid-path,
+.droplet-dark {
+  fill: url(#fluidUserGradient);
+}
+
+.login-split-stage.is-staff-mode .dark-fluid-path,
+.login-split-stage.is-staff-mode .droplet-dark {
+  fill: url(#fluidStaffGradient);
+}
+
+.cream-fluid-path,
+.droplet-cream {
+  fill: var(--login-offwhite-bg);
+}
+
+.wave-boundary-stroke {
+  fill: none;
+  stroke: var(--sand);
+  stroke-width: 2.2;
+  stroke-opacity: 0.55;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Brand SVG Fill Classes */
+.svg-google-blue   { fill: var(--brand-google-blue); }
+.svg-google-green  { fill: var(--brand-google-green); }
+.svg-google-yellow { fill: var(--brand-google-yellow); }
+.svg-google-red    { fill: var(--brand-google-red); }
+.svg-facebook-blue { fill: var(--brand-facebook-blue); }
+.svg-apple-black   { fill: var(--brand-apple-black); }
+
+/* ==========================================================================
    1. OFF-WHITE CREAM WELCOME PANEL
    - Bounded from the outer screen edge to the narrowest part of the wave.
    - Centered both horizontally and vertically inside the usable cream area.
+   - Snaps position instantaneously during Phase 2 while covered by dark flood.
    ========================================================================== */
 .login-welcome-panel {
   position: relative;
@@ -98,11 +171,9 @@ body.login-body {
   align-items: center;
   text-align: center;
   transform: translate3d(0%, 0, 0);
-  will-change: transform;
-  transition: transform var(--panel-glide-duration) var(--panel-glide-easing);
 }
 
-/* In Staff Mode on Desktop (40% width moves across 60% fluid panel = 150% of own width) */
+/* In Staff Mode on Desktop (40% width sits on the right 60vw..100vw = 150% of own width) */
 .login-split-stage.is-staff-mode .login-welcome-panel {
   transform: translate3d(150%, 0, 0);
 }
@@ -118,9 +189,6 @@ body.login-body {
   opacity: 1;
   transform: translate3d(0, 0, 0);
   will-change: transform, opacity;
-  transition:
-    opacity var(--content-fade-in-duration) cubic-bezier(0.22, 1, 0.36, 1),
-    transform var(--content-fade-in-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .welcome-logo-link {
@@ -243,8 +311,13 @@ body.login-body {
   color: var(--burnt-orange);
 }
 
+.welcome-return-anchor i {
+  color: var(--burnt-orange);
+}
+
 /* ==========================================================================
-   2. COLOURED FLUID PANEL (Desktop: 60% Width) & WAVY SVG MORPH
+   2. COLOURED FLUID PANEL (Desktop: 60% Width)
+   - Snaps position instantaneously during Phase 2 while covered by dark flood.
    ========================================================================== */
 .login-fluid-panel {
   position: relative;
@@ -258,41 +331,15 @@ body.login-body {
   justify-content: center;
   padding: 1rem 2.8rem 1rem 4.8rem;
   transform: translate3d(0%, 0, 0);
-  will-change: transform;
-  transition: transform var(--panel-glide-duration) var(--panel-glide-easing);
 }
 
-/* In Staff Mode on Desktop (60% width moves left by 40vw = -66.6667% of own width) */
+/* In Staff Mode on Desktop (60% width sits on the left 0vw..60vw = -66.6667% of own width) */
 .login-split-stage.is-staff-mode .login-fluid-panel {
   transform: translate3d(-66.6667%, 0, 0);
   padding: 1rem 4.8rem 1rem 2.8rem;
 }
 
-/* Desktop & Tablet Morphing SVG Canvas */
-.fluid-morph-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.fluid-body-path {
-  fill: url(#fluidUserGradient);
-  stroke: var(--sand);
-  stroke-width: 2;
-  stroke-opacity: 0.45;
-  vector-effect: non-scaling-stroke;
-}
-
-.login-split-stage.is-staff-mode .fluid-body-path {
-  fill: url(#fluidStaffGradient);
-}
-
-/* Mobile Vertical Wave SVG & Elements (Hidden on Desktop & Tablet) */
-.mobile-wave-svg,
+/* Mobile Elements (Hidden on Desktop & Tablet) */
 .mobile-welcome-header,
 .mobile-bottom-switch-bar {
   display: none;
@@ -328,8 +375,7 @@ body.login-body {
 .bg-icon.ic-9 { top: 12%;    left: 48%;  transform: rotate(15deg);  font-size: 2.0rem; }
 
 /* ==========================================================================
-   4. FORM CARD, CHOREOGRAPHED CONTENT SWAP & SEGMENTED CONTROLS
-   - Sized carefully so all tabs fit inside a 768px-high laptop screen.
+   4. FORM CARD & SEGMENTED CONTROLS
    ========================================================================== */
 .fluid-form-wrapper {
   position: relative;
@@ -339,71 +385,6 @@ body.login-body {
   opacity: 1;
   transform: translate3d(0, 0, 0);
   will-change: transform, opacity;
-  transition:
-    opacity var(--content-fade-in-duration) cubic-bezier(0.22, 1, 0.36, 1),
-    transform var(--content-fade-in-duration) cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Exit states during panel travel (transform & opacity only) */
-.welcome-content-inner.is-exiting-left,
-.fluid-form-wrapper.is-exiting-left {
-  opacity: 0;
-  transform: translate3d(-32px, 0, 0);
-  transition:
-    opacity var(--content-fade-out-duration) ease-in,
-    transform var(--content-fade-out-duration) ease-in;
-}
-
-.welcome-content-inner.is-exiting-right,
-.fluid-form-wrapper.is-exiting-right {
-  opacity: 0;
-  transform: translate3d(32px, 0, 0);
-  transition:
-    opacity var(--content-fade-out-duration) ease-in,
-    transform var(--content-fade-out-duration) ease-in;
-}
-
-.fluid-form-wrapper.is-exiting-up {
-  opacity: 0;
-  transform: translate3d(0, -24px, 0);
-  transition:
-    opacity var(--content-fade-out-duration) ease-in,
-    transform var(--content-fade-out-duration) ease-in;
-}
-
-.fluid-form-wrapper.is-exiting-down {
-  opacity: 0;
-  transform: translate3d(0, 24px, 0);
-  transition:
-    opacity var(--content-fade-out-duration) ease-in,
-    transform var(--content-fade-out-duration) ease-in;
-}
-
-/* Staging states prior to delayed fade-in */
-.welcome-content-inner.is-staging-left,
-.fluid-form-wrapper.is-staging-left {
-  opacity: 0;
-  transform: translate3d(-24px, 0, 0);
-  transition: none !important;
-}
-
-.welcome-content-inner.is-staging-right,
-.fluid-form-wrapper.is-staging-right {
-  opacity: 0;
-  transform: translate3d(24px, 0, 0);
-  transition: none !important;
-}
-
-.fluid-form-wrapper.is-staging-up {
-  opacity: 0;
-  transform: translate3d(0, 22px, 0);
-  transition: none !important;
-}
-
-.fluid-form-wrapper.is-staging-down {
-  opacity: 0;
-  transform: translate3d(0, -22px, 0);
-  transition: none !important;
 }
 
 /* Flat Form Card (Moderate 10px radius, compact vertical padding for 768px laptops) */
@@ -735,7 +716,7 @@ body.login-body {
 }
 
 /* ==========================================================================
-   5. SOCIAL LOGIN SECTION (GUEST MODE ONLY: Google, Facebook, Apple)
+   5. SOCIAL LOGIN SECTION (GUEST MODE ONLY: Circular Logo Buttons)
    ========================================================================== */
 .social-auth-section {
   margin-top: 0.75rem;
@@ -898,10 +879,13 @@ body.login-body {
   color: var(--dark-green);
 }
 
+.forgot-modal-card .modal-title i {
+  color: var(--burnt-orange);
+}
+
 /* ==========================================================================
    6. TABLET BREAKPOINT (768px to 1023.98px)
    - Keep split layout; Fluid panel = 55% wide, Off-white panel = 45% wide
-   - Centered welcome content & smaller background icons
    ========================================================================== */
 @media (min-width: 768px) and (max-width: 1023.98px) {
   .login-welcome-panel {
@@ -910,7 +894,6 @@ body.login-body {
     padding: 1.75rem 1.5rem;
   }
 
-  /* 45% panel moves across 55% fluid panel -> 55 / 45 = 122.2222% */
   .login-split-stage.is-staff-mode .login-welcome-panel {
     transform: translate3d(122.2222%, 0, 0);
   }
@@ -921,13 +904,11 @@ body.login-body {
     padding: 1.25rem 1.5rem 1.25rem 3.2rem;
   }
 
-  /* 55% panel moves left across 45% welcome panel -> -45 / 55 = -81.8182% */
   .login-split-stage.is-staff-mode .login-fluid-panel {
     transform: translate3d(-81.8182%, 0, 0);
     padding: 1.25rem 3.2rem 1.25rem 1.5rem;
   }
 
-  /* Shrink scattered background icons on tablet */
   .bg-icon.ic-1 { font-size: 1.65rem; }
   .bg-icon.ic-2 { font-size: 1.9rem; }
   .bg-icon.ic-3 { font-size: 1.55rem; }
@@ -941,17 +922,12 @@ body.login-body {
 
 /* ==========================================================================
    7. MOBILE BREAKPOINT (< 768px)
-   - No side-by-side: Fluid panel is full-screen background with card on top
-   - Centered welcome heading sits above the card
-   - Curved edge sweeps vertically (wave moving up/down) on mode switch
-   - "Operator or staff" link is fixed at the bottom of the screen
+   - Vertical layout with the same 2 full-screen SVG layers (#fluidCanvasStage)
+   - Dark floods UP from bottom to cover screen, then Cream returns from top
+     with 4 gooey droplets.
    ========================================================================== */
 @media (max-width: 767.98px) {
   .login-welcome-panel {
-    display: none !important;
-  }
-
-  .fluid-morph-svg {
     display: none !important;
   }
 
@@ -962,40 +938,9 @@ body.login-body {
     min-height: 100vh;
     padding: 1.25rem 1rem 4.5rem;
     transform: none !important;
-    background: linear-gradient(
-      160deg,
-      var(--fluid-user-tone-start) 0%,
-      var(--fluid-user-tone-end) 100%
-    );
+    background: transparent;
   }
 
-  .login-split-stage.is-staff-mode .login-fluid-panel {
-    background: linear-gradient(
-      160deg,
-      var(--fluid-staff-tone-start) 0%,
-      var(--fluid-staff-tone-end) 100%
-    );
-  }
-
-  /* Full-Screen Vertical Wave Sweep SVG on Mobile */
-  .mobile-wave-svg {
-    display: block;
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 3;
-  }
-
-  .mobile-wave-path {
-    fill: var(--dark-green);
-    stroke: var(--sand);
-    stroke-width: 2;
-    stroke-opacity: 0.5;
-  }
-
-  /* Centered Short Welcome Heading Above the Card on Mobile */
   .mobile-welcome-header {
     display: flex;
     flex-direction: column;
@@ -1036,7 +981,6 @@ body.login-body {
     padding: 1.25rem 1.2rem 1.2rem;
   }
 
-  /* Small Fixed Mode Switch Bar at the Bottom of the Screen */
   .mobile-bottom-switch-bar {
     display: flex;
     justify-content: center;
@@ -1063,7 +1007,6 @@ body.login-body {
     text-underline-offset: 3px;
   }
 
-  /* Smaller background icons on mobile */
   .fluid-bg-icons .bg-icon {
     font-size: 1.6rem;
     opacity: 0.055;
@@ -1071,27 +1014,13 @@ body.login-body {
 }
 
 /* ==========================================================================
-   8. ACCESSIBILITY: PREFERS-REDUCED-MOTION (Simple Quick Crossfade)
+   8. ACCESSIBILITY: PREFERS-REDUCED-MOTION
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
-  .login-welcome-panel,
-  .login-fluid-panel,
   .card-dynamic-viewport,
-  .staff-segment-thumb {
-    transition: none !important;
-  }
-
-  .welcome-content-inner,
-  .fluid-form-wrapper,
-  .welcome-content-inner.is-exiting-left,
-  .welcome-content-inner.is-exiting-right,
-  .fluid-form-wrapper.is-exiting-left,
-  .fluid-form-wrapper.is-exiting-right,
-  .fluid-form-wrapper.is-exiting-up,
-  .fluid-form-wrapper.is-exiting-down,
+  .staff-segment-thumb,
   .auth-form-pane {
-    transform: none !important;
-    transition: opacity 0.18s ease !important;
+    transition: none !important;
   }
 
   .login-form-card.is-shaking {
