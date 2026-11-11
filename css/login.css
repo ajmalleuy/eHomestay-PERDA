@@ -346,33 +346,39 @@ body.login-body {
 }
 
 /* ==========================================================================
-   3. SCATTERED FAINT LINE-ART BACKGROUND ICONS
+   3. SCATTERED FAINT LINE-ART BACKGROUND ICONS (Inside Full-Screen SVG)
+   - Clipped by #darkFluidClipPath (referencing #darkFluidMainPath)
+   - Outside the gooey filter so icons stay sharp
+   - Subtle resting bob (2 to 4px, 6 to 9s, turned off in reduced motion)
    ========================================================================== */
-.fluid-bg-icons {
-  position: absolute;
-  inset: 0 8%;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.fluid-bg-icons .bg-icon {
-  position: absolute;
+.fluid-floating-icons-group {
   color: var(--login-pattern-color);
-  opacity: 0.07;
-  font-size: 2.4rem;
+  pointer-events: none;
   user-select: none;
 }
 
-.bg-icon.ic-1 { top: 9%;     left: 14%;  transform: rotate(-14deg); font-size: 2.3rem; }
-.bg-icon.ic-2 { top: 15%;    right: 11%; transform: rotate(12deg);  font-size: 2.7rem; }
-.bg-icon.ic-3 { top: 34%;    left: 8%;   transform: rotate(9deg);   font-size: 2.1rem; }
-.bg-icon.ic-4 { top: 29%;    right: 17%; transform: rotate(-19deg); font-size: 2.2rem; }
-.bg-icon.ic-5 { top: 55%;    left: 12%;  transform: rotate(-8deg);  font-size: 2.6rem; }
-.bg-icon.ic-6 { top: 58%;    right: 9%;  transform: rotate(16deg);  font-size: 2.3rem; }
-.bg-icon.ic-7 { bottom: 16%; left: 18%;  transform: rotate(14deg);  font-size: 2.2rem; }
-.bg-icon.ic-8 { bottom: 11%; right: 14%; transform: rotate(-11deg); font-size: 2.8rem; }
-.bg-icon.ic-9 { top: 12%;    left: 48%;  transform: rotate(15deg);  font-size: 2.0rem; }
+.fluid-icon-graphic {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.075;
+}
+
+@keyframes fluidIconFloatBob {
+  0%, 100% {
+    transform: translate3d(0, calc(var(--bob-amp, 3px) * -1), 0);
+  }
+  50% {
+    transform: translate3d(0, var(--bob-amp, 3px), 0);
+  }
+}
+
+.fluid-icon-bob {
+  animation: fluidIconFloatBob var(--bob-dur, 7.4s) ease-in-out var(--bob-delay, 0s) infinite;
+  will-change: transform;
+}
 
 /* ==========================================================================
    4. FORM CARD & SEGMENTED CONTROLS
@@ -909,15 +915,9 @@ body.login-body {
     padding: 1.25rem 3.2rem 1.25rem 1.5rem;
   }
 
-  .bg-icon.ic-1 { font-size: 1.65rem; }
-  .bg-icon.ic-2 { font-size: 1.9rem; }
-  .bg-icon.ic-3 { font-size: 1.55rem; }
-  .bg-icon.ic-4 { font-size: 1.6rem; }
-  .bg-icon.ic-5 { font-size: 1.85rem; }
-  .bg-icon.ic-6 { font-size: 1.65rem; }
-  .bg-icon.ic-7 { font-size: 1.6rem; }
-  .bg-icon.ic-8 { font-size: 2.0rem; }
-  .bg-icon.ic-9 { font-size: 1.5rem; }
+  .fluid-icon-graphic {
+    opacity: 0.068;
+  }
 }
 
 /* ==========================================================================
@@ -1007,8 +1007,7 @@ body.login-body {
     text-underline-offset: 3px;
   }
 
-  .fluid-bg-icons .bg-icon {
-    font-size: 1.6rem;
+  .fluid-icon-graphic {
     opacity: 0.055;
   }
 }
@@ -1023,7 +1022,8 @@ body.login-body {
     transition: none !important;
   }
 
-  .login-form-card.is-shaking {
+  .login-form-card.is-shaking,
+  .fluid-icon-bob {
     animation: none !important;
   }
 }

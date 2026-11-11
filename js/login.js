@@ -80,6 +80,218 @@ const MOBILE_DROPLETS_DATA = [
   { id: 'm4', type: 'dark-trail', pos: 640, rx: 24, ry: 32, skew: 0.78, speed: 0.90, delay: 0.18, dist: 85 }
 ];
 
+/**
+ * FLOATING LINE-ART BACKGROUND ICONS DATA ARRAY
+ * - Positioned in screen percentages (startX/startY for Guest layout on right,
+ *   endX/endY for Staff layout on left).
+ * - depth (0.6 to 1.4): controls parallax speed & travel distance so higher-depth
+ *   icons move slightly faster and further than lower-depth icons.
+ * - rotation: resting angle (deg); staffRotation: resting angle in staff mode;
+ *   travelRot: rotation delta while travelling (-12 to +12 deg, unique per icon).
+ * - lagMs: delay (0.00s to 0.15s) before following the fluid edge.
+ * - mobile: 6 icons enabled on < 768px for vertical fluid travel.
+ */
+const FLUID_ICONS_DATA = [
+  {
+    id: 'ic-1',
+    symbol: '#icon-house',
+    svgPath: 'M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6.5h-5V21H4a1 1 0 0 1-1-1v-9.5Z',
+    size: 37,
+    startX: 52.5,
+    startY: 11.0,
+    endX: 11.0,
+    endY: 11.0,
+    depth: 1.15,
+    rotation: -14,
+    staffRotation: -13,
+    travelRot: -10,
+    lagMs: 0.03,
+    bobAmp: 3.0,
+    bobDur: 7.2,
+    bobDelay: -1.1,
+    mobile: true,
+    mobileX: 14.0,
+    mobileGuestY: 16.0,
+    mobileStaffY: 21.0
+  },
+  {
+    id: 'ic-2',
+    symbol: '#icon-envelope',
+    svgPath: 'M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11ZM3.5 6l8.5 6.25L20.5 6',
+    size: 43,
+    startX: 90.0,
+    startY: 16.0,
+    endX: 48.0,
+    endY: 16.0,
+    depth: 0.72,
+    rotation: 12,
+    staffRotation: 11,
+    travelRot: 9,
+    lagMs: 0.12,
+    bobAmp: 3.5,
+    bobDur: 8.4,
+    bobDelay: -3.4,
+    mobile: true,
+    mobileX: 85.0,
+    mobileGuestY: 19.0,
+    mobileStaffY: 24.0
+  },
+  {
+    id: 'ic-3',
+    symbol: '#icon-key',
+    svgPath: 'M7.5 15.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9ZM12 11h9v3.5M17.5 11v2.5',
+    size: 34,
+    startX: 48.5,
+    startY: 35.0,
+    endX: 8.0,
+    endY: 35.0,
+    depth: 1.35,
+    rotation: 9,
+    staffRotation: 10,
+    travelRot: -11,
+    lagMs: 0.01,
+    bobAmp: 2.5,
+    bobDur: 6.4,
+    bobDelay: -2.2,
+    mobile: true,
+    mobileX: 11.0,
+    mobileGuestY: 43.0,
+    mobileStaffY: 48.0
+  },
+  {
+    id: 'ic-4',
+    symbol: '#icon-location-pin',
+    svgPath: 'M12 21.5s-7-5.75-7-11.25a7 7 0 1 1 14 0c0 5.5-7 11.25-7 11.25ZM12 13a2.75 2.75 0 1 0 0-5.5 2.75 2.75 0 0 0 0 5.5Z',
+    size: 35,
+    startX: 86.0,
+    startY: 30.0,
+    endX: 44.5,
+    endY: 30.0,
+    depth: 0.88,
+    rotation: -19,
+    staffRotation: -18,
+    travelRot: 8,
+    lagMs: 0.09,
+    bobAmp: 3.2,
+    bobDur: 7.9,
+    bobDelay: -4.7,
+    mobile: false,
+    mobileX: 84.0,
+    mobileGuestY: 36.0,
+    mobileStaffY: 41.0
+  },
+  {
+    id: 'ic-5',
+    symbol: '#icon-compass',
+    svgPath: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM15.5 8.5l-2.1 5.1-5.1 2.1 2.1-5.1 5.1-2.1Z',
+    size: 42,
+    startX: 50.5,
+    startY: 57.0,
+    endX: 10.0,
+    endY: 57.0,
+    depth: 1.26,
+    rotation: -8,
+    staffRotation: -7,
+    travelRot: -12,
+    lagMs: 0.02,
+    bobAmp: 3.8,
+    bobDur: 6.8,
+    bobDelay: -0.7,
+    mobile: true,
+    mobileX: 87.0,
+    mobileGuestY: 64.0,
+    mobileStaffY: 69.0
+  },
+  {
+    id: 'ic-6',
+    symbol: '#icon-paper-plane',
+    svgPath: 'M21.5 3.5L10.5 14.5M21.5 3.5l-6.5 17.5-4.5-6.5-6.5-4.5 17.5-6.5Z',
+    size: 37,
+    startX: 91.5,
+    startY: 60.0,
+    endX: 49.5,
+    endY: 60.0,
+    depth: 0.62,
+    rotation: 16,
+    staffRotation: 15,
+    travelRot: 11,
+    lagMs: 0.15,
+    bobAmp: 2.8,
+    bobDur: 8.8,
+    bobDelay: -5.3,
+    mobile: true,
+    mobileX: 15.0,
+    mobileGuestY: 82.0,
+    mobileStaffY: 86.0
+  },
+  {
+    id: 'ic-7',
+    symbol: '#icon-key',
+    svgPath: 'M7.5 15.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9ZM12 11h9v3.5M17.5 11v2.5',
+    size: 35,
+    startX: 54.0,
+    startY: 83.0,
+    endX: 13.5,
+    endY: 83.0,
+    depth: 1.05,
+    rotation: 14,
+    staffRotation: 13,
+    travelRot: -9,
+    lagMs: 0.06,
+    bobAmp: 2.4,
+    bobDur: 7.5,
+    bobDelay: -2.9,
+    mobile: false,
+    mobileX: 22.0,
+    mobileGuestY: 85.0,
+    mobileStaffY: 88.0
+  },
+  {
+    id: 'ic-8',
+    symbol: '#icon-location-pin',
+    svgPath: 'M12 21.5s-7-5.75-7-11.25a7 7 0 1 1 14 0c0 5.5-7 11.25-7 11.25ZM12 13a2.75 2.75 0 1 0 0-5.5 2.75 2.75 0 0 0 0 5.5Z',
+    size: 45,
+    startX: 88.0,
+    startY: 87.0,
+    endX: 46.5,
+    endY: 87.0,
+    depth: 0.78,
+    rotation: -11,
+    staffRotation: -12,
+    travelRot: 10,
+    lagMs: 0.11,
+    bobAmp: 3.6,
+    bobDur: 8.2,
+    bobDelay: -6.1,
+    mobile: true,
+    mobileX: 83.0,
+    mobileGuestY: 85.0,
+    mobileStaffY: 89.0
+  },
+  {
+    id: 'ic-9',
+    symbol: '#icon-envelope',
+    svgPath: 'M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11ZM3.5 6l8.5 6.25L20.5 6',
+    size: 32,
+    startX: 71.0,
+    startY: 12.0,
+    endX: 29.0,
+    endY: 12.0,
+    depth: 1.40,
+    rotation: 15,
+    staffRotation: 14,
+    travelRot: -8,
+    lagMs: 0.00,
+    bobAmp: 2.2,
+    bobDur: 6.2,
+    bobDelay: -1.8,
+    mobile: false,
+    mobileX: 50.0,
+    mobileGuestY: 14.0,
+    mobileStaffY: 18.0
+  }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
   const loginStage = document.getElementById('loginStage');
   const welcomeContentInner = document.getElementById('welcomeContentInner');
@@ -87,13 +299,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginFormCard = document.getElementById('loginFormCard');
   const cardDynamicViewport = document.getElementById('cardDynamicViewport');
 
-  // Full-Screen SVG Paths & Droplet Groups
+  // Full-Screen SVG Paths, Droplet Groups & Floating Icons Group
   const darkFluidMainPath = document.getElementById('darkFluidMainPath');
   const creamFluidMainPath = document.getElementById('creamFluidMainPath');
   const darkBridgePath = document.getElementById('darkBridgePath');
   const creamDropletsGroup = document.getElementById('creamDropletsGroup');
   const darkTrailingBlobsGroup = document.getElementById('darkTrailingBlobsGroup');
   const waveBoundaryStrokePath = document.getElementById('waveBoundaryStrokePath');
+  const fluidFloatingIconsGroup = document.getElementById('fluidFloatingIconsGroup');
 
   const sideSwitchBtn = document.getElementById('sideSwitchBtn');
   const mobileSideSwitchBtn = document.getElementById('mobileSideSwitchBtn');
@@ -245,9 +458,115 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * ==========================================================================
-   * 2. RENDER STATIC / RESTING SVG FLUID STATE
+   * 2. RENDER STATIC / RESTING SVG FLUID STATE & FLOATING ICONS
    * ==========================================================================
    */
+  const fluidIconNodes = [];
+
+  function buildFluidIconsDOM() {
+    if (!fluidFloatingIconsGroup || fluidIconNodes.length > 0) return;
+    fluidFloatingIconsGroup.innerHTML = '';
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+
+    FLUID_ICONS_DATA.forEach((item) => {
+      // 1. Position group in 0..1000 SVG coordinates (animated with GSAP x, y)
+      const posEl = document.createElementNS(svgNS, 'g');
+      posEl.setAttribute('class', 'fluid-icon-pos');
+      posEl.setAttribute('id', `fluidIconPos-${item.id}`);
+
+      // 2. Aspect-ratio compensation group (keeps icons 1:1 square pixels at any screen size)
+      const aspectEl = document.createElementNS(svgNS, 'g');
+      aspectEl.setAttribute('class', 'fluid-icon-aspect');
+
+      // 3. Rotation group in 1:1 pixel coordinates (animated with GSAP rotation)
+      const rotEl = document.createElementNS(svgNS, 'g');
+      rotEl.setAttribute('class', 'fluid-icon-rot');
+      rotEl.setAttribute('id', `fluidIconRot-${item.id}`);
+
+      // 4. Subtle resting floating bob group (2 to 4px, 6 to 9s, disabled in reduced motion)
+      const bobEl = document.createElementNS(svgNS, 'g');
+      bobEl.setAttribute('class', 'fluid-icon-bob');
+      bobEl.style.setProperty('--bob-amp', `${item.bobAmp}px`);
+      bobEl.style.setProperty('--bob-dur', `${item.bobDur}s`);
+      bobEl.style.setProperty('--bob-delay', `${item.bobDelay}s`);
+
+      // 5. Crisp line-art icon symbol reference
+      const useEl = document.createElementNS(svgNS, 'use');
+      useEl.setAttribute('href', item.symbol);
+      useEl.setAttribute('class', 'fluid-icon-graphic');
+
+      bobEl.appendChild(useEl);
+      rotEl.appendChild(bobEl);
+      aspectEl.appendChild(rotEl);
+      posEl.appendChild(aspectEl);
+      fluidFloatingIconsGroup.appendChild(posEl);
+
+      fluidIconNodes.push({ item, posEl, aspectEl, rotEl, bobEl, useEl });
+    });
+  }
+
+  function getIconTargetCoords(item, staffMode) {
+    if (isMobileViewport()) {
+      return {
+        x: item.mobileX * 10,
+        y: (staffMode ? item.mobileStaffY : item.mobileGuestY) * 10,
+        rot: staffMode ? item.staffRotation : item.rotation
+      };
+    }
+
+    const tabletAdjust = isTabletViewport() ? (staffMode ? -2.2 : 2.2) : 0;
+    const pctX = (staffMode ? item.endX : item.startX) + tabletAdjust;
+    const pctY = staffMode ? item.endY : item.startY;
+
+    return {
+      x: pctX * 10,
+      y: pctY * 10,
+      rot: staffMode ? item.staffRotation : item.rotation
+    };
+  }
+
+  function syncIconsViewportMetrics() {
+    buildFluidIconsDOM();
+    const vw = Math.max(320, window.innerWidth || 1280);
+    const vh = Math.max(320, window.innerHeight || 800);
+    const scaleX = 1000 / vw;
+    const scaleY = 1000 / vh;
+    const mobileMode = isMobileViewport();
+    const sizeFactor = mobileMode ? 0.68 : isTabletViewport() ? 0.74 : 1.0;
+
+    fluidIconNodes.forEach(({ item, posEl, aspectEl, useEl }) => {
+      if (mobileMode && !item.mobile) {
+        posEl.style.display = 'none';
+      } else {
+        posEl.style.display = '';
+      }
+
+      aspectEl.setAttribute('transform', `scale(${scaleX.toFixed(4)} ${scaleY.toFixed(4)})`);
+
+      const pxSize = item.size * sizeFactor;
+      const half = pxSize / 2;
+      useEl.setAttribute('x', (-half).toFixed(2));
+      useEl.setAttribute('y', (-half).toFixed(2));
+      useEl.setAttribute('width', pxSize.toFixed(2));
+      useEl.setAttribute('height', pxSize.toFixed(2));
+    });
+  }
+
+  function setIconsRestingState(staffMode) {
+    syncIconsViewportMetrics();
+    fluidIconNodes.forEach(({ item, posEl, rotEl }) => {
+      const { x, y, rot } = getIconTargetCoords(item, staffMode);
+      if (typeof window.gsap !== 'undefined') {
+        gsap.set(posEl, { x, y });
+        gsap.set(rotEl, { rotation: rot, svgOrigin: '0 0' });
+      } else {
+        posEl.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+        rotEl.setAttribute('transform', `rotate(${rot})`);
+      }
+    });
+  }
+
   function renderRestingFluidState(staffMode) {
     if (creamDropletsGroup) creamDropletsGroup.innerHTML = '';
     if (darkTrailingBlobsGroup) darkTrailingBlobsGroup.innerHTML = '';
@@ -829,6 +1148,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function setInitialLoginMode(staffMode) {
     applyHiddenDomSwap(staffMode);
     renderRestingFluidState(staffMode);
+    setIconsRestingState(staffMode);
     syncUrlHash(staffMode, true);
     focusFirstActiveField();
   }
@@ -838,6 +1158,8 @@ document.addEventListener('DOMContentLoaded', () => {
    *   - PHASE 1: FLOOD (0 to ~0.90s)
    *   - PHASE 2: HOLD & HIDDEN DOM SWAP (~0.90s to ~1.00s)
    *   - PHASE 3: CREAM RETURNS WITH GOOEY DROPLETS & SETTLE (~1.00s to ~2.10s)
+   *   - FLOATING ICONS: Animated continuously in the same timeline using only
+   *     transform (x, y, rotation) with per-icon lag, depth parallax, and settle.
    */
   function triggerModeSwitch(targetStaffMode, updateHash = true) {
     if (isAnimating || targetStaffMode === isStaffMode) return;
@@ -861,6 +1183,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         applyHiddenDomSwap(targetStaffMode);
         renderRestingFluidState(targetStaffMode);
+        setIconsRestingState(targetStaffMode);
         if (welcomeContentInner) welcomeContentInner.style.opacity = '1';
         if (fluidFormWrapper) fluidFormWrapper.style.opacity = '1';
         loginStage.classList.remove('is-animating');
@@ -874,6 +1197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMode = isMobileViewport();
     const dropletsData = mobileMode ? MOBILE_DROPLETS_DATA : DESKTOP_DROPLETS_DATA;
     const dropletNodes = ensureDropletElements(dropletsData);
+    syncIconsViewportMetrics();
 
     const proxy = {
       floodProgress: 0,
@@ -889,6 +1213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tl = gsap.timeline({
       onComplete: () => {
         renderRestingFluidState(targetStaffMode);
+        setIconsRestingState(targetStaffMode);
         gsap.set([fluidFormWrapper, welcomeContentInner], { clearProps: 'transform,opacity' });
         loginStage.classList.remove('is-animating');
         setInteractiveControlsDisabled(false);
@@ -958,6 +1283,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // - Card and welcome text fade in (0.3s, small upward slide) once settled.
     // ------------------------------------------------------------------------
     const phase3Start = phase2Start + TIMING_PHASE2_HOLD;
+    const totalFluidEnd = phase3Start + TIMING_PHASE3_RETURN;
 
     tl.to(
       proxy,
@@ -976,6 +1302,134 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       phase3Start
     );
+
+    // ------------------------------------------------------------------------
+    // CONTINUOUS FLOATING ICONS MOTION (In the same GSAP timeline `tl`)
+    // - Animated using ONLY transform (x, y, rotation) with position offsets.
+    // - Lag (0 to 150ms), parallax depth (0.6 to 1.4), travel rotation
+    //   (-12 to +12 deg), overshoot, and soft settle into final resting places.
+    // ------------------------------------------------------------------------
+    fluidIconNodes.forEach((node, idx) => {
+      const { item, posEl, rotEl } = node;
+      if (mobileMode && !item.mobile) return;
+
+      const fromCoords = getIconTargetCoords(item, !targetStaffMode);
+      const toCoords = getIconTargetCoords(item, targetStaffMode);
+
+      const delay = item.lagMs; // 0.00s to 0.15s lag behind fluid edge
+      const depth = item.depth; // 0.60 to 1.40 parallax depth
+      const startAt = 0.05 + delay;
+
+      // Higher depth travels slightly faster and further than lower depth
+      const speedFactor = 0.84 + (depth - 0.6) * 0.36;
+      const moveDur = Math.min(
+        totalFluidEnd - startAt - 0.26,
+        (TIMING_PHASE1_FLOOD + TIMING_PHASE2_HOLD + TIMING_PHASE3_RETURN * 0.64) / speedFactor
+      );
+      const settleDur = Math.max(0.26, totalFluidEnd - (startAt + moveDur));
+
+      if (mobileMode) {
+        // Mobile vertical travel: surge UP with Phase 1 flood, then push DOWN & settle in Phase 3
+        const floodDur = TIMING_PHASE1_FLOOD * (0.95 - (depth - 0.6) * 0.15);
+        const returnDur = Math.max(0.32, totalFluidEnd - (startAt + floodDur) - 0.24);
+        const mobileSettleDur = Math.max(0.24, totalFluidEnd - (startAt + floodDur + returnDur));
+
+        const surgeY = fromCoords.y - (80 + 55 * depth);
+        const surgeX = fromCoords.x + (idx % 2 === 0 ? 1 : -1) * 18 * depth;
+        const overshootY = toCoords.y + (18 + 22 * depth);
+        const overshootX = toCoords.x + (idx % 2 === 0 ? -1 : 1) * 8 * depth;
+
+        tl.to(
+          posEl,
+          {
+            x: surgeX,
+            y: surgeY,
+            duration: floodDur,
+            ease: 'power2.inOut'
+          },
+          startAt
+        );
+
+        tl.to(
+          posEl,
+          {
+            x: overshootX,
+            y: overshootY,
+            duration: returnDur,
+            ease: 'power2.out'
+          },
+          startAt + floodDur
+        );
+
+        tl.to(
+          posEl,
+          {
+            x: toCoords.x,
+            y: toCoords.y,
+            duration: mobileSettleDur,
+            ease: 'sine.inOut'
+          },
+          startAt + floodDur + returnDur
+        );
+      } else {
+        // Desktop & Tablet horizontal travel:
+        // Continuous glide across screen -> depth-scaled overshoot -> settle to rest
+        const dirX = targetStaffMode ? -1 : 1;
+        const overshootX = toCoords.x + dirX * (15 + 24 * depth);
+        const driftY = (idx % 2 === 0 ? -1 : 1) * (10 + 12 * depth);
+        const overshootY = toCoords.y + driftY;
+
+        tl.to(
+          posEl,
+          {
+            x: overshootX,
+            y: overshootY,
+            duration: moveDur,
+            ease: 'power2.inOut'
+          },
+          startAt
+        );
+
+        tl.to(
+          posEl,
+          {
+            x: toCoords.x,
+            y: toCoords.y,
+            duration: settleDur,
+            ease: 'sine.inOut'
+          },
+          startAt + moveDur
+        );
+      }
+
+      // Rotation while travelling (-12 to +12 deg) -> returns close to resting angle
+      const rotDir = targetStaffMode ? 1 : -1;
+      const peakRot = fromCoords.rot + rotDir * item.travelRot;
+      const rotPeakDur = moveDur * 0.68;
+      const rotSettleDur = moveDur * 0.32 + settleDur;
+
+      tl.to(
+        rotEl,
+        {
+          rotation: peakRot,
+          svgOrigin: '0 0',
+          duration: rotPeakDur,
+          ease: 'sine.inOut'
+        },
+        startAt
+      );
+
+      tl.to(
+        rotEl,
+        {
+          rotation: toCoords.rot,
+          svgOrigin: '0 0',
+          duration: rotSettleDur,
+          ease: 'back.out(1.35)'
+        },
+        startAt + rotPeakDur
+      );
+    });
 
     tl.to(
       [fluidFormWrapper, welcomeContentInner],
@@ -1010,10 +1464,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Keep resting wave crisp on window resize when not animating
+  // Keep resting wave and floating icons crisp on window resize when not animating
   window.addEventListener('resize', () => {
     if (!isAnimating) {
       renderRestingFluidState(isStaffMode);
+      setIconsRestingState(isStaffMode);
+    } else {
+      syncIconsViewportMetrics();
     }
   });
 

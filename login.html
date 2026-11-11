@@ -63,11 +63,44 @@
             />
             <feComposite in="SourceGraphic" in2="goo" operator="atop" />
           </filter>
+
+          <!-- ClipPath referencing the exact same animated dark fluid path (#darkFluidMainPath) -->
+          <clipPath id="darkFluidClipPath">
+            <use href="#darkFluidMainPath" />
+          </clipPath>
+
+          <!-- Line-Art Icon Symbols (house, envelope, key, location pin, compass, paper plane) -->
+          <symbol id="icon-house" viewBox="0 0 24 24">
+            <path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6.5h-5V21H4a1 1 0 0 1-1-1v-9.5Z" />
+          </symbol>
+          <symbol id="icon-envelope" viewBox="0 0 24 24">
+            <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11ZM3.5 6l8.5 6.25L20.5 6" />
+          </symbol>
+          <symbol id="icon-key" viewBox="0 0 24 24">
+            <path d="M7.5 15.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9ZM12 11h9v3.5M17.5 11v2.5" />
+          </symbol>
+          <symbol id="icon-location-pin" viewBox="0 0 24 24">
+            <path d="M12 21.5s-7-5.75-7-11.25a7 7 0 1 1 14 0c0 5.5-7 11.25-7 11.25ZM12 13a2.75 2.75 0 1 0 0-5.5 2.75 2.75 0 0 0 0 5.5Z" />
+          </symbol>
+          <symbol id="icon-compass" viewBox="0 0 24 24">
+            <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM15.5 8.5l-2.1 5.1-5.1 2.1 2.1-5.1 5.1-2.1Z" />
+          </symbol>
+          <symbol id="icon-paper-plane" viewBox="0 0 24 24">
+            <path d="M21.5 3.5L10.5 14.5M21.5 3.5l-6.5 17.5-4.5-6.5-6.5-4.5 17.5-6.5Z" />
+          </symbol>
         </defs>
 
-        <!-- Gooey group holding the main dark fluid shape -->
+        <!-- Gooey group holding the main dark fluid shape (goo filter applies ONLY to fluid edge) -->
         <g filter="url(#gooeyLiquidFilter)">
           <path id="darkFluidMainPath" class="dark-fluid-path" d=""></path>
+        </g>
+
+        <!-- Full-screen floating line-art icons group:
+             - Placed ABOVE dark green fill (#darkFluidMainPath) and BELOW the form card
+             - Clipped by #darkFluidClipPath (referencing #darkFluidMainPath)
+             - Outside #gooeyLiquidFilter so icons stay crisp and unblurred -->
+        <g id="fluidIconsClipWrapper" clip-path="url(#darkFluidClipPath)">
+          <g id="fluidFloatingIconsGroup" class="fluid-floating-icons-group"></g>
         </g>
       </svg>
 
@@ -79,6 +112,12 @@
         preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"
       >
+        <defs>
+          <clipPath id="creamFluidClipPath">
+            <use href="#creamFluidMainPath" />
+          </clipPath>
+        </defs>
+
         <!-- Gooey group for the advancing Cream wave & leading Cream droplets -->
         <g id="creamGooGroup" filter="url(#gooeyLiquidFilter)">
           <path id="creamFluidMainPath" class="cream-fluid-path" d=""></path>
@@ -86,9 +125,11 @@
         </g>
 
         <!-- Gooey group for trailing Dark blobs that break off inside the Cream zone & merge back -->
-        <g id="darkBlobsGooGroup" filter="url(#gooeyLiquidFilter)">
-          <path id="darkBridgePath" class="dark-fluid-path" d=""></path>
-          <g id="darkTrailingBlobsGroup"></g>
+        <g id="darkBlobsClipWrapper" clip-path="url(#creamFluidClipPath)">
+          <g id="darkBlobsGooGroup" filter="url(#gooeyLiquidFilter)">
+            <path id="darkBridgePath" class="dark-fluid-path" d=""></path>
+            <g id="darkTrailingBlobsGroup"></g>
+          </g>
         </g>
 
         <!-- Crisp sand accent stroke along the active wave boundary -->
@@ -139,21 +180,8 @@
       </div>
     </section>
 
-    <!-- 2. COLOURED FLUID PANEL: Faint Line Icons & Form Card -->
+    <!-- 2. COLOURED FLUID PANEL: Form Card -->
     <section id="fluidPanel" class="login-fluid-panel" aria-label="Sign In and Registration Panel">
-
-      <!-- Faint Line-Art Icons Scattered at Low Opacity -->
-      <div class="fluid-bg-icons" aria-hidden="true">
-        <i class="fa-solid fa-house bg-icon ic-1"></i>
-        <i class="fa-regular fa-envelope bg-icon ic-2"></i>
-        <i class="fa-solid fa-key bg-icon ic-3"></i>
-        <i class="fa-solid fa-location-dot bg-icon ic-4"></i>
-        <i class="fa-regular fa-compass bg-icon ic-5"></i>
-        <i class="fa-regular fa-paper-plane bg-icon ic-6"></i>
-        <i class="fa-solid fa-key bg-icon ic-7"></i>
-        <i class="fa-solid fa-location-dot bg-icon ic-8"></i>
-        <i class="fa-regular fa-envelope-open bg-icon ic-9"></i>
-      </div>
 
       <!-- Form Card Wrapper -->
       <div id="fluidFormWrapper" class="fluid-form-wrapper">
