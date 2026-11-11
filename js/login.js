@@ -1,24 +1,53 @@
 /**
  * ============================================================================
- * e-Homestay PERDA (Inap Desa) - Split-Screen Fluid Login & Register (login.js)
- * Manages:
- *   1. 3 User Types & 5 Forms:
- *      - Guest: Login + Register (optional, with "book without an account" note)
- *      - Staff -> Operator: Login + Register (shows pending approval notice)
- *      - Staff -> Admin: Login ONLY (no register tab or register link anywhere)
- *   2. Smooth Card Height Transition when switching Operator/Admin or Login/Register
- *      (without triggering the big fluid panel movement).
- *   3. Weighted Liquid SVG Path Morph + Translate Glide when switching Guest <-> Staff.
- *   4. Inline Field Validation (empty, invalid email, invalid phone, short password,
- *      mismatched passwords, unchecked terms), Button Loading State & Card Shake.
- *   5. Backend Endpoint Wiring (/login, /register-tourist) & Role Redirects:
- *      - Guest -> index.html (Landing Page)
- *      - Operator -> dashboard.html?role=operator
- *      - Admin -> dashboard.html?role=officer
- *   6. Keyboard Accessibility: proper tab order, Enter submits, auto-focus first
- *      input field after every switch.
+ * e-Homestay PERDA (Inap Desa) - Login & Registration Controller (login.js)
+ * ============================================================================
+ * HOW TO ADJUST ANIMATION SPEED & CURVE SHAPE:
+ *   Edit the ANIMATION_CONFIG object right below:
+ *   - MORPH_DURATION_MS:       Total duration of the SVG wave morph (default: 1050ms)
+ *   - CONTENT_SWAP_DELAY_MS:   When hidden text/form swaps mid-flight (default: 240ms)
+ *   - CONTENT_FADE_IN_MS:      When new content fades in after arrival (default: 660ms)
+ *   - LEAD_BOW_STRENGTH:       How far the leading liquid edge bulges ahead (px in 0..1000 viewBox)
+ *   - TRAIL_DRAG_STRENGTH:     How much the back edge lags behind at launch
+ *   - SPRING_WOBBLE_STRENGTH:  Amplitude of the arrival overshoot & settle wobble
+ *   - SPRING_DAMPING:          Higher = settles faster; Lower = more elastic bounces
+ *   - SPRING_FREQUENCY:        Number of wobble oscillations during settle
+ *   - GUEST_REST_VEC / STAFF_REST_VEC:
+ *       20-number array defining the resting cubic Bezier x-coordinates for
+ *       the Left Edge [0..9] and Right Edge [10..19] in a 1000x1000 viewBox.
  * ============================================================================
  */
+
+const ANIMATION_CONFIG = {
+  MORPH_DURATION_MS: 1050,
+  CONTENT_SWAP_DELAY_MS: 240,
+  CONTENT_FADE_IN_MS: 660,
+  UNLOCK_DELAY_MS: 1070,
+
+  // Liquid curve physics (increase for more dramatic wave, decrease for subtler curve)
+  LEAD_BOW_STRENGTH: 76,
+  TRAIL_DRAG_STRENGTH: 60,
+  SPRING_WOBBLE_STRENGTH: 88,
+  SPRING_DAMPING: 4.6,
+  SPRING_FREQUENCY: 2.8,
+
+  // Resting State 1: GUEST MODE (#guest) — Fluid panel on RIGHT
+  // Indices [0..9] = uneven organic wave on Left edge; [10..19] = flat Right wall (1012)
+  GUEST_REST_VEC: [
+    78, 152, 19, 98, 162, 31, 114, 168, 39, 86,
+    1012, 1012, 1012, 1012, 1012, 1012, 1012, 1012, 1012, 1012
+  ],
+
+  // Resting State 2: STAFF MODE (#staff) — Fluid panel on LEFT
+  // Indices [0..9] = flat Left wall (-12); [10..19] = uneven organic wave on Right edge
+  STAFF_REST_VEC: [
+    -12, -12, -12, -12, -12, -12, -12, -12, -12, -12,
+    922, 848, 981, 902, 838, 969, 886, 832, 961, 914
+  ],
+
+  // Vertical weights along the wave edge so each crest deforms unevenly
+  WAVE_WEIGHTS: [0.45, 1.15, 0.85, 1.05, 1.32, 0.88, 1.14, 1.24, 0.78, 0.48]
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginStage = document.getElementById('loginStage');
@@ -27,11 +56,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginFormCard = document.getElementById('loginFormCard');
   const cardDynamicViewport = document.getElementById('cardDynamicViewport');
   const fluidBodyPath = document.getElementById('fluidBodyPath');
+  const mobileWavePath = document.getElementById('mobileWavePath');
 
   const sideSwitchBtn = document.getElementById('sideSwitchBtn');
+  const mobileSideSwitchBtn = document.getElementById('mobileSideSwitchBtn');
   const welcomeModePill = document.getElementById('welcomeModePill');
   const welcomeHeading = document.getElementById('welcomeHeading');
   const welcomeSubtext = document.getElementById('welcomeSubtext');
+  const mobileWelcomeHeading = document.getElementById('mobileWelcomeHeading');
+  const mobileWelcomeSubtext = document.getElementById('mobileWelcomeSubtext');
 
   // Card Top Controls: Segmented Staff Toggle & Login/Register Tabs
   const staffSegmentedToggle = document.getElementById('staffSegmentedToggle');
@@ -50,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginFeedbackIcon = document.getElementById('loginFeedbackIcon');
   const loginFeedbackText = document.getElementById('loginFeedbackText');
 
-  // 5 Form Panes
   const panes = {
     'guest-login': document.getElementById('guestLoginForm'),
     'guest-register': document.getElementById('guestRegisterForm'),
@@ -61,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!loginStage || !loginFormCard) return;
 
-  // State variables
   let isStaffMode = false;          // false = Guest (#guest), true = Staff (#staff)
   let activeStaffRole = 'operator'; // 'operator' or 'admin'
   let activeGuestTab = 'login';     // 'login' or 'register'
@@ -72,36 +103,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const prefersReducedMotion = () =>
     window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  const isMobileViewport = () => window.innerWidth < 768;
+
   /**
    * ==========================================================================
-   * 1. LIQUID SVG PATH MORPH DEFINITIONS (20-point coordinate vector)
+   * 1. DESKTOP/TABLET HORIZONTAL LIQUID SVG PATH MORPH & MOBILE VERTICAL SWEEP
    * ==========================================================================
    */
-  const GUEST_REST_VEC = [
-    75, 148, 22, 96, 158, 34, 112, 165, 42, 84,
-    1012, 1012, 1012, 1012, 1012, 1012, 1012, 1012, 1012, 1012
-  ];
-
-  const STAFF_REST_VEC = [
-    -12, -12, -12, -12, -12, -12, -12, -12, -12, -12,
-    925, 852, 978, 904, 842, 966, 888, 835, 958, 916
-  ];
-
-  const WAVE_WEIGHTS = [0.45, 1.15, 0.85, 1.05, 1.30, 0.90, 1.12, 1.22, 0.80, 0.50];
-
-  function buildFluidPath(v) {
+  function buildDesktopFluidPath(v) {
     return (
       `M${v[0].toFixed(1)},-8 ` +
-      `C${v[1].toFixed(1)},105 ${v[2].toFixed(1)},215 ${v[3].toFixed(1)},330 ` +
-      `C${v[4].toFixed(1)},425 ${v[5].toFixed(1)},540 ${v[6].toFixed(1)},665 ` +
-      `C${v[7].toFixed(1)},760 ${v[8].toFixed(1)},880 ${v[9].toFixed(1)},1008 ` +
+      `C${v[1].toFixed(1)},102 ${v[2].toFixed(1)},218 ${v[3].toFixed(1)},334 ` +
+      `C${v[4].toFixed(1)},428 ${v[5].toFixed(1)},544 ${v[6].toFixed(1)},668 ` +
+      `C${v[7].toFixed(1)},762 ${v[8].toFixed(1)},882 ${v[9].toFixed(1)},1008 ` +
       `L${v[19].toFixed(1)},1008 ` +
-      `C${v[18].toFixed(1)},880 ${v[17].toFixed(1)},760 ${v[16].toFixed(1)},665 ` +
-      `C${v[15].toFixed(1)},540 ${v[14].toFixed(1)},425 ${v[13].toFixed(1)},330 ` +
-      `C${v[12].toFixed(1)},215 ${v[11].toFixed(1)},105 ${v[10].toFixed(1)},-8 Z`
+      `C${v[18].toFixed(1)},882 ${v[17].toFixed(1)},762 ${v[16].toFixed(1)},668 ` +
+      `C${v[15].toFixed(1)},544 ${v[14].toFixed(1)},428 ${v[13].toFixed(1)},334 ` +
+      `C${v[12].toFixed(1)},218 ${v[11].toFixed(1)},102 ${v[10].toFixed(1)},-8 Z`
     );
   }
 
+  // Smooth cubic-bezier(0.65, 0, 0.35, 1) approximation
   function easeFluidGlide(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
@@ -110,48 +132,102 @@ document.addEventListener('DOMContentLoaded', () => {
     return a + (b - a) * t;
   }
 
+  /**
+   * Computes the 20-point horizontal liquid morph vector at normalized time t in [0, 1].
+   */
   function computeLiquidMorphVector(t, toStaff) {
+    const {
+      GUEST_REST_VEC,
+      STAFF_REST_VEC,
+      WAVE_WEIGHTS,
+      LEAD_BOW_STRENGTH,
+      TRAIL_DRAG_STRENGTH,
+      SPRING_WOBBLE_STRENGTH,
+      SPRING_DAMPING,
+      SPRING_FREQUENCY
+    } = ANIMATION_CONFIG;
+
     const out = new Array(20);
     const leadT = easeFluidGlide(Math.min(1, Math.pow(t, 0.68)));
     const trailT = easeFluidGlide(Math.pow(t, 1.38));
+
     const leadBowPhase = t < 0.68 ? Math.sin((t / 0.68) * Math.PI) : 0;
     const dragImpulse = t < 0.52 ? Math.sin((t / 0.52) * Math.PI) : 0;
     const settlePhase = t > 0.38 ? (t - 0.38) / 0.62 : 0;
     const springWobble =
       settlePhase > 0
-        ? Math.exp(-4.6 * settlePhase) *
-          Math.sin(settlePhase * Math.PI * 2.8) *
+        ? Math.exp(-SPRING_DAMPING * settlePhase) *
+          Math.sin(settlePhase * Math.PI * SPRING_FREQUENCY) *
           (1 - Math.pow(settlePhase, 3))
         : 0;
 
     if (toStaff) {
       for (let i = 0; i < 10; i++) {
         const baseL = lerp(GUEST_REST_VEC[i], STAFF_REST_VEC[i], leadT);
-        const surgeLeft = -78 * leadBowPhase * WAVE_WEIGHTS[i] * (1 - leadT * 0.85);
+        const surgeLeft = -LEAD_BOW_STRENGTH * leadBowPhase * WAVE_WEIGHTS[i] * (1 - leadT * 0.85);
         out[i] = baseL + surgeLeft;
       }
       for (let i = 0; i < 10; i++) {
         const idx = 10 + i;
         const baseR = lerp(GUEST_REST_VEC[idx], STAFF_REST_VEC[idx], trailT);
-        const trailDrag = 62 * dragImpulse * WAVE_WEIGHTS[i];
-        const wobbleOffset = -92 * springWobble * WAVE_WEIGHTS[9 - i];
+        const trailDrag = TRAIL_DRAG_STRENGTH * dragImpulse * WAVE_WEIGHTS[i];
+        const wobbleOffset = -SPRING_WOBBLE_STRENGTH * springWobble * WAVE_WEIGHTS[9 - i];
         out[idx] = baseR + trailDrag + wobbleOffset;
       }
     } else {
       for (let i = 0; i < 10; i++) {
         const idx = 10 + i;
         const baseR = lerp(STAFF_REST_VEC[idx], GUEST_REST_VEC[idx], leadT);
-        const surgeRight = 78 * leadBowPhase * WAVE_WEIGHTS[i] * (1 - leadT * 0.85);
+        const surgeRight = LEAD_BOW_STRENGTH * leadBowPhase * WAVE_WEIGHTS[i] * (1 - leadT * 0.85);
         out[idx] = baseR + surgeRight;
       }
       for (let i = 0; i < 10; i++) {
         const baseL = lerp(STAFF_REST_VEC[i], GUEST_REST_VEC[i], trailT);
-        const trailDrag = -62 * dragImpulse * WAVE_WEIGHTS[i];
-        const wobbleOffset = 92 * springWobble * WAVE_WEIGHTS[9 - i];
+        const trailDrag = -TRAIL_DRAG_STRENGTH * dragImpulse * WAVE_WEIGHTS[i];
+        const wobbleOffset = SPRING_WOBBLE_STRENGTH * springWobble * WAVE_WEIGHTS[9 - i];
         out[i] = baseL + trailDrag + wobbleOffset;
       }
     }
     return out;
+  }
+
+  /**
+   * Computes the Mobile (< 768px) vertical wave sweep path at normalized time t in [0, 1].
+   * - Guest -> Staff: Wave sweeps UP from bottom (y=1012) to top (y=-12), then clears.
+   * - Staff -> Guest: Wave sweeps DOWN from top (y=-12) to bottom (y=1012), then clears.
+   */
+  function buildMobileVerticalWavePath(t, toStaff) {
+    if (t <= 0 || t >= 1) {
+      return 'M-8,1012 L-8,1012 C180,1012 340,1012 510,1012 C690,1012 840,1012 1008,1012 L1008,1012 Z';
+    }
+    const coreY = toStaff
+      ? lerp(1012, -12, easeFluidGlide(t))
+      : lerp(-12, 1012, easeFluidGlide(t));
+    const bow = Math.sin(t * Math.PI) * (toStaff ? -115 : 115);
+    const wobble = Math.sin(t * Math.PI * 3) * 35 * (1 - t);
+
+    const c1y = coreY + bow * 0.9 + wobble;
+    const c2y = coreY + bow * 1.25 - wobble * 0.7;
+    const midY = coreY + bow * 0.85;
+    const c3y = coreY + bow * 1.15 + wobble * 0.8;
+    const c4y = coreY + bow * 0.7 - wobble;
+
+    if (toStaff) {
+      // Sweeping UP from bottom (1012)
+      return (
+        `M-8,1012 L-8,${coreY.toFixed(1)} ` +
+        `C180,${c1y.toFixed(1)} 340,${c2y.toFixed(1)} 510,${midY.toFixed(1)} ` +
+        `C690,${c3y.toFixed(1)} 840,${c4y.toFixed(1)} 1008,${coreY.toFixed(1)} ` +
+        `L1008,1012 Z`
+      );
+    }
+    // Sweeping DOWN from top (-12)
+    return (
+      `M-8,-12 L-8,${coreY.toFixed(1)} ` +
+      `C180,${c1y.toFixed(1)} 340,${c2y.toFixed(1)} 510,${midY.toFixed(1)} ` +
+      `C690,${c3y.toFixed(1)} 840,${c4y.toFixed(1)} 1008,${coreY.toFixed(1)} ` +
+      `L1008,-12 Z`
+    );
   }
 
   /**
@@ -164,14 +240,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return activeGuestTab === 'register' ? 'guest-register' : 'guest-login';
     }
     if (activeStaffRole === 'admin') {
-      return 'admin-login'; // Admin is strictly LOGIN ONLY
+      return 'admin-login';
     }
     return activeOperatorTab === 'register' ? 'operator-register' : 'operator-login';
   }
 
-  /**
-   * Focuses the first visible input/select field inside the active form pane
-   */
   function focusFirstActiveField() {
     const activeKey = getTargetPaneKey();
     const activePane = panes[activeKey];
@@ -185,43 +258,59 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Updates Card Header, Segmented Toggle, Login/Register Tabs & Below-Card Link
+   * Synchronizes all headings, specific human copy, tabs & switch buttons
    */
   function syncCardControlsUI() {
     const currentTab = !isStaffMode ? activeGuestTab : activeOperatorTab;
 
-    // 1. Welcome Panel Content
+    // 1. Off-white Welcome Panel & Mobile Header Copy (Specific, non-generic copy)
     if (isStaffMode) {
       loginStage.setAttribute('data-mode', 'staff');
       if (welcomeModePill) {
-        welcomeModePill.innerHTML =
-          '<i class="fa-solid fa-shield-halved" style="color: var(--burnt-orange);"></i> Staff &amp; Operator Access';
+        welcomeModePill.innerHTML = '<i class="fa-solid fa-key"></i> Staff &amp; Operator Access';
       }
       if (welcomeHeading) {
-        welcomeHeading.textContent = 'PERDA Internal Management Portal';
+        welcomeHeading.textContent = 'Operator & staff portal';
       }
       if (welcomeSubtext) {
         welcomeSubtext.textContent =
-          'Manage your assigned homestay unit, verify incoming bookings, and generate official district reports.';
+          'Verify guest payment receipts, update your unit calendar, or export monthly reports.';
       }
       if (sideSwitchBtn) {
         sideSwitchBtn.innerHTML = '&larr; Back to guest sign in';
       }
+      if (mobileSideSwitchBtn) {
+        mobileSideSwitchBtn.innerHTML = '&larr; Back to guest sign in';
+      }
+      if (mobileWelcomeHeading) {
+        mobileWelcomeHeading.textContent = 'Operator & staff portal';
+      }
+      if (mobileWelcomeSubtext) {
+        mobileWelcomeSubtext.textContent = 'Sign in to manage your unit or review bookings.';
+      }
     } else {
       loginStage.setAttribute('data-mode', 'user');
       if (welcomeModePill) {
-        welcomeModePill.innerHTML =
-          '<i class="fa-solid fa-leaf" style="color: var(--olive);"></i> Official PERDA Inap Desa';
+        welcomeModePill.innerHTML = '<i class="fa-regular fa-compass"></i> PERDA Inap Desa';
       }
       if (welcomeHeading) {
-        welcomeHeading.textContent = 'Welcome to Kampung Serenity';
+        welcomeHeading.textContent = 'Welcome back';
       }
       if (welcomeSubtext) {
         welcomeSubtext.textContent =
-          'Discover and book authentic rural homestays across Penang’s peaceful villages.';
+          'Sign in to manage your bookings or check homestay availability in Penang.';
       }
       if (sideSwitchBtn) {
         sideSwitchBtn.innerHTML = 'Homestay operator or PERDA staff? Sign in here &rarr;';
+      }
+      if (mobileSideSwitchBtn) {
+        mobileSideSwitchBtn.innerHTML = 'Homestay operator or PERDA staff? Sign in here &rarr;';
+      }
+      if (mobileWelcomeHeading) {
+        mobileWelcomeHeading.textContent = 'Welcome back';
+      }
+      if (mobileWelcomeSubtext) {
+        mobileWelcomeSubtext.textContent = 'Sign in to manage your bookings.';
       }
     }
 
@@ -255,11 +344,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isStaffMode) {
       if (activeGuestTab === 'register') {
         if (formCardHeading) formCardHeading.textContent = 'Create an account';
-        if (formCardSubheading) formCardSubheading.textContent = 'for faster bookings & stay tracking';
+        if (formCardSubheading) {
+          formCardSubheading.textContent = 'Save your details for future homestay bookings';
+        }
         if (belowCardPrompt) {
           belowCardPrompt.hidden = false;
           belowCardPrompt.innerHTML =
-            'Already have an account? <button type="button" id="belowCardSwitchTabBtn">Sign in here</button>';
+            'Already have an account? <button type="button" id="belowCardSwitchTabBtn">Sign in</button>';
         }
       } else {
         if (formCardHeading) formCardHeading.textContent = 'Sign in';
@@ -272,27 +363,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else if (activeStaffRole === 'operator') {
       if (activeOperatorTab === 'register') {
-        if (formCardHeading) formCardHeading.textContent = 'Operator Registration';
-        if (formCardSubheading) formCardSubheading.textContent = 'Register your PERDA homestay unit';
+        if (formCardHeading) formCardHeading.textContent = 'Register your homestay';
+        if (formCardSubheading) {
+          formCardSubheading.textContent = 'Submit your unit details for PERDA verification';
+        }
         if (belowCardPrompt) {
           belowCardPrompt.hidden = false;
           belowCardPrompt.innerHTML =
             'Already registered? <button type="button" id="belowCardSwitchTabBtn">Operator login</button>';
         }
       } else {
-        if (formCardHeading) formCardHeading.textContent = 'Operator Sign in';
-        if (formCardSubheading) formCardSubheading.textContent = 'Manage your homestay & verify bookings';
+        if (formCardHeading) formCardHeading.textContent = 'Operator sign in';
+        if (formCardSubheading) {
+          formCardSubheading.textContent = 'Check bookings and manage your homestay unit';
+        }
         if (belowCardPrompt) {
           belowCardPrompt.hidden = false;
           belowCardPrompt.innerHTML =
-            'New homestay owner? <button type="button" id="belowCardSwitchTabBtn">Register as operator</button>';
+            'Own a homestay in Penang? <button type="button" id="belowCardSwitchTabBtn">Register as operator</button>';
         }
       }
     } else {
-      // Admin Mode: LOGIN ONLY — No register tab and no register link anywhere!
-      if (formCardHeading) formCardHeading.textContent = 'Admin Sign in';
+      // Admin Mode: LOGIN ONLY — No register tab and no register link anywhere
+      if (formCardHeading) formCardHeading.textContent = 'Admin sign in';
       if (formCardSubheading) {
-        formCardSubheading.textContent = 'Internal BPE PERDA Officer Portal (@perda.gov.my)';
+        formCardSubheading.textContent = 'For verified BPE PERDA officers (@perda.gov.my)';
       }
       if (belowCardPrompt) {
         belowCardPrompt.hidden = true;
@@ -300,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Bind dynamic below-card switch button if present
     document.getElementById('belowCardSwitchTabBtn')?.addEventListener('click', () => {
       if (!isStaffMode) {
         switchCardInnerState({ guestTab: activeGuestTab === 'login' ? 'register' : 'login' });
@@ -348,11 +442,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // 1. Measure current viewport height before switching panes
     const startHeight = cardDynamicViewport.offsetHeight;
     cardDynamicViewport.style.height = `${startHeight}px`;
 
-    // 2. Swap active pane & stage subtle fade-in
     if (prevPane) {
       prevPane.hidden = true;
       prevPane.classList.remove('is-active-pane');
@@ -360,9 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
     nextPane.hidden = false;
     nextPane.classList.add('is-active-pane', 'is-pane-entering');
 
-    // 3. Measure target height and animate smoothly
     const targetHeight = nextPane.offsetHeight;
-    void cardDynamicViewport.offsetHeight; // force reflow
+    void cardDynamicViewport.offsetHeight;
     cardDynamicViewport.style.height = `${targetHeight}px`;
 
     requestAnimationFrame(() => {
@@ -372,12 +463,14 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       cardDynamicViewport.style.height = '';
       focusFirstActiveField();
-    }, 330);
+    }, 320);
   }
 
   /**
    * ==========================================================================
-   * 3. GUEST <-> STAFF BIG FLUID PANEL GLIDE & CHOREOGRAPHED SWAP
+   * 3. GUEST <-> STAFF FLUID PANEL SWITCHING ANIMATION
+   *    - Desktop & Tablet: Horizontal glide + SVG curve morph
+   *    - Mobile (< 768px): Vertical wave sweep up/down
    * ==========================================================================
    */
   function syncUrlHash(staffMode, replace = false) {
@@ -408,7 +501,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (fluidBodyPath) {
       fluidBodyPath.setAttribute(
         'd',
-        buildFluidPath(staffMode ? STAFF_REST_VEC : GUEST_REST_VEC)
+        buildDesktopFluidPath(
+          staffMode ? ANIMATION_CONFIG.STAFF_REST_VEC : ANIMATION_CONFIG.GUEST_REST_VEC
+        )
       );
     }
     syncUrlHash(staffMode, true);
@@ -428,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
       syncUrlHash(targetStaffMode, false);
     }
 
-    // Reduced-motion fallback: simple quick crossfade
+    // Accessibility: prefers-reduced-motion quick crossfade
     if (prefersReducedMotion()) {
       welcomeContentInner?.classList.add('is-exiting-left');
       fluidFormWrapper?.classList.add('is-exiting-left');
@@ -443,7 +538,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fluidBodyPath) {
           fluidBodyPath.setAttribute(
             'd',
-            buildFluidPath(targetStaffMode ? STAFF_REST_VEC : GUEST_REST_VEC)
+            buildDesktopFluidPath(
+              targetStaffMode ? ANIMATION_CONFIG.STAFF_REST_VEC : ANIMATION_CONFIG.GUEST_REST_VEC
+            )
           );
         }
         welcomeContentInner?.classList.remove('is-exiting-left');
@@ -455,31 +552,50 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // 1. Fade & slide out current content
-    const formExitClass = targetStaffMode ? 'is-exiting-left' : 'is-exiting-right';
+    const mobileMode = isMobileViewport();
+
+    // 1. Fade & slide out current content (vertical on mobile, horizontal on desktop/tablet)
+    const formExitClass = mobileMode
+      ? targetStaffMode
+        ? 'is-exiting-up'
+        : 'is-exiting-down'
+      : targetStaffMode
+        ? 'is-exiting-left'
+        : 'is-exiting-right';
     const welcomeExitClass = targetStaffMode ? 'is-exiting-right' : 'is-exiting-left';
-    const formStageClass = targetStaffMode ? 'is-staging-right' : 'is-staging-left';
+    const formStageClass = mobileMode
+      ? targetStaffMode
+        ? 'is-staging-up'
+        : 'is-staging-down'
+      : targetStaffMode
+        ? 'is-staging-right'
+        : 'is-staging-left';
     const welcomeStageClass = targetStaffMode ? 'is-staging-left' : 'is-staging-right';
 
     fluidFormWrapper?.classList.add(formExitClass);
     welcomeContentInner?.classList.add(welcomeExitClass);
 
-    // 2. Trigger GPU-accelerated panel translate across the screen
-    loginStage.classList.toggle('is-staff-mode', targetStaffMode);
+    if (!mobileMode) {
+      loginStage.classList.toggle('is-staff-mode', targetStaffMode);
+    } else if (mobileWavePath) {
+      mobileWavePath.style.fill = targetStaffMode ? 'var(--dark-green)' : 'var(--olive)';
+    }
 
-    // 3. Animate SVG Liquid Path Morph + Wobble Settle (1060ms)
-    const MORPH_DURATION = 1060;
+    // 2. Run rAF SVG Path Morph (Desktop horizontal morph OR Mobile vertical wave sweep)
     const startTime = performance.now();
-
     if (activeRafId) cancelAnimationFrame(activeRafId);
 
     function stepLiquidMorph(now) {
       const elapsed = now - startTime;
-      const progress = Math.min(1, elapsed / MORPH_DURATION);
-      const vec = computeLiquidMorphVector(progress, targetStaffMode);
+      const progress = Math.min(1, elapsed / ANIMATION_CONFIG.MORPH_DURATION_MS);
 
-      if (fluidBodyPath) {
-        fluidBodyPath.setAttribute('d', buildFluidPath(vec));
+      if (mobileMode) {
+        if (mobileWavePath) {
+          mobileWavePath.setAttribute('d', buildMobileVerticalWavePath(progress, targetStaffMode));
+        }
+      } else if (fluidBodyPath) {
+        const vec = computeLiquidMorphVector(progress, targetStaffMode);
+        fluidBodyPath.setAttribute('d', buildDesktopFluidPath(vec));
       }
 
       if (progress < 1) {
@@ -488,8 +604,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fluidBodyPath) {
           fluidBodyPath.setAttribute(
             'd',
-            buildFluidPath(targetStaffMode ? STAFF_REST_VEC : GUEST_REST_VEC)
+            buildDesktopFluidPath(
+              targetStaffMode ? ANIMATION_CONFIG.STAFF_REST_VEC : ANIMATION_CONFIG.GUEST_REST_VEC
+            )
           );
+        }
+        if (mobileWavePath) {
+          mobileWavePath.setAttribute('d', buildMobileVerticalWavePath(1, targetStaffMode));
         }
         activeRafId = null;
       }
@@ -497,8 +618,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     activeRafId = requestAnimationFrame(stepLiquidMorph);
 
-    // 4. Mid-flight (240ms): swap card & welcome content while hidden
+    // 3. Mid-flight swap while content is hidden
     setTimeout(() => {
+      if (mobileMode) {
+        loginStage.classList.toggle('is-staff-mode', targetStaffMode);
+      }
       syncCardControlsUI();
       const nextKey = getTargetPaneKey();
       Object.entries(panes).forEach(([k, p]) => {
@@ -512,27 +636,26 @@ document.addEventListener('DOMContentLoaded', () => {
       welcomeContentInner?.classList.remove(welcomeExitClass);
       fluidFormWrapper?.classList.add(formStageClass);
       welcomeContentInner?.classList.add(welcomeStageClass);
-    }, 240);
+    }, ANIMATION_CONFIG.CONTENT_SWAP_DELAY_MS);
 
-    // 5. Delayed fade-in after panel has mostly arrived (680ms)
+    // 4. Delayed fade-in after panel has mostly arrived
     setTimeout(() => {
       void fluidFormWrapper?.offsetWidth;
       fluidFormWrapper?.classList.remove(formStageClass);
       welcomeContentInner?.classList.remove(welcomeStageClass);
-    }, 680);
+    }, ANIMATION_CONFIG.CONTENT_FADE_IN_MS);
 
-    // 6. Unlock & focus first field once fluid settles (1080ms)
+    // 5. Unlock interaction & focus first field
     setTimeout(() => {
       loginStage.classList.remove('is-animating');
       isAnimating = false;
       focusFirstActiveField();
-    }, 1080);
+    }, ANIMATION_CONFIG.UNLOCK_DELAY_MS);
   }
 
-  // Event listeners for mode, segmented role toggle, and tabs
-  sideSwitchBtn?.addEventListener('click', () => {
-    triggerModeSwitch(!isStaffMode, true);
-  });
+  // Bind both Desktop/Tablet and Mobile mode switch buttons
+  sideSwitchBtn?.addEventListener('click', () => triggerModeSwitch(!isStaffMode, true));
+  mobileSideSwitchBtn?.addEventListener('click', () => triggerModeSwitch(!isStaffMode, true));
 
   window.addEventListener('hashchange', () => {
     const hashWantsStaff = window.location.hash.toLowerCase() === '#staff';
@@ -571,7 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * ==========================================================================
-   * 4. SHOW / HIDE PASSWORD TOGGLES (All Password Fields)
+   * 4. SHOW / HIDE PASSWORD TOGGLES
    * ==========================================================================
    */
   document.querySelectorAll('.pill-password-toggle').forEach((btn) => {
@@ -582,15 +705,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const isHidden = input.type === 'password';
       input.type = isHidden ? 'text' : 'password';
       btn.innerHTML = isHidden
-        ? '<i class="fa-solid fa-eye-slash"></i>'
-        : '<i class="fa-solid fa-eye"></i>';
+        ? '<i class="fa-regular fa-eye-slash"></i>'
+        : '<i class="fa-regular fa-eye"></i>';
       btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
     });
   });
 
   /**
    * ==========================================================================
-   * 5. INLINE VALIDATION HELPERS, CARD SHAKE & LOADING STATE
+   * 5. INLINE FIELD VALIDATION, CARD SHAKE & BUTTON LOADING STATE
    * ==========================================================================
    */
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -619,7 +742,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Clear individual inline error as soon as the user types or changes a field
   document.querySelectorAll('.auth-form-pane input, .auth-form-pane select').forEach((input) => {
     const clearHandler = () => {
       input.classList.remove('is-invalid-pill');
@@ -641,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginFeedbackIcon) {
       loginFeedbackIcon.className = isSuccess
         ? 'fa-solid fa-circle-check mt-1'
-        : 'fa-solid fa-triangle-exclamation mt-1';
+        : 'fa-solid fa-circle-exclamation mt-1';
     }
     loginFeedbackText.innerHTML = message;
     loginFeedbackAlert.classList.add('show');
@@ -654,7 +776,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function triggerCardShake() {
     if (!loginFormCard) return;
     loginFormCard.classList.remove('is-shaking');
-    void loginFormCard.offsetWidth; // restart keyframe animation
+    void loginFormCard.offsetWidth;
     loginFormCard.classList.add('is-shaking');
   }
 
@@ -675,11 +797,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /**
-   * Helper to post to existing backend endpoint (/login or /register-tourist)
-   * when served over HTTP/HTTPS with a live backend, while falling back cleanly
-   * in standalone local mode.
-   */
   async function tryPostBackendEndpoint(endpoint, formDataObj) {
     if (!window.location.protocol.startsWith('http')) {
       return { handledByServer: false };
@@ -698,16 +815,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return { handledByServer: true, redirectUrl: res.url };
       }
     } catch (err) {
-      // Static server or offline mode: continue with client-side handler
+      // Static file or offline environment: continue with client-side verification
     }
     return { handledByServer: false };
   }
 
   /**
    * ==========================================================================
-   * 6. FORM 1: GUEST LOGIN (#guestLoginForm -> Redirects to Landing Page)
+   * 6. FORM SUBMISSIONS (Guest Login/Register, Operator Login/Register, Admin)
    * ==========================================================================
    */
+
+  // PANE 1: GUEST LOGIN -> Redirects to Landing Page (index.html)
   panes['guest-login']?.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideCardBanner();
@@ -746,7 +865,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setButtonLoading(panes['guest-login'], true, 'Signing in...');
     await new Promise((r) => setTimeout(r, 650));
 
-    // Check if guest registered a local account with a specific password
     let storedGuests = [];
     try {
       storedGuests = JSON.parse(localStorage.getItem('perda_registered_guests') || '[]');
@@ -758,17 +876,9 @@ document.addEventListener('DOMContentLoaded', () => {
         g.name.toLowerCase() === identity.toLowerCase()
     );
 
-    if (matchedGuest && matchedGuest.password !== password) {
+    if ((matchedGuest && matchedGuest.password !== password) || password.toLowerCase() === 'wrongpass') {
       setButtonLoading(panes['guest-login'], false);
-      showCardBanner('Incorrect email/username or password. Please check your credentials.');
-      triggerCardShake();
-      return;
-    }
-
-    // Demo wrong-password check if user types "wrong"
-    if (password.toLowerCase() === 'wrongpass') {
-      setButtonLoading(panes['guest-login'], false);
-      showCardBanner('Invalid credentials: The username or password you entered is incorrect.');
+      showCardBanner('Incorrect email/username or password. Please check your details and try again.');
       triggerCardShake();
       return;
     }
@@ -784,24 +894,10 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('perda_guest_user', matchedGuest ? matchedGuest.name : identity);
     } catch (err) {}
 
-    if (typeof showPerdaToast === 'function') {
-      showPerdaToast(
-        'Signed In Successfully',
-        `Welcome back! Redirecting to the e-Homestay landing page...`,
-        'fa-circle-check'
-      );
-    }
-
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 650);
+    window.location.href = 'index.html';
   });
 
-  /**
-   * ==========================================================================
-   * 7. FORM 2: GUEST REGISTER (#guestRegisterForm -> /register-tourist -> Landing Page)
-   * ==========================================================================
-   */
+  // PANE 2: GUEST REGISTER -> /register-tourist -> Redirects to Landing Page (index.html)
   panes['guest-register']?.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideCardBanner();
@@ -821,7 +917,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const termsChecked = Boolean(termsEl?.checked);
 
     let hasError = false;
-
     if (!name) {
       setFieldError(nameEl, 'guestRegNameError', 'Please enter your full name.');
       hasError = true;
@@ -841,7 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hasError = true;
     }
     if (!pass) {
-      setFieldError(passEl, 'guestRegPasswordError', 'Please create a password.');
+      setFieldError(passEl, 'guestRegPasswordError', 'Please enter a password.');
       hasError = true;
     } else if (pass.length < 8) {
       setFieldError(passEl, 'guestRegPasswordError', 'Password must be at least 8 characters.');
@@ -855,11 +950,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hasError = true;
     }
     if (!termsChecked) {
-      setFieldError(
-        termsEl,
-        'guestRegTermsError',
-        'Please accept the terms & conditions to register.'
-      );
+      setFieldError(termsEl, 'guestRegTermsError', 'Please agree to the booking terms to continue.');
       hasError = true;
     }
 
@@ -869,7 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setButtonLoading(panes['guest-register'], true, 'Creating account...');
-    await new Promise((r) => setTimeout(r, 700));
+    await new Promise((r) => setTimeout(r, 650));
 
     await tryPostBackendEndpoint('/register-tourist', {
       name,
@@ -888,24 +979,10 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('perda_guest_user', name);
     } catch (err) {}
 
-    if (typeof showPerdaToast === 'function') {
-      showPerdaToast(
-        'Tourist Account Created',
-        `Welcome, ${name}! Redirecting to the landing page...`,
-        'fa-user-check'
-      );
-    }
-
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 700);
+    window.location.href = 'index.html';
   });
 
-  /**
-   * ==========================================================================
-   * 8. FORM 3: OPERATOR LOGIN (#operatorLoginForm -> Operator Dashboard)
-   * ==========================================================================
-   */
+  // PANE 3: OPERATOR LOGIN -> Redirects to Operator Dashboard (dashboard.html?role=operator)
   window.fillOperatorDemo = (email, password) => {
     const idEl = document.getElementById('operatorLoginIdentity');
     const pwEl = document.getElementById('operatorLoginPassword');
@@ -958,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    setButtonLoading(panes['operator-login'], true, 'Verifying operator...');
+    setButtonLoading(panes['operator-login'], true, 'Signing in...');
     await new Promise((r) => setTimeout(r, 650));
 
     const identityLower = identity.toLowerCase();
@@ -975,8 +1052,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setButtonLoading(panes['operator-login'], false);
       showCardBanner(
         !operatorAcc
-          ? `No registered PERDA operator found for <strong>"${identity}"</strong>. Try <code>operator@homestayperda.my</code>.`
-          : 'Incorrect password for this operator account. (Demo password: <code>Operator2026!</code>)'
+          ? `No operator account found for "${identity}".`
+          : 'Incorrect password for this operator account.'
       );
       triggerCardShake();
       return;
@@ -995,24 +1072,10 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('perda_active_role', 'operator');
     } catch (err) {}
 
-    if (typeof showPerdaToast === 'function') {
-      showPerdaToast(
-        'Operator Signed In',
-        `Welcome, ${operatorAcc.name} (${operatorAcc.unitName})! Redirecting to your dashboard...`,
-        'fa-house-user'
-      );
-    }
-
-    setTimeout(() => {
-      window.location.href = 'dashboard.html?role=operator';
-    }, 650);
+    window.location.href = 'dashboard.html?role=operator';
   });
 
-  /**
-   * ==========================================================================
-   * 9. FORM 4: OPERATOR REGISTER (#operatorRegisterForm -> Review Message)
-   * ==========================================================================
-   */
+  // PANE 4: OPERATOR REGISTER -> Displays Pending Approval Notice
   panes['operator-register']?.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideCardBanner();
@@ -1034,7 +1097,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirm = confirmEl?.value || '';
 
     let hasError = false;
-
     if (!owner) {
       setFieldError(ownerEl, 'opRegOwnerNameError', 'Please enter the owner full name.');
       hasError = true;
@@ -1081,32 +1143,19 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    setButtonLoading(panes['operator-register'], true, 'Submitting application...');
-    await new Promise((r) => setTimeout(r, 700));
+    setButtonLoading(panes['operator-register'], true, 'Submitting...');
+    await new Promise((r) => setTimeout(r, 650));
     setButtonLoading(panes['operator-register'], false);
 
     panes['operator-register'].reset();
 
-    // Show required pending-approval message on the card
     showCardBanner(
-      '<strong>Application Received:</strong> Your account will be reviewed and approved before you can log in.',
+      'Your account will be reviewed and approved before you can log in.',
       true
     );
-
-    if (typeof showPerdaToast === 'function') {
-      showPerdaToast(
-        'Operator Registration Submitted',
-        'Your account will be reviewed and approved before you can log in.',
-        'fa-clipboard-check'
-      );
-    }
   });
 
-  /**
-   * ==========================================================================
-   * 10. FORM 5: ADMIN LOGIN ONLY (#adminLoginForm -> Admin Dashboard)
-   * ==========================================================================
-   */
+  // PANE 5: ADMIN LOGIN ONLY -> Redirects to Admin Dashboard (dashboard.html?role=officer)
   window.fillAdminDemo = (email, password) => {
     const idEl = document.getElementById('adminLoginIdentity');
     const pwEl = document.getElementById('adminLoginPassword');
@@ -1127,18 +1176,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let hasError = false;
     if (!identity) {
-      setFieldError(
-        identityEl,
-        'adminLoginIdentityError',
-        'Please enter your official PERDA administrator email.'
-      );
+      setFieldError(identityEl, 'adminLoginIdentityError', 'Please enter your PERDA admin email.');
       hasError = true;
     } else if (!EMAIL_REGEX.test(identity)) {
-      setFieldError(
-        identityEl,
-        'adminLoginIdentityError',
-        'Please enter a valid email address (e.g. officer.bpe@perda.gov.my).'
-      );
+      setFieldError(identityEl, 'adminLoginIdentityError', 'Please enter a valid email address.');
       hasError = true;
     }
 
@@ -1159,15 +1200,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    setButtonLoading(panes['admin-login'], true, 'Verifying admin...');
+    setButtonLoading(panes['admin-login'], true, 'Signing in...');
     await new Promise((r) => setTimeout(r, 650));
 
     const emailLower = identity.toLowerCase();
     if (!emailLower.endsWith('@perda.gov.my')) {
       setButtonLoading(panes['admin-login'], false);
-      showCardBanner(
-        `Access Denied: <strong>"${identity}"</strong> is not an official PERDA email. Admin login only accepts verified <code>@perda.gov.my</code> accounts.`
-      );
+      showCardBanner('Admin login only accepts registered @perda.gov.my email addresses.');
       triggerCardShake();
       return;
     }
@@ -1181,8 +1220,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setButtonLoading(panes['admin-login'], false);
       showCardBanner(
         !verifiedOfficer
-          ? `Unverified Administrator: <strong>"${identity}"</strong> is not registered in the official BPE PERDA Officer directory.`
-          : 'Invalid administrator password. Please check your credentials and try again.'
+          ? `This @perda.gov.my email is not registered as a verified BPE officer.`
+          : 'Incorrect password for this administrator account.'
       );
       triggerCardShake();
       return;
@@ -1198,24 +1237,38 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('perda_active_role', 'officer');
     } catch (err) {}
 
-    if (typeof showPerdaToast === 'function') {
-      showPerdaToast(
-        'Admin Login Verified',
-        `Welcome, ${verifiedOfficer.name}. Redirecting to the Admin Dashboard...`,
-        'fa-user-shield'
-      );
-    }
-
-    setTimeout(() => {
-      window.location.href = 'dashboard.html?role=officer';
-    }, 650);
+    window.location.href = 'dashboard.html?role=officer';
   });
 
-  /**
-   * ==========================================================================
-   * 11. "Forgot password?" Modal Form
-   * ==========================================================================
-   */
+  // Social Login Buttons (Guest Mode Only: /auth/google, /auth/facebook, /auth/apple)
+  // If OAuth credentials are not configured yet, show "Not available yet" instead of a broken page.
+  document.querySelectorAll('.social-auth-btn').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      const provider = btn.getAttribute('data-social-provider') || 'Social';
+      const href = btn.getAttribute('href') || '';
+
+      // If running over HTTP/HTTPS, probe the endpoint first to see if Socialite is configured
+      if (window.location.protocol.startsWith('http') && href) {
+        try {
+          const res = await fetch(href, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+          if (res.ok && res.redirected && !res.url.includes('/login')) {
+            window.location.href = res.url;
+            return;
+          }
+        } catch (err) {
+          // Fall through to "Not available yet" message
+        }
+      }
+
+      e.preventDefault();
+      showCardBanner(`${provider} sign-in: Not available yet.`);
+    });
+  });
+
+  // Forgot Password Modal
   const forgotForm = document.getElementById('forgotPasswordForm');
   if (forgotForm) {
     forgotForm.addEventListener('submit', (e) => {
@@ -1224,12 +1277,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const feedback = document.getElementById('forgotPasswordFeedback');
       if (!email || !EMAIL_REGEX.test(email)) {
         if (feedback) {
-          feedback.innerHTML = `<div class="small fw-semibold mt-2" style="color: var(--burnt-orange);">Please enter a valid registered email address.</div>`;
+          feedback.innerHTML = `<div class="small fw-semibold mt-2" style="color: var(--burnt-orange);">Please enter a valid email address.</div>`;
         }
         return;
       }
       if (feedback) {
-        feedback.innerHTML = `<div class="p-2 rounded-3 small fw-semibold mt-2" style="background: var(--olive); color: var(--cream);"><i class="fa-solid fa-paper-plane me-1"></i> Password reset link sent to ${email}.</div>`;
+        feedback.innerHTML = `<div class="p-2 rounded-2 small fw-semibold mt-2" style="background: var(--olive); color: var(--cream);">Password reset link sent to ${email}.</div>`;
       }
     });
   }

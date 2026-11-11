@@ -23,10 +23,16 @@ Route::post('/register-tourist', [HomeController::class, 'registerTourist'])->na
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 
-// Page 3: Internal Login for Homestay Operators & Verified BPE PERDA Officers
+// Page 3: Internal & Guest Login + Laravel Socialite OAuth (Google, Facebook, Apple for Guests)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->name('login.authenticate');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/auth/{provider}', [AuthController::class, 'redirectToProvider'])
+    ->whereIn('provider', ['google', 'facebook', 'apple'])
+    ->name('social.redirect');
+Route::get('/auth/{provider}/callback', [AuthController::class, 'handleProviderCallback'])
+    ->whereIn('provider', ['google', 'facebook', 'apple'])
+    ->name('social.callback');
 
 // Page 4: Officer & Operator Dashboard + Homestay CRUD + Block Calendar Tool
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

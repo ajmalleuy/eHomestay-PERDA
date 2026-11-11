@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In &amp; Register | e-Homestay PERDA (Inap Desa)</title>
-  <!-- Google Fonts: Playfair Display & Poppins -->
+  <title>Sign In | e-Homestay PERDA</title>
+  <!-- Google Fonts (Strictly 2 fonts: Nunito friendly rounded sans for headings, Poppins clean sans for body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome 6 Icons -->
+  <!-- FontAwesome 6 Line Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <!-- Custom Stylesheets -->
   <link rel="stylesheet" href="css/main.css">
@@ -19,92 +19,135 @@
 <body class="login-body">
 
   <!-- ========================================================================
-       SPLIT-SCREEN FULL VIEWPORT LOGIN STAGE
-       - Default State (#guest, data-mode="user"):
-         Off-white Welcome Panel (40%) on LEFT | Coloured Fluid Panel (60%) on RIGHT
-       - Staff State (#staff, data-mode="staff", .is-staff-mode):
-         Coloured Fluid Panel (60%) on LEFT | Off-white Welcome Panel (40%) on RIGHT
+       SPLIT-SCREEN LOGIN STAGE
+       - Desktop (>= 1024px): 40% Off-white panel | 60% Fluid panel
+       - Tablet (768px - 1023px): 45% Off-white panel | 55% Fluid panel
+       - Mobile (< 768px): Full-screen Fluid background + centered welcome header
+         above card + vertical wave sweep + fixed bottom mode switch link
        ======================================================================== -->
   <main id="loginStage" class="login-split-stage" data-mode="user">
 
-    <!-- 1. OFF-WHITE PANEL (~40% Width): Logo, Welcome Heading, Supporting Line & Side Switch -->
-    <section id="welcomePanel" class="login-welcome-panel" aria-label="Welcome & Role Switcher">
+    <!-- 1. OFF-WHITE CREAM PANEL (Desktop & Tablet):
+         Centered horizontally & vertically inside the USABLE cream area
+         (measured from outer screen edge to the narrowest part of the wave). -->
+    <section id="welcomePanel" class="login-welcome-panel" aria-label="Welcome and Role Switch">
       <div id="welcomeContentInner" class="welcome-content-inner">
-        <!-- Brand Logo -->
-        <a href="index.html" class="welcome-logo-link" title="Return to e-Homestay Home">
+        <!-- Brand Logo (Centered) -->
+        <a href="index.html" class="welcome-logo-link" title="Back to e-Homestay PERDA home page">
           <span class="welcome-logo-badge">
-            <img src="images/logo.svg" alt="e-Homestay PERDA Inap Desa Logo">
+            <img src="images/logo.svg" alt="e-Homestay PERDA Logo">
           </span>
         </a>
 
-        <div>
+        <!-- Badge (Centered) -->
+        <div class="welcome-badge-wrap">
           <span id="welcomeModePill" class="welcome-mode-pill">
-            <i class="fa-solid fa-leaf" style="color: var(--olive);"></i> Official PERDA Inap Desa
+            <i class="fa-regular fa-compass"></i> PERDA Inap Desa
           </span>
         </div>
 
-        <!-- Short Welcome Heading -->
-        <h1 id="welcomeHeading" class="welcome-heading">Welcome to Kampung Serenity</h1>
+        <!-- Short, Specific Welcome Heading (Centered) -->
+        <h1 id="welcomeHeading" class="welcome-heading">Welcome back</h1>
 
-        <!-- One Line of Supporting Text -->
+        <!-- Specific Supporting Copy (Centered) -->
         <p id="welcomeSubtext" class="welcome-subtext">
-          Discover and book authentic rural homestays across Penang’s peaceful villages.
+          Sign in to manage your bookings or check homestay availability in Penang.
         </p>
 
-        <!-- Quiet Side-Switch Text Link -->
-        <div>
+        <!-- Quiet Side-Switch Text Link (Centered) -->
+        <div class="welcome-switch-wrap">
           <button type="button" id="sideSwitchBtn" class="side-switch-link">
             Homestay operator or PERDA staff? Sign in here &rarr;
           </button>
         </div>
 
-        <!-- Return to Home Link -->
+        <!-- Centered Divider Line & Return to Home Link -->
         <div class="welcome-home-return">
-          <a href="index.html" class="text-decoration-none fw-medium" style="color: var(--dark-green);">
-            <i class="fa-solid fa-compass me-1" style="color: var(--burnt-orange);"></i> Explore Homestays on Home Page
+          <a href="index.html" class="welcome-return-anchor">
+            <i class="fa-solid fa-arrow-left me-1"></i> Browse homestays without signing in
           </a>
         </div>
       </div>
     </section>
 
-    <!-- 2. COLOURED FLUID PANEL (~60% Width): Morphing Wavy SVG Fluid Body, Faint Icons & Form Card -->
-    <section id="fluidPanel" class="login-fluid-panel" aria-label="Authentication Form Panel">
+    <!-- 2. COLOURED FLUID PANEL: Wavy SVG Edge, Faint Line Icons & Form Card -->
+    <section id="fluidPanel" class="login-fluid-panel" aria-label="Sign In and Registration Panel">
 
-      <!-- Full-Panel Morphing Liquid SVG (Animated via JS requestAnimationFrame during mode switch) -->
+      <!-- Desktop & Tablet Morphing Liquid SVG (Horizontal Glide + Curve Morph)
+           Uses the single subtle tonal gradient from the PERDA palette -->
       <svg
+        id="desktopFluidSvg"
         class="fluid-morph-svg"
         viewBox="0 0 1000 1000"
         preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
+        <defs>
+          <linearGradient id="fluidUserGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="var(--fluid-user-tone-start)" />
+            <stop offset="100%" stop-color="var(--fluid-user-tone-end)" />
+          </linearGradient>
+          <linearGradient id="fluidStaffGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="var(--fluid-staff-tone-start)" />
+            <stop offset="100%" stop-color="var(--fluid-staff-tone-end)" />
+          </linearGradient>
+        </defs>
         <path
           id="fluidBodyPath"
           class="fluid-body-path"
-          d="M75,-8 C148,105 22,215 96,330 C158,425 34,540 112,665 C165,760 42,880 84,1008 L1012,1008 C1012,880 1012,760 1012,665 C1012,540 1012,425 1012,330 C1012,215 1012,105 1012,-8 Z"
+          d="M78,-8 C152,102 19,218 98,334 C162,428 31,544 114,668 C168,762 39,882 86,1008 L1012,1008 C1012,882 1012,762 1012,668 C1012,544 1012,428 1012,334 C1012,218 1012,102 1012,-8 Z"
         ></path>
       </svg>
 
-      <!-- Scattered Faint Line-Art Icons in the Background (Keys, Envelopes, House, Location Pin) -->
+      <!-- Mobile (< 768px) Vertical Wave Sweep SVG -->
+      <svg
+        id="mobileWaveSvg"
+        class="mobile-wave-svg"
+        viewBox="0 0 1000 1000"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          id="mobileWavePath"
+          class="mobile-wave-path"
+          d="M-8,1012 L-8,1012 C180,1012 340,1012 510,1012 C690,1012 840,1012 1008,1012 L1008,1012 Z"
+        ></path>
+      </svg>
+
+      <!-- Faint Line-Art Icons Scattered at Low Opacity -->
       <div class="fluid-bg-icons" aria-hidden="true">
-        <i class="fa-solid fa-house-chimney bg-icon ic-1"></i>
+        <i class="fa-solid fa-house bg-icon ic-1"></i>
         <i class="fa-regular fa-envelope bg-icon ic-2"></i>
         <i class="fa-solid fa-key bg-icon ic-3"></i>
         <i class="fa-solid fa-location-dot bg-icon ic-4"></i>
         <i class="fa-regular fa-compass bg-icon ic-5"></i>
-        <i class="fa-solid fa-house-flag bg-icon ic-6"></i>
-        <i class="fa-regular fa-paper-plane bg-icon ic-7"></i>
-        <i class="fa-solid fa-key bg-icon ic-8"></i>
-        <i class="fa-solid fa-location-dot bg-icon ic-9"></i>
-        <i class="fa-regular fa-envelope-open bg-icon ic-10"></i>
+        <i class="fa-regular fa-paper-plane bg-icon ic-6"></i>
+        <i class="fa-solid fa-key bg-icon ic-7"></i>
+        <i class="fa-solid fa-location-dot bg-icon ic-8"></i>
+        <i class="fa-regular fa-envelope-open bg-icon ic-9"></i>
       </div>
 
-      <!-- Form Card & Below-Card Prompt -->
+      <!-- Form Card Wrapper -->
       <div id="fluidFormWrapper" class="fluid-form-wrapper">
+
+        <!-- Mobile-Only (< 768px) Centered Welcome Header Above the Card -->
+        <header id="mobileWelcomeHeader" class="mobile-welcome-header">
+          <a href="index.html" class="mobile-logo-link">
+            <img src="images/logo.svg" alt="e-Homestay PERDA">
+          </a>
+          <h1 id="mobileWelcomeHeading" class="mobile-welcome-title">Welcome back</h1>
+          <p id="mobileWelcomeSubtext" class="mobile-welcome-sub">
+            Sign in to manage your bookings.
+          </p>
+        </header>
+
+        <!-- Flat Off-White Form Card (Sized to fit 768px laptop screen without scrolling) -->
         <div id="loginFormCard" class="login-form-card">
 
-          <!-- STAFF ONLY: Segmented Role Toggle ("Operator" vs "Admin") at Top of Card -->
-          <div id="staffSegmentedToggle" class="staff-segmented-toggle" role="radiogroup" aria-label="Staff Role Selector" hidden>
+          <!-- STAFF ONLY: Segmented Role Toggle ("Operator" | "Admin") -->
+          <div id="staffSegmentedToggle" class="staff-segmented-toggle" role="radiogroup" aria-label="Staff Role" hidden>
             <div id="staffSegmentThumb" class="staff-segment-thumb" aria-hidden="true"></div>
             <button
               type="button"
@@ -128,14 +171,14 @@
             </button>
           </div>
 
-          <!-- Small Heading and Subheading -->
+          <!-- Card Heading & Subheading -->
           <div class="card-header-block">
             <h2 id="formCardHeading" class="form-card-heading">Sign in</h2>
             <p id="formCardSubheading" class="form-card-subheading">to book your homestay</p>
           </div>
 
           <!-- "Login" and "Register" Tabs (Shown for Guest and Operator; Hidden for Admin) -->
-          <div id="authModeTabs" class="auth-mode-tabs" role="tablist" aria-label="Authentication Action Tabs">
+          <div id="authModeTabs" class="auth-mode-tabs" role="tablist" aria-label="Sign in or Register">
             <button
               type="button"
               id="tabBtnLogin"
@@ -158,9 +201,9 @@
             </button>
           </div>
 
-          <!-- Card-Level Error / Status Banner (Used for Wrong Credentials or Approval Notice) -->
+          <!-- Card-Level Error / Status Banner -->
           <div id="loginFeedbackAlert" class="login-feedback-alert" role="alert" aria-live="assertive">
-            <i id="loginFeedbackIcon" class="fa-solid fa-triangle-exclamation mt-1"></i>
+            <i id="loginFeedbackIcon" class="fa-solid fa-circle-exclamation mt-1"></i>
             <div id="loginFeedbackText">Invalid login credentials.</div>
           </div>
 
@@ -168,7 +211,7 @@
           <div id="cardDynamicViewport" class="card-dynamic-viewport">
 
             <!-- ==============================================================
-                 PANE 1: GUEST LOGIN (Default) -> Redirects to Landing Page
+                 PANE 1: GUEST LOGIN -> Includes Social Login ("or continue with")
                  ============================================================== -->
             <form
               id="guestLoginForm"
@@ -180,7 +223,6 @@
             >
               <input type="hidden" name="login_role" value="tourist">
 
-              <!-- Email / Username -->
               <div class="field-block">
                 <label for="guestLoginIdentity" class="visually-hidden">Email or Username</label>
                 <div class="pill-input-group">
@@ -198,7 +240,6 @@
                 <div class="field-error-msg" id="guestLoginIdentityError" role="alert"></div>
               </div>
 
-              <!-- Password -->
               <div class="field-block">
                 <label for="guestLoginPassword" class="visually-hidden">Password</label>
                 <div class="pill-input-group">
@@ -219,19 +260,17 @@
                     aria-label="Show password"
                     title="Show or hide password"
                   >
-                    <i class="fa-solid fa-eye"></i>
+                    <i class="fa-regular fa-eye"></i>
                   </button>
                 </div>
                 <div class="field-error-msg" id="guestLoginPasswordError" role="alert"></div>
               </div>
 
-              <!-- Submit Button -->
               <button type="submit" class="login-submit-btn">
-                <span class="btn-label-text">Login</span>
-                <i class="fa-solid fa-arrow-right-to-bracket btn-label-icon"></i>
+                <span>Login</span>
+                <i class="fa-solid fa-arrow-right"></i>
               </button>
 
-              <!-- Forgot Password Link -->
               <div class="forgot-link-wrap">
                 <a
                   href="#forgotPasswordModal"
@@ -242,10 +281,43 @@
                   Forgot password?
                 </a>
               </div>
+
+              <!-- GUEST ONLY: Social Login ("or continue with") -->
+              <div class="social-auth-section">
+                <div class="social-auth-divider">
+                  <span>or continue with</span>
+                </div>
+                <div class="social-auth-grid">
+                  <!-- Google -->
+                  <a href="/auth/google" class="social-auth-btn" data-social-provider="Google" aria-label="Continue with Google">
+                    <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
+                      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/>
+                      <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/>
+                      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+                    </svg>
+                    <span class="social-btn-label">Google</span>
+                  </a>
+                  <!-- Facebook -->
+                  <a href="/auth/facebook" class="social-auth-btn" data-social-provider="Facebook" aria-label="Continue with Facebook">
+                    <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    <span class="social-btn-label">Facebook</span>
+                  </a>
+                  <!-- Apple -->
+                  <a href="/auth/apple" class="social-auth-btn" data-social-provider="Apple" aria-label="Continue with Apple">
+                    <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#000000" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                    </svg>
+                    <span class="social-btn-label">Apple</span>
+                  </a>
+                </div>
+              </div>
             </form>
 
             <!-- ==============================================================
-                 PANE 2: GUEST REGISTER -> Optional Tourist Account Registration
+                 PANE 2: GUEST REGISTER -> Includes Social Login ("or sign up with")
                  ============================================================== -->
             <form
               id="guestRegisterForm"
@@ -256,17 +328,15 @@
               hidden
               novalidate
             >
-              <!-- Optional Registration Note -->
               <div class="optional-booking-note">
-                <i class="fa-solid fa-circle-info me-1" style="color: var(--burnt-orange);"></i>
+                <i class="fa-regular fa-bell me-1"></i>
                 <span>You can also <a href="booking.html">book without an account</a>.</span>
               </div>
 
-              <!-- Full Name -->
               <div class="field-block">
                 <label for="guestRegName" class="visually-hidden">Full Name</label>
                 <div class="pill-input-group">
-                  <i class="fa-regular fa-id-card pill-input-icon" aria-hidden="true"></i>
+                  <i class="fa-regular fa-user pill-input-icon" aria-hidden="true"></i>
                   <input
                     type="text"
                     id="guestRegName"
@@ -280,43 +350,45 @@
                 <div class="field-error-msg" id="guestRegNameError" role="alert"></div>
               </div>
 
-              <!-- Email -->
-              <div class="field-block">
-                <label for="guestRegEmail" class="visually-hidden">Email Address</label>
-                <div class="pill-input-group">
-                  <i class="fa-regular fa-envelope pill-input-icon" aria-hidden="true"></i>
-                  <input
-                    type="email"
-                    id="guestRegEmail"
-                    name="email"
-                    class="pill-input-control"
-                    placeholder="Email address"
-                    autocomplete="email"
-                    required
-                  >
+              <div class="row g-2">
+                <div class="col-sm-7">
+                  <div class="field-block">
+                    <label for="guestRegEmail" class="visually-hidden">Email Address</label>
+                    <div class="pill-input-group">
+                      <i class="fa-regular fa-envelope pill-input-icon" aria-hidden="true"></i>
+                      <input
+                        type="email"
+                        id="guestRegEmail"
+                        name="email"
+                        class="pill-input-control"
+                        placeholder="Email address"
+                        autocomplete="email"
+                        required
+                      >
+                    </div>
+                    <div class="field-error-msg" id="guestRegEmailError" role="alert"></div>
+                  </div>
                 </div>
-                <div class="field-error-msg" id="guestRegEmailError" role="alert"></div>
+                <div class="col-sm-5">
+                  <div class="field-block">
+                    <label for="guestRegPhone" class="visually-hidden">Phone Number</label>
+                    <div class="pill-input-group">
+                      <i class="fa-solid fa-phone pill-input-icon" aria-hidden="true"></i>
+                      <input
+                        type="tel"
+                        id="guestRegPhone"
+                        name="phone"
+                        class="pill-input-control"
+                        placeholder="Phone number"
+                        autocomplete="tel"
+                        required
+                      >
+                    </div>
+                    <div class="field-error-msg" id="guestRegPhoneError" role="alert"></div>
+                  </div>
+                </div>
               </div>
 
-              <!-- Phone Number -->
-              <div class="field-block">
-                <label for="guestRegPhone" class="visually-hidden">Phone Number</label>
-                <div class="pill-input-group">
-                  <i class="fa-solid fa-phone pill-input-icon" aria-hidden="true"></i>
-                  <input
-                    type="tel"
-                    id="guestRegPhone"
-                    name="phone"
-                    class="pill-input-control"
-                    placeholder="Phone number (e.g. 012-345 6789)"
-                    autocomplete="tel"
-                    required
-                  >
-                </div>
-                <div class="field-error-msg" id="guestRegPhoneError" role="alert"></div>
-              </div>
-
-              <!-- Password & Confirm Password (2-column grid on desktop for compact height) -->
               <div class="row g-2">
                 <div class="col-sm-6">
                   <div class="field-block">
@@ -338,7 +410,7 @@
                         data-target="guestRegPassword"
                         aria-label="Show password"
                       >
-                        <i class="fa-solid fa-eye"></i>
+                        <i class="fa-regular fa-eye"></i>
                       </button>
                     </div>
                     <div class="field-error-msg" id="guestRegPasswordError" role="alert"></div>
@@ -348,7 +420,7 @@
                   <div class="field-block">
                     <label for="guestRegConfirmPassword" class="visually-hidden">Confirm Password</label>
                     <div class="pill-input-group">
-                      <i class="fa-solid fa-shield-halved pill-input-icon" aria-hidden="true"></i>
+                      <i class="fa-solid fa-lock pill-input-icon" aria-hidden="true"></i>
                       <input
                         type="password"
                         id="guestRegConfirmPassword"
@@ -364,7 +436,7 @@
                         data-target="guestRegConfirmPassword"
                         aria-label="Show confirm password"
                       >
-                        <i class="fa-solid fa-eye"></i>
+                        <i class="fa-regular fa-eye"></i>
                       </button>
                     </div>
                     <div class="field-error-msg" id="guestRegConfirmPasswordError" role="alert"></div>
@@ -372,8 +444,7 @@
                 </div>
               </div>
 
-              <!-- Terms Checkbox -->
-              <div class="field-block mt-1 mb-2">
+              <div class="field-block mb-1">
                 <div class="form-check custom-perda-check">
                   <input
                     class="form-check-input"
@@ -383,21 +454,53 @@
                     required
                   >
                   <label class="form-check-label small" for="guestRegTerms">
-                    I agree to the PERDA Homestay terms &amp; promotional updates
+                    I agree to the PERDA Homestay booking terms and email updates
                   </label>
                 </div>
                 <div class="field-error-msg" id="guestRegTermsError" role="alert"></div>
               </div>
 
-              <!-- Submit Button -->
               <button type="submit" class="login-submit-btn">
-                <span class="btn-label-text">Create Account</span>
-                <i class="fa-solid fa-user-plus btn-label-icon"></i>
+                <span>Create account</span>
+                <i class="fa-solid fa-arrow-right"></i>
               </button>
+
+              <!-- GUEST ONLY: Social Sign Up ("or sign up with") -->
+              <div class="social-auth-section">
+                <div class="social-auth-divider">
+                  <span>or sign up with</span>
+                </div>
+                <div class="social-auth-grid">
+                  <!-- Google -->
+                  <a href="/auth/google" class="social-auth-btn" data-social-provider="Google" aria-label="Sign up with Google">
+                    <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
+                      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/>
+                      <path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/>
+                      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+                    </svg>
+                    <span class="social-btn-label">Google</span>
+                  </a>
+                  <!-- Facebook -->
+                  <a href="/auth/facebook" class="social-auth-btn" data-social-provider="Facebook" aria-label="Sign up with Facebook">
+                    <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    <span class="social-btn-label">Facebook</span>
+                  </a>
+                  <!-- Apple -->
+                  <a href="/auth/apple" class="social-auth-btn" data-social-provider="Apple" aria-label="Sign up with Apple">
+                    <svg class="social-brand-svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#000000" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                    </svg>
+                    <span class="social-btn-label">Apple</span>
+                  </a>
+                </div>
+              </div>
             </form>
 
             <!-- ==============================================================
-                 PANE 3: OPERATOR LOGIN -> Redirects to Operator Dashboard
+                 PANE 3: OPERATOR LOGIN (Email & Password ONLY — No Social Login)
                  ============================================================== -->
             <form
               id="operatorLoginForm"
@@ -410,11 +513,10 @@
             >
               <input type="hidden" name="login_role" value="operator">
 
-              <!-- Operator Email / Username -->
               <div class="field-block">
                 <label for="operatorLoginIdentity" class="visually-hidden">Operator Email or Username</label>
                 <div class="pill-input-group">
-                  <i class="fa-solid fa-house-user pill-input-icon" aria-hidden="true"></i>
+                  <i class="fa-regular fa-user pill-input-icon" aria-hidden="true"></i>
                   <input
                     type="text"
                     id="operatorLoginIdentity"
@@ -428,7 +530,6 @@
                 <div class="field-error-msg" id="operatorLoginIdentityError" role="alert"></div>
               </div>
 
-              <!-- Operator Password -->
               <div class="field-block">
                 <label for="operatorLoginPassword" class="visually-hidden">Password</label>
                 <div class="pill-input-group">
@@ -448,19 +549,17 @@
                     data-target="operatorLoginPassword"
                     aria-label="Show password"
                   >
-                    <i class="fa-solid fa-eye"></i>
+                    <i class="fa-regular fa-eye"></i>
                   </button>
                 </div>
                 <div class="field-error-msg" id="operatorLoginPasswordError" role="alert"></div>
               </div>
 
-              <!-- Submit Button -->
               <button type="submit" class="login-submit-btn">
-                <span class="btn-label-text">Login</span>
-                <i class="fa-solid fa-arrow-right-to-bracket btn-label-icon"></i>
+                <span>Login</span>
+                <i class="fa-solid fa-arrow-right"></i>
               </button>
 
-              <!-- Forgot Password Link -->
               <div class="forgot-link-wrap">
                 <a
                   href="#forgotPasswordModal"
@@ -472,11 +571,8 @@
                 </a>
               </div>
 
-              <!-- Quick Demo Operator Accounts -->
               <div class="staff-demo-helper">
-                <div class="small fw-semibold mb-1" style="color: var(--dark-green); font-size: 0.73rem;">
-                  <i class="fa-solid fa-key me-1" style="color: var(--burnt-orange);"></i> Demo Operators (1 Operator = 1 Homestay):
-                </div>
+                <div class="demo-helper-label">Sample operator accounts:</div>
                 <div class="d-flex flex-wrap gap-1">
                   <button
                     type="button"
@@ -497,7 +593,7 @@
             </form>
 
             <!-- ==============================================================
-                 PANE 4: OPERATOR REGISTER -> Pending Review Approval Message
+                 PANE 4: OPERATOR REGISTER (No Social Login)
                  ============================================================== -->
             <form
               id="operatorRegisterForm"
@@ -508,7 +604,6 @@
               hidden
               novalidate
             >
-              <!-- Owner Full Name -->
               <div class="field-block">
                 <label for="opRegOwnerName" class="visually-hidden">Owner Full Name</label>
                 <div class="pill-input-group">
@@ -526,13 +621,12 @@
                 <div class="field-error-msg" id="opRegOwnerNameError" role="alert"></div>
               </div>
 
-              <!-- Homestay Name & District -->
               <div class="row g-2">
                 <div class="col-sm-7">
                   <div class="field-block">
                     <label for="opRegHomestayName" class="visually-hidden">Homestay Name</label>
                     <div class="pill-input-group">
-                      <i class="fa-solid fa-house-chimney pill-input-icon" aria-hidden="true"></i>
+                      <i class="fa-solid fa-house pill-input-icon" aria-hidden="true"></i>
                       <input
                         type="text"
                         id="opRegHomestayName"
@@ -547,7 +641,7 @@
                 </div>
                 <div class="col-sm-5">
                   <div class="field-block">
-                    <label for="opRegDistrict" class="visually-hidden">PERDA District</label>
+                    <label for="opRegDistrict" class="visually-hidden">District</label>
                     <div class="pill-input-group">
                       <i class="fa-solid fa-location-dot pill-input-icon" aria-hidden="true"></i>
                       <select
@@ -570,7 +664,6 @@
                 </div>
               </div>
 
-              <!-- Phone & Email -->
               <div class="row g-2">
                 <div class="col-sm-5">
                   <div class="field-block">
@@ -610,7 +703,6 @@
                 </div>
               </div>
 
-              <!-- Password & Confirm Password -->
               <div class="row g-2">
                 <div class="col-sm-6">
                   <div class="field-block">
@@ -632,7 +724,7 @@
                         data-target="opRegPassword"
                         aria-label="Show password"
                       >
-                        <i class="fa-solid fa-eye"></i>
+                        <i class="fa-regular fa-eye"></i>
                       </button>
                     </div>
                     <div class="field-error-msg" id="opRegPasswordError" role="alert"></div>
@@ -642,7 +734,7 @@
                   <div class="field-block">
                     <label for="opRegConfirmPassword" class="visually-hidden">Confirm Password</label>
                     <div class="pill-input-group">
-                      <i class="fa-solid fa-shield-halved pill-input-icon" aria-hidden="true"></i>
+                      <i class="fa-solid fa-lock pill-input-icon" aria-hidden="true"></i>
                       <input
                         type="password"
                         id="opRegConfirmPassword"
@@ -658,7 +750,7 @@
                         data-target="opRegConfirmPassword"
                         aria-label="Show confirm password"
                       >
-                        <i class="fa-solid fa-eye"></i>
+                        <i class="fa-regular fa-eye"></i>
                       </button>
                     </div>
                     <div class="field-error-msg" id="opRegConfirmPasswordError" role="alert"></div>
@@ -666,15 +758,14 @@
                 </div>
               </div>
 
-              <!-- Submit Button -->
               <button type="submit" class="login-submit-btn mt-1">
-                <span class="btn-label-text">Register Homestay</span>
-                <i class="fa-solid fa-paper-plane btn-label-icon"></i>
+                <span>Submit registration</span>
+                <i class="fa-solid fa-arrow-right"></i>
               </button>
             </form>
 
             <!-- ==============================================================
-                 PANE 5: ADMIN LOGIN ONLY -> No Register Tab or Link Anywhere
+                 PANE 5: ADMIN LOGIN ONLY (Email & Password ONLY — No Social Login)
                  ============================================================== -->
             <form
               id="adminLoginForm"
@@ -687,11 +778,10 @@
             >
               <input type="hidden" name="login_role" value="officer">
 
-              <!-- Official Admin Email / Username -->
               <div class="field-block">
                 <label for="adminLoginIdentity" class="visually-hidden">Official PERDA Admin Email</label>
                 <div class="pill-input-group">
-                  <i class="fa-solid fa-user-shield pill-input-icon" aria-hidden="true"></i>
+                  <i class="fa-regular fa-envelope pill-input-icon" aria-hidden="true"></i>
                   <input
                     type="text"
                     id="adminLoginIdentity"
@@ -705,7 +795,6 @@
                 <div class="field-error-msg" id="adminLoginIdentityError" role="alert"></div>
               </div>
 
-              <!-- Admin Password -->
               <div class="field-block">
                 <label for="adminLoginPassword" class="visually-hidden">Password</label>
                 <div class="pill-input-group">
@@ -725,19 +814,17 @@
                     data-target="adminLoginPassword"
                     aria-label="Show password"
                   >
-                    <i class="fa-solid fa-eye"></i>
+                    <i class="fa-regular fa-eye"></i>
                   </button>
                 </div>
                 <div class="field-error-msg" id="adminLoginPasswordError" role="alert"></div>
               </div>
 
-              <!-- Submit Button -->
               <button type="submit" class="login-submit-btn">
-                <span class="btn-label-text">Login</span>
-                <i class="fa-solid fa-arrow-right-to-bracket btn-label-icon"></i>
+                <span>Login</span>
+                <i class="fa-solid fa-arrow-right"></i>
               </button>
 
-              <!-- Forgot Password Link -->
               <div class="forgot-link-wrap">
                 <a
                   href="#forgotPasswordModal"
@@ -749,11 +836,8 @@
                 </a>
               </div>
 
-              <!-- Quick Demo Admin Account -->
               <div class="staff-demo-helper">
-                <div class="small fw-semibold mb-1" style="color: var(--dark-green); font-size: 0.73rem;">
-                  <i class="fa-solid fa-shield-halved me-1" style="color: var(--burnt-orange);"></i> Verified BPE PERDA Officer Demo:
-                </div>
+                <div class="demo-helper-label">Sample BPE officer accounts:</div>
                 <div class="d-flex flex-wrap gap-1">
                   <button
                     type="button"
@@ -785,6 +869,13 @@
         </p>
       </div>
 
+      <!-- Mobile-Only (< 768px) Fixed Bottom Mode Switch Bar -->
+      <div id="mobileBottomSwitchBar" class="mobile-bottom-switch-bar">
+        <button type="button" id="mobileSideSwitchBtn" class="mobile-bottom-switch-btn">
+          Homestay operator or PERDA staff? Sign in here &rarr;
+        </button>
+      </div>
+
     </section>
 
   </main>
@@ -794,24 +885,25 @@
        ======================================================================== -->
   <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="background-color: var(--cream); border: 2px solid var(--sand); border-radius: 24px;">
+      <div class="modal-content forgot-modal-card">
         <div class="modal-header border-0 pb-0">
-          <h3 class="h5 modal-title fw-bold" id="forgotPasswordModalLabel" style="font-family: 'Playfair Display', serif; color: var(--dark-green);">
-            <i class="fa-solid fa-key me-2" style="color: var(--burnt-orange);"></i>Reset Your Password
+          <h3 class="h5 modal-title fw-bold" id="forgotPasswordModalLabel">
+            <i class="fa-solid fa-key me-2" style="color: var(--burnt-orange);"></i>Reset password
           </h3>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body pt-2">
           <p class="small mb-3" style="color: var(--dark-green);">
-            Enter your registered email address and we will send you a password reset link.
+            Enter the email address linked to your account and we will send a password reset link.
           </p>
           <form id="forgotPasswordForm" novalidate>
             <div class="mb-3">
-              <label for="resetPasswordEmail" class="form-label small fw-semibold">Registered Email Address *</label>
-              <input type="email" id="resetPasswordEmail" class="form-control form-control-perda" placeholder="you@example.com or officer@perda.gov.my" required>
+              <label for="resetPasswordEmail" class="form-label small fw-semibold">Registered email address</label>
+              <input type="email" id="resetPasswordEmail" class="pill-input-control ps-3" placeholder="you@example.com or officer@perda.gov.my" required>
             </div>
-            <button type="submit" class="btn btn-cta-orange w-100">
-              <i class="fa-solid fa-paper-plane me-2"></i>Send Reset Link
+            <button type="submit" class="login-submit-btn">
+              <span>Send reset link</span>
+              <i class="fa-regular fa-paper-plane"></i>
             </button>
             <div id="forgotPasswordFeedback"></div>
           </form>

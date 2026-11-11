@@ -1,26 +1,32 @@
 /* ==========================================================================
    e-Homestay PERDA (Inap Desa) - Split-Screen Fluid Login Styles (login.css)
-   All colors are controlled via CSS variables below for single-place tuning.
-   Includes:
-   - GPU-accelerated (transform/opacity) fluid glide & SVG path morph
-   - Segmented Operator/Admin toggle, Login/Register tabs & smooth card height
-   - Inline field validation errors, button loading state & card error shake
+   --------------------------------------------------------------------------
+   PALETTE & DESIGN SYSTEM:
+   - Edit all colors & timing variables in :root below.
+   - Only ONE subtle tonal gradient is used (inside the fluid panel SVG/mobile
+     background). All cards, buttons, badges, and panels are flat solid colors.
+   - Pill radius (999px) is used on inputs, main submit buttons, and social
+     buttons; all other surfaces use 6px–10px radius.
    ========================================================================== */
 
 :root {
-  /* Core PERDA Palette Variables */
+  /* Core PERDA Palette */
   --olive: #606C38;
   --dark-green: #283618;
   --cream: #FEFAE0;
   --sand: #DDA15E;
   --burnt-orange: #BC6C25;
   --white: #FFFFFF;
-  --grey-muted: #7A7A72;
+  --grey-muted: #6E6E66;
 
-  /* Login Page Semantic Theme Variables (Change palette in one place) */
+  /* Single Allowed Subtle Tonal Gradient Shades (Two close tones from palette) */
+  --fluid-user-tone-start: #606C38;
+  --fluid-user-tone-end: #525D2F;
+  --fluid-staff-tone-start: #283618;
+  --fluid-staff-tone-end: #32421F;
+
+  /* Semantic Login Theme Variables */
   --login-offwhite-bg: var(--cream);
-  --login-fluid-user-bg: var(--olive);
-  --login-fluid-staff-bg: var(--dark-green);
   --login-card-bg: var(--cream);
   --login-input-bg: var(--white);
   --login-input-border: var(--sand);
@@ -31,18 +37,28 @@
   --login-btn-bg: var(--burnt-orange);
   --login-btn-hover-bg: var(--dark-green);
   --login-btn-text: var(--cream);
-  --login-badge-bg: var(--sand);
   --login-pattern-color: var(--cream);
+
+  /* Typography (2 Google Fonts: Nunito rounded sans for headings, Poppins for body) */
+  --login-font-heading: 'Nunito', sans-serif;
+  --login-font-body: 'Poppins', sans-serif;
+
+  /* Animation Timing Variables (Adjust speed & easing here) */
+  --panel-glide-duration: 0.98s;
+  --panel-glide-easing: cubic-bezier(0.65, 0, 0.35, 1);
+  --content-fade-in-duration: 0.34s;
+  --content-fade-out-duration: 0.22s;
+  --card-height-duration: 0.3s;
 }
 
-/* Full-Viewport Split-Screen Stage */
+/* Base Page Reset */
 body.login-body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
   background-color: var(--login-offwhite-bg);
   color: var(--login-text-color);
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--login-font-body);
   overflow-x: hidden;
 }
 
@@ -57,124 +73,140 @@ body.login-body {
   overflow: hidden;
 }
 
-/* Disable switch interactions while fluid animation is in flight */
+/* Block clicks on mode switch links while transition is running */
 .login-split-stage.is-animating .side-switch-link,
+.login-split-stage.is-animating .mobile-bottom-switch-btn,
 .login-split-stage.is-animating #belowCardSwitchTabBtn {
   pointer-events: none;
 }
 
 /* ==========================================================================
-   STATE 1 (DEFAULT = USER MODE, #guest):
-   - Off-White Welcome Panel (40%) on LEFT:  translate3d(0%, 0, 0)
-   - Coloured Fluid Panel (60%) on RIGHT:    translate3d(0%, 0, 0)
-
-   STATE 2 (STAFF = ADMIN / OPERATOR MODE, #staff):
-   - Coloured Fluid Panel (60%) glides LEFT: translate3d(-66.6667%, 0, 0)
-   - Off-White Welcome Panel (40%) glides RIGHT: translate3d(150%, 0, 0)
-   Uses ONLY transform for zero-reflow GPU performance.
+   1. OFF-WHITE CREAM WELCOME PANEL
+   - Bounded from the outer screen edge to the narrowest part of the wave.
+   - Centered both horizontally and vertically inside the usable cream area.
    ========================================================================== */
-
-/* 1. OFF-WHITE WELCOME PANEL (~40% Width on Desktop) */
 .login-welcome-panel {
   position: relative;
   z-index: 2;
   flex: 0 0 40%;
   max-width: 40%;
   background-color: transparent;
-  padding: 3rem 3rem;
+  padding: 2rem 2.25rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  text-align: center;
   transform: translate3d(0%, 0, 0);
   will-change: transform;
-  transition: transform 0.98s cubic-bezier(0.65, 0, 0.35, 1);
+  transition: transform var(--panel-glide-duration) var(--panel-glide-easing);
 }
 
+/* In Staff Mode on Desktop (40% width moves across 60% fluid panel = 150% of own width) */
 .login-split-stage.is-staff-mode .login-welcome-panel {
   transform: translate3d(150%, 0, 0);
 }
 
 .welcome-content-inner {
-  max-width: 390px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 400px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   opacity: 1;
   transform: translate3d(0, 0, 0);
   will-change: transform, opacity;
   transition:
-    opacity 0.36s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--content-fade-in-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    transform var(--content-fade-in-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .welcome-logo-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 2.25rem;
+  justify-content: center;
+  margin-bottom: 1.65rem;
   text-decoration: none;
 }
 
 .welcome-logo-badge {
   background-color: var(--dark-green);
-  padding: 0.55rem 1rem;
-  border-radius: 16px;
-  border: 2px solid var(--sand);
+  padding: 0.5rem 0.95rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--sand);
   display: inline-flex;
   align-items: center;
-  box-shadow: 0 8px 20px rgba(40, 54, 24, 0.12);
+  justify-content: center;
 }
 
 .welcome-logo-badge img {
-  height: 40px;
+  height: 38px;
   width: auto;
+}
+
+.welcome-badge-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .welcome-mode-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  background-color: rgba(221, 161, 94, 0.28);
-  border: 1.5px solid var(--sand);
-  color: var(--login-heading-color);
-  padding: 0.35rem 0.95rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: var(--sand);
+  color: var(--dark-green);
+  padding: 0.28rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.76rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
 .welcome-heading {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--login-font-heading);
   color: var(--login-heading-color);
-  font-size: clamp(1.85rem, 2.7vw, 2.45rem);
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 0.85rem;
+  font-size: clamp(1.85rem, 2.4vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.65rem 0;
+  text-align: center;
 }
 
 .welcome-subtext {
   color: var(--login-text-color);
-  opacity: 0.86;
-  font-size: 0.96rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
+  font-size: 0.93rem;
+  line-height: 1.56;
+  margin: 0 0 1.65rem 0;
+  text-align: center;
 }
 
-/* Quiet Side-Switch Link under the Welcome Text */
+.welcome-switch-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 .side-switch-link {
   background: none;
   border: none;
-  padding: 0.45rem 0;
+  padding: 0.35rem 0;
   color: var(--olive);
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.9rem;
+  font-family: var(--login-font-body);
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  text-align: left;
-  border-bottom: 1.5px solid transparent;
-  transition: color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+  border-bottom: 1.5px solid var(--sand);
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .side-switch-link:hover {
@@ -188,14 +220,31 @@ body.login-body {
 }
 
 .welcome-home-return {
-  margin-top: 2.5rem;
-  padding-top: 1.15rem;
-  border-top: 1px dashed var(--sand);
-  font-size: 0.83rem;
+  width: 100%;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--sand);
+  font-size: 0.82rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.welcome-return-anchor {
+  color: var(--dark-green);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-return-anchor:hover {
+  color: var(--burnt-orange);
 }
 
 /* ==========================================================================
-   2. COLOURED FLUID PANEL (~60% Width on Desktop) WITH MORPHING SVG LIQUID BODY
+   2. COLOURED FLUID PANEL (Desktop: 60% Width) & WAVY SVG MORPH
    ========================================================================== */
 .login-fluid-panel {
   position: relative;
@@ -207,18 +256,19 @@ body.login-body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem 3rem 2rem 5rem;
+  padding: 1rem 2.8rem 1rem 4.8rem;
   transform: translate3d(0%, 0, 0);
   will-change: transform;
-  transition: transform 0.98s cubic-bezier(0.65, 0, 0.35, 1);
+  transition: transform var(--panel-glide-duration) var(--panel-glide-easing);
 }
 
+/* In Staff Mode on Desktop (60% width moves left by 40vw = -66.6667% of own width) */
 .login-split-stage.is-staff-mode .login-fluid-panel {
   transform: translate3d(-66.6667%, 0, 0);
-  padding: 2rem 5rem 2rem 3rem;
+  padding: 1rem 4.8rem 1rem 2.8rem;
 }
 
-/* Full-Panel Morphing SVG Liquid Canvas */
+/* Desktop & Tablet Morphing SVG Canvas */
 .fluid-morph-svg {
   position: absolute;
   inset: 0;
@@ -230,24 +280,30 @@ body.login-body {
 }
 
 .fluid-body-path {
-  fill: var(--login-fluid-user-bg);
+  fill: url(#fluidUserGradient);
   stroke: var(--sand);
-  stroke-width: 2.5;
-  stroke-opacity: 0.55;
+  stroke-width: 2;
+  stroke-opacity: 0.45;
   vector-effect: non-scaling-stroke;
-  transition: fill 0.85s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .login-split-stage.is-staff-mode .fluid-body-path {
-  fill: var(--login-fluid-staff-bg);
+  fill: url(#fluidStaffGradient);
+}
+
+/* Mobile Vertical Wave SVG & Elements (Hidden on Desktop & Tablet) */
+.mobile-wave-svg,
+.mobile-welcome-header,
+.mobile-bottom-switch-bar {
+  display: none;
 }
 
 /* ==========================================================================
-   3. SCATTERED FAINT LINE-ART BACKGROUND ICONS (Very Low Opacity)
+   3. SCATTERED FAINT LINE-ART BACKGROUND ICONS
    ========================================================================== */
 .fluid-bg-icons {
   position: absolute;
-  inset: 0 9%;
+  inset: 0 8%;
   overflow: hidden;
   pointer-events: none;
   z-index: 2;
@@ -256,105 +312,133 @@ body.login-body {
 .fluid-bg-icons .bg-icon {
   position: absolute;
   color: var(--login-pattern-color);
-  opacity: 0.075;
-  font-size: 2.8rem;
+  opacity: 0.07;
+  font-size: 2.4rem;
   user-select: none;
 }
 
-.bg-icon.ic-1  { top: 8%;    left: 12%;  transform: rotate(-18deg); font-size: 2.6rem; }
-.bg-icon.ic-2  { top: 14%;   right: 10%; transform: rotate(15deg);  font-size: 3.2rem; }
-.bg-icon.ic-3  { top: 32%;   left: 7%;   transform: rotate(12deg);  font-size: 2.3rem; }
-.bg-icon.ic-4  { top: 28%;   right: 16%; transform: rotate(-22deg); font-size: 2.5rem; }
-.bg-icon.ic-5  { top: 52%;   left: 11%;  transform: rotate(-10deg); font-size: 3.1rem; }
-.bg-icon.ic-6  { top: 56%;   right: 8%;  transform: rotate(20deg);  font-size: 2.7rem; }
-.bg-icon.ic-7  { bottom: 18%; left: 16%; transform: rotate(16deg);  font-size: 2.5rem; }
-.bg-icon.ic-8  { bottom: 12%; right: 13%; transform: rotate(-14deg); font-size: 3.3rem; }
-.bg-icon.ic-9  { top: 75%;   left: 44%;  transform: rotate(-8deg);  font-size: 2.2rem; }
-.bg-icon.ic-10 { top: 11%;   left: 50%;  transform: rotate(19deg);  font-size: 2.4rem; }
+.bg-icon.ic-1 { top: 9%;     left: 14%;  transform: rotate(-14deg); font-size: 2.3rem; }
+.bg-icon.ic-2 { top: 15%;    right: 11%; transform: rotate(12deg);  font-size: 2.7rem; }
+.bg-icon.ic-3 { top: 34%;    left: 8%;   transform: rotate(9deg);   font-size: 2.1rem; }
+.bg-icon.ic-4 { top: 29%;    right: 17%; transform: rotate(-19deg); font-size: 2.2rem; }
+.bg-icon.ic-5 { top: 55%;    left: 12%;  transform: rotate(-8deg);  font-size: 2.6rem; }
+.bg-icon.ic-6 { top: 58%;    right: 9%;  transform: rotate(16deg);  font-size: 2.3rem; }
+.bg-icon.ic-7 { bottom: 16%; left: 18%;  transform: rotate(14deg);  font-size: 2.2rem; }
+.bg-icon.ic-8 { bottom: 11%; right: 14%; transform: rotate(-11deg); font-size: 2.8rem; }
+.bg-icon.ic-9 { top: 12%;    left: 48%;  transform: rotate(15deg);  font-size: 2.0rem; }
 
 /* ==========================================================================
-   4. FORM CARD, SEGMENTED TOGGLE, TABS & SMOOTH HEIGHT VIEWPORT
+   4. FORM CARD, CHOREOGRAPHED CONTENT SWAP & SEGMENTED CONTROLS
+   - Sized carefully so all tabs fit inside a 768px-high laptop screen.
    ========================================================================== */
 .fluid-form-wrapper {
   position: relative;
   z-index: 5;
   width: 100%;
-  max-width: 460px;
+  max-width: 440px;
   opacity: 1;
   transform: translate3d(0, 0, 0);
   will-change: transform, opacity;
   transition:
-    opacity 0.36s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--content-fade-in-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    transform var(--content-fade-in-duration) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Exit states while fluid panel begins travelling */
+/* Exit states during panel travel (transform & opacity only) */
 .welcome-content-inner.is-exiting-left,
 .fluid-form-wrapper.is-exiting-left {
   opacity: 0;
-  transform: translate3d(-36px, 0, 0);
+  transform: translate3d(-32px, 0, 0);
   transition:
-    opacity 0.22s cubic-bezier(0.4, 0, 1, 1),
-    transform 0.24s cubic-bezier(0.4, 0, 1, 1);
+    opacity var(--content-fade-out-duration) ease-in,
+    transform var(--content-fade-out-duration) ease-in;
 }
 
 .welcome-content-inner.is-exiting-right,
 .fluid-form-wrapper.is-exiting-right {
   opacity: 0;
-  transform: translate3d(36px, 0, 0);
+  transform: translate3d(32px, 0, 0);
   transition:
-    opacity 0.22s cubic-bezier(0.4, 0, 1, 1),
-    transform 0.24s cubic-bezier(0.4, 0, 1, 1);
+    opacity var(--content-fade-out-duration) ease-in,
+    transform var(--content-fade-out-duration) ease-in;
 }
 
-/* Pre-entry staging states (applied while opacity is 0 before delayed fade-in) */
+.fluid-form-wrapper.is-exiting-up {
+  opacity: 0;
+  transform: translate3d(0, -24px, 0);
+  transition:
+    opacity var(--content-fade-out-duration) ease-in,
+    transform var(--content-fade-out-duration) ease-in;
+}
+
+.fluid-form-wrapper.is-exiting-down {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  transition:
+    opacity var(--content-fade-out-duration) ease-in,
+    transform var(--content-fade-out-duration) ease-in;
+}
+
+/* Staging states prior to delayed fade-in */
 .welcome-content-inner.is-staging-left,
 .fluid-form-wrapper.is-staging-left {
   opacity: 0;
-  transform: translate3d(-28px, 0, 0);
+  transform: translate3d(-24px, 0, 0);
   transition: none !important;
 }
 
 .welcome-content-inner.is-staging-right,
 .fluid-form-wrapper.is-staging-right {
   opacity: 0;
-  transform: translate3d(28px, 0, 0);
+  transform: translate3d(24px, 0, 0);
   transition: none !important;
 }
 
+.fluid-form-wrapper.is-staging-up {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition: none !important;
+}
+
+.fluid-form-wrapper.is-staging-down {
+  opacity: 0;
+  transform: translate3d(0, -22px, 0);
+  transition: none !important;
+}
+
+/* Flat Form Card (Moderate 10px radius, compact vertical padding for 768px laptops) */
 .login-form-card {
   background-color: var(--login-card-bg);
-  border: 2px solid var(--login-input-border);
-  border-radius: 28px;
-  padding: 1.85rem 2rem;
-  box-shadow: 0 22px 50px rgba(40, 54, 24, 0.28);
+  border: 1.5px solid var(--login-input-border);
+  border-radius: 10px;
+  padding: 1.35rem 1.75rem 1.3rem 1.7rem;
+  box-shadow: 0 4px 14px rgba(40, 54, 24, 0.14);
   transform: translate3d(0, 0, 0);
 }
 
-/* Card Shake Animation on Invalid Credentials / Validation Failure */
+/* Card Shake on Invalid Credentials / Validation Failure */
 @keyframes cardShake {
   0%, 100% { transform: translate3d(0, 0, 0); }
-  18%      { transform: translate3d(-9px, 0, 0); }
-  36%      { transform: translate3d(8px, 0, 0); }
-  54%      { transform: translate3d(-6px, 0, 0); }
-  72%      { transform: translate3d(5px, 0, 0); }
-  88%      { transform: translate3d(-2px, 0, 0); }
+  20%      { transform: translate3d(-8px, 0, 0); }
+  40%      { transform: translate3d(7px, 0, 0); }
+  60%      { transform: translate3d(-5px, 0, 0); }
+  80%      { transform: translate3d(4px, 0, 0); }
 }
 
 .login-form-card.is-shaking {
-  animation: cardShake 0.44s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation: cardShake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-/* STAFF MODE: Segmented Toggle ("Operator" | "Admin") at Top of Card */
+/* STAFF MODE: Segmented Toggle ("Operator" | "Admin") — 8px/6px radius */
 .staff-segmented-toggle {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   background-color: var(--white);
-  border: 1.8px solid var(--sand);
-  border-radius: 999px;
-  padding: 0.26rem;
-  margin-bottom: 1.15rem;
+  border: 1.5px solid var(--sand);
+  border-radius: 8px;
+  padding: 0.2rem;
+  margin-bottom: 0.85rem;
   user-select: none;
 }
 
@@ -364,14 +448,14 @@ body.login-body {
 
 .staff-segment-thumb {
   position: absolute;
-  top: 0.26rem;
-  bottom: 0.26rem;
-  left: 0.26rem;
-  width: calc(50% - 0.26rem);
+  top: 0.2rem;
+  bottom: 0.2rem;
+  left: 0.2rem;
+  width: calc(50% - 0.2rem);
   background-color: var(--dark-green);
-  border-radius: 999px;
+  border-radius: 6px;
   transform: translate3d(0%, 0, 0);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 1;
 }
 
@@ -382,49 +466,51 @@ body.login-body {
 .staff-segment-btn {
   position: relative;
   z-index: 2;
-  min-height: 36px;
+  min-height: 34px;
   border: none;
-  border-radius: 999px;
+  border-radius: 6px;
   background: transparent;
   color: var(--dark-green);
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.82rem;
+  font-family: var(--login-font-body);
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  transition: color 0.22s ease;
+  transition: color 0.2s ease;
 }
 
 .staff-segment-btn.active {
   color: var(--cream);
 }
 
-/* Card Heading & Subheading */
+/* Card Header */
 .card-header-block {
-  margin-bottom: 0.95rem;
+  text-align: left;
+  margin-bottom: 0.65rem;
 }
 
 .form-card-heading {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--login-font-heading);
   color: var(--login-heading-color);
-  font-size: 1.65rem;
-  font-weight: 700;
-  margin-bottom: 0.1rem;
+  font-size: 1.42rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.05rem 0;
 }
 
 .form-card-subheading {
   color: var(--olive);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   font-weight: 500;
-  margin-bottom: 0;
+  margin: 0;
 }
 
-/* Top Tabs: "Login" and "Register" (Guest & Operator) */
+/* Top Tabs: "Login" and "Register" */
 .auth-mode-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
-  border-bottom: 2px solid rgba(221, 161, 94, 0.45);
-  margin-bottom: 1.15rem;
+  gap: 0.35rem;
+  border-bottom: 1.5px solid var(--sand);
+  margin-bottom: 0.85rem;
 }
 
 .auth-mode-tabs[hidden] {
@@ -434,12 +520,12 @@ body.login-body {
 .auth-tab-btn {
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
-  padding: 0.48rem 0.75rem;
-  margin-bottom: -2px;
+  border-bottom: 2.5px solid transparent;
+  padding: 0.38rem 0.65rem;
+  margin-bottom: -1.5px;
   color: var(--olive);
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.88rem;
+  font-family: var(--login-font-body);
+  font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease;
@@ -454,19 +540,19 @@ body.login-body {
   border-bottom-color: var(--burnt-orange);
 }
 
-/* Smooth Height-Transition Viewport for Switching Forms Inside the Card */
+/* Smooth Height-Transition Viewport for Switching Panes Inside the Card */
 .card-dynamic-viewport {
   position: relative;
   overflow: hidden;
-  transition: height 0.32s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: height var(--card-height-duration) cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .auth-form-pane {
   opacity: 1;
   transform: translate3d(0, 0, 0);
   transition:
-    opacity 0.24s ease,
-    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.22s ease,
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .auth-form-pane[hidden] {
@@ -475,18 +561,18 @@ body.login-body {
 
 .auth-form-pane.is-pane-entering {
   opacity: 0;
-  transform: translate3d(0, 8px, 0);
+  transform: translate3d(0, 6px, 0);
 }
 
-/* Optional Tourist Registration Note */
+/* Optional Tourist Registration Note (8px radius) */
 .optional-booking-note {
-  background-color: rgba(221, 161, 94, 0.22);
+  background-color: var(--white);
   border: 1px solid var(--sand);
   color: var(--dark-green);
-  border-radius: 12px;
-  padding: 0.45rem 0.8rem;
-  font-size: 0.78rem;
-  margin-bottom: 0.85rem;
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  margin-bottom: 0.55rem;
 }
 
 .optional-booking-note a {
@@ -495,9 +581,9 @@ body.login-body {
   text-decoration: underline;
 }
 
-/* Field Blocks, Pill Inputs & Inline Error Messages */
+/* Pill-Shaped Inputs & Inline Field Error Messages */
 .field-block {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.55rem;
 }
 
 .pill-input-group {
@@ -506,30 +592,30 @@ body.login-body {
 
 .pill-input-icon {
   position: absolute;
-  left: 16px;
+  left: 15px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--olive);
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   pointer-events: none;
   z-index: 2;
 }
 
 .pill-input-control {
   width: 100%;
-  min-height: 45px;
+  min-height: 40px;
   background-color: var(--login-input-bg);
-  border: 1.8px solid var(--login-input-border);
+  border: 1.5px solid var(--login-input-border);
   border-radius: 999px;
-  padding: 0.52rem 2.6rem 0.52rem 2.6rem;
+  padding: 0.42rem 2.3rem 0.42rem 2.4rem;
   color: var(--login-text-color);
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.86rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: var(--login-font-body);
+  font-size: 0.82rem;
+  transition: border-color 0.2s ease;
 }
 
 .pill-select-control {
-  padding-right: 1.75rem;
+  padding-right: 1.4rem;
   cursor: pointer;
 }
 
@@ -540,23 +626,19 @@ body.login-body {
 .pill-input-control:focus {
   outline: none;
   border-color: var(--login-input-focus);
-  box-shadow: 0 0 0 3px rgba(188, 108, 37, 0.18);
 }
 
 .pill-input-control.is-invalid-pill {
   border-color: var(--burnt-orange);
-  background-color: rgba(188, 108, 37, 0.04);
 }
 
-/* Inline Error Message under each field */
 .field-error-msg {
   color: var(--burnt-orange);
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  line-height: 1.3;
-  padding-left: 0.85rem;
-  margin-top: 0.22rem;
-  min-height: 0;
+  line-height: 1.25;
+  padding-left: 0.75rem;
+  margin-top: 0.16rem;
   display: none;
 }
 
@@ -566,11 +648,11 @@ body.login-body {
 
 .pill-password-toggle {
   position: absolute;
-  right: 8px;
+  right: 6px;
   top: 50%;
   transform: translateY(-50%);
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 50%;
   background: transparent;
@@ -589,6 +671,7 @@ body.login-body {
 /* Terms Checkbox */
 .custom-perda-check .form-check-input {
   border-color: var(--olive);
+  border-radius: 4px;
   cursor: pointer;
 }
 
@@ -599,69 +682,137 @@ body.login-body {
 
 .custom-perda-check .form-check-label {
   color: var(--dark-green);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   cursor: pointer;
 }
 
 /* Solid Pill Submit Button & Loading State */
 .login-submit-btn {
   width: 100%;
-  min-height: 46px;
+  min-height: 42px;
   border-radius: 999px;
   background-color: var(--login-btn-bg);
-  border: 2px solid var(--login-btn-bg);
+  border: 1.5px solid var(--login-btn-bg);
   color: var(--login-btn-text);
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--login-font-body);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 0.87rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   cursor: pointer;
-  margin-top: 0.25rem;
-  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, opacity 0.2s ease;
+  margin-top: 0.15rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 
 .login-submit-btn:hover:not(:disabled) {
   background-color: var(--login-btn-hover-bg);
   border-color: var(--login-btn-hover-bg);
-  transform: translate3d(0, -2px, 0);
-  box-shadow: 0 8px 20px rgba(40, 54, 24, 0.22);
 }
 
 .login-submit-btn:disabled,
 .login-submit-btn.is-loading {
   opacity: 0.85;
   cursor: wait;
-  transform: none;
 }
 
 .forgot-link-wrap {
   text-align: center;
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .forgot-password-link {
   color: var(--dark-green);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 0.2s ease;
 }
 
 .forgot-password-link:hover {
   color: var(--burnt-orange);
 }
 
+/* ==========================================================================
+   5. SOCIAL LOGIN SECTION (GUEST MODE ONLY: Google, Facebook, Apple)
+   ========================================================================== */
+.social-auth-section {
+  margin-top: 0.75rem;
+}
+
+.social-auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--olive);
+  font-size: 0.74rem;
+  font-weight: 500;
+  margin-bottom: 0.6rem;
+}
+
+.social-auth-divider::before,
+.social-auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--sand);
+}
+
+.social-auth-divider span {
+  padding: 0 0.65rem;
+}
+
+.social-auth-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.social-auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  min-height: 38px;
+  padding: 0.35rem 0.5rem;
+  background-color: var(--white);
+  border: 1px solid var(--sand);
+  border-radius: 999px;
+  color: var(--dark-green);
+  font-family: var(--login-font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.social-auth-btn:hover {
+  border-color: var(--burnt-orange);
+  color: var(--dark-green);
+  transform: translateY(-1px);
+}
+
+.social-brand-svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* On narrow screens, show brand logo only */
+@media (max-width: 480px) {
+  .social-btn-label {
+    display: none;
+  }
+}
+
 /* Below the Card Prompt */
 .below-card-prompt {
   text-align: center;
-  margin-top: 1.1rem;
+  margin-top: 0.75rem;
   margin-bottom: 0;
   color: var(--login-on-fluid-text);
-  font-size: 0.88rem;
+  font-size: 0.83rem;
 }
 
 .below-card-prompt[hidden] {
@@ -673,7 +824,7 @@ body.login-body {
   border: none;
   padding: 0;
   color: var(--sand);
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
@@ -685,43 +836,50 @@ body.login-body {
   color: var(--cream);
 }
 
-/* Card-Level Error / Status Banner inside Form Card */
+/* Card-Level Error / Status Banner (8px radius) */
 .login-feedback-alert {
   background-color: var(--burnt-orange);
   color: var(--cream);
-  border-radius: 14px;
-  padding: 0.65rem 0.9rem;
-  font-size: 0.8rem;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.77rem;
   font-weight: 500;
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.7rem;
   display: none;
   align-items: flex-start;
-  gap: 0.55rem;
+  gap: 0.5rem;
 }
 
 .login-feedback-alert.is-success-banner {
   background-color: var(--olive);
-  border: 1.5px solid var(--sand);
+  border: 1px solid var(--sand);
 }
 
 .login-feedback-alert.show {
   display: flex;
 }
 
-/* Demo Account Quick-Fill Strip */
+/* Sample Accounts Helper Strip (6px radius chips) */
 .staff-demo-helper {
-  margin-top: 0.85rem;
-  padding-top: 0.7rem;
-  border-top: 1px dashed var(--sand);
+  margin-top: 0.7rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--sand);
+}
+
+.demo-helper-label {
+  color: var(--dark-green);
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
 }
 
 .demo-chip-btn {
   background-color: var(--white);
   border: 1px solid var(--sand);
   color: var(--dark-green);
-  border-radius: 999px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.7rem;
+  border-radius: 6px;
+  padding: 0.18rem 0.5rem;
+  font-size: 0.68rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -731,13 +889,196 @@ body.login-body {
   background-color: var(--sand);
 }
 
+/* Forgot Password Modal (10px radius) */
+.forgot-modal-card {
+  background-color: var(--cream);
+  border: 1.5px solid var(--sand);
+  border-radius: 10px;
+}
+
+.forgot-modal-card .modal-title {
+  font-family: var(--login-font-heading);
+  color: var(--dark-green);
+}
+
 /* ==========================================================================
-   5. ACCESSIBILITY: PREFERS-REDUCED-MOTION (Simple Quick Crossfade)
+   6. TABLET BREAKPOINT (768px to 1023.98px)
+   - Keep split layout; Fluid panel = 55% wide, Off-white panel = 45% wide
+   - Centered welcome content & smaller background icons
+   ========================================================================== */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .login-welcome-panel {
+    flex: 0 0 45%;
+    max-width: 45%;
+    padding: 1.75rem 1.5rem;
+  }
+
+  /* 45% panel moves across 55% fluid panel -> 55 / 45 = 122.2222% */
+  .login-split-stage.is-staff-mode .login-welcome-panel {
+    transform: translate3d(122.2222%, 0, 0);
+  }
+
+  .login-fluid-panel {
+    flex: 0 0 55%;
+    max-width: 55%;
+    padding: 1.25rem 1.5rem 1.25rem 3.2rem;
+  }
+
+  /* 55% panel moves left across 45% welcome panel -> -45 / 55 = -81.8182% */
+  .login-split-stage.is-staff-mode .login-fluid-panel {
+    transform: translate3d(-81.8182%, 0, 0);
+    padding: 1.25rem 3.2rem 1.25rem 1.5rem;
+  }
+
+  /* Shrink scattered background icons on tablet */
+  .bg-icon.ic-1 { font-size: 1.65rem; }
+  .bg-icon.ic-2 { font-size: 1.9rem; }
+  .bg-icon.ic-3 { font-size: 1.55rem; }
+  .bg-icon.ic-4 { font-size: 1.6rem; }
+  .bg-icon.ic-5 { font-size: 1.85rem; }
+  .bg-icon.ic-6 { font-size: 1.65rem; }
+  .bg-icon.ic-7 { font-size: 1.6rem; }
+  .bg-icon.ic-8 { font-size: 2.0rem; }
+  .bg-icon.ic-9 { font-size: 1.5rem; }
+}
+
+/* ==========================================================================
+   7. MOBILE BREAKPOINT (< 768px)
+   - No side-by-side: Fluid panel is full-screen background with card on top
+   - Centered welcome heading sits above the card
+   - Curved edge sweeps vertically (wave moving up/down) on mode switch
+   - "Operator or staff" link is fixed at the bottom of the screen
+   ========================================================================== */
+@media (max-width: 767.98px) {
+  .login-welcome-panel {
+    display: none !important;
+  }
+
+  .fluid-morph-svg {
+    display: none !important;
+  }
+
+  .login-fluid-panel,
+  .login-split-stage.is-staff-mode .login-fluid-panel {
+    flex: 0 0 100%;
+    max-width: 100%;
+    min-height: 100vh;
+    padding: 1.25rem 1rem 4.5rem;
+    transform: none !important;
+    background: linear-gradient(
+      160deg,
+      var(--fluid-user-tone-start) 0%,
+      var(--fluid-user-tone-end) 100%
+    );
+  }
+
+  .login-split-stage.is-staff-mode .login-fluid-panel {
+    background: linear-gradient(
+      160deg,
+      var(--fluid-staff-tone-start) 0%,
+      var(--fluid-staff-tone-end) 100%
+    );
+  }
+
+  /* Full-Screen Vertical Wave Sweep SVG on Mobile */
+  .mobile-wave-svg {
+    display: block;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .mobile-wave-path {
+    fill: var(--dark-green);
+    stroke: var(--sand);
+    stroke-width: 2;
+    stroke-opacity: 0.5;
+  }
+
+  /* Centered Short Welcome Heading Above the Card on Mobile */
+  .mobile-welcome-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 0.95rem;
+    color: var(--cream);
+  }
+
+  .mobile-logo-link {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+  }
+
+  .mobile-logo-link img {
+    height: 32px;
+    width: auto;
+  }
+
+  .mobile-welcome-title {
+    font-family: var(--login-font-heading);
+    color: var(--cream);
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 0.15rem 0;
+    text-align: center;
+  }
+
+  .mobile-welcome-sub {
+    color: var(--cream);
+    opacity: 0.9;
+    font-size: 0.83rem;
+    margin: 0;
+    text-align: center;
+  }
+
+  .login-form-card {
+    padding: 1.25rem 1.2rem 1.2rem;
+  }
+
+  /* Small Fixed Mode Switch Bar at the Bottom of the Screen */
+  .mobile-bottom-switch-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    background-color: var(--dark-green);
+    border-top: 1px solid var(--sand);
+    padding: 0.6rem 1rem;
+  }
+
+  .mobile-bottom-switch-btn {
+    background: none;
+    border: none;
+    color: var(--cream);
+    font-family: var(--login-font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Smaller background icons on mobile */
+  .fluid-bg-icons .bg-icon {
+    font-size: 1.6rem;
+    opacity: 0.055;
+  }
+}
+
+/* ==========================================================================
+   8. ACCESSIBILITY: PREFERS-REDUCED-MOTION (Simple Quick Crossfade)
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   .login-welcome-panel,
   .login-fluid-panel,
-  .fluid-body-path,
   .card-dynamic-viewport,
   .staff-segment-thumb {
     transition: none !important;
@@ -749,6 +1090,8 @@ body.login-body {
   .welcome-content-inner.is-exiting-right,
   .fluid-form-wrapper.is-exiting-left,
   .fluid-form-wrapper.is-exiting-right,
+  .fluid-form-wrapper.is-exiting-up,
+  .fluid-form-wrapper.is-exiting-down,
   .auth-form-pane {
     transform: none !important;
     transition: opacity 0.18s ease !important;
@@ -756,40 +1099,5 @@ body.login-body {
 
   .login-form-card.is-shaking {
     animation: none !important;
-  }
-}
-
-/* ==========================================================================
-   6. RESPONSIVE DESIGN (Tablet & Mobile < 992px)
-   ========================================================================== */
-@media (max-width: 991.98px) {
-  .login-split-stage {
-    flex-direction: column;
-  }
-
-  .login-split-stage.is-staff-mode {
-    flex-direction: column-reverse;
-  }
-
-  .login-welcome-panel,
-  .login-fluid-panel,
-  .login-split-stage.is-staff-mode .login-welcome-panel,
-  .login-split-stage.is-staff-mode .login-fluid-panel {
-    flex: 0 0 100%;
-    max-width: 100%;
-    padding: 2.2rem 1.25rem;
-    transform: none !important;
-  }
-
-  .login-fluid-panel {
-    background-color: var(--login-fluid-user-bg);
-  }
-
-  .login-split-stage.is-staff-mode .login-fluid-panel {
-    background-color: var(--login-fluid-staff-bg);
-  }
-
-  .fluid-morph-svg {
-    display: none !important;
   }
 }
