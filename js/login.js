@@ -51,31 +51,21 @@ const WAVE_CONFIG = {
 };
 
 /**
- * DESKTOP / TABLET DROPLETS DATA ARRAY (7 irregular droplets for Phase 3)
- * - type: 'cream-lead' -> Small irregular cream droplets just ahead of the main
- *   cream edge inside the dark area; stretched & absorbed by the advancing cream wave.
- * - type: 'dark-trail' -> Irregular dark green blobs left behind inside the cream
- *   area for a moment, which slowly shrink and merge back into the dark side.
+ * DESKTOP / TABLET GREEN FLUID DROPLETS DATA ARRAY
+ * - Irregular dark green blobs left behind inside the cream area for a moment,
+ *   which slowly shrink and merge back into the dark green fluid side.
+ * - (Cream-colored droplets have been removed.)
  */
 const DESKTOP_DROPLETS_DATA = [
-  // 4 Leading Cream Droplets (ahead of the cream wave inside the dark area)
-  { id: 'd1', type: 'cream-lead', pos: 210, rx: 24, ry: 16, skew: 1.35, speed: 1.22, delay: 0.04, dist: 86 },
-  { id: 'd2', type: 'cream-lead', pos: 390, rx: 32, ry: 21, skew: 1.42, speed: 1.08, delay: 0.10, dist: 108 },
-  { id: 'd3', type: 'cream-lead', pos: 585, rx: 20, ry: 14, skew: 1.28, speed: 1.30, delay: 0.07, dist: 78 },
-  { id: 'd4', type: 'cream-lead', pos: 775, rx: 27, ry: 18, skew: 1.38, speed: 1.14, delay: 0.15, dist: 94 },
-
-  // 3 Trailing Dark Green Blobs (break off inside the cream area & merge back into dark side)
   { id: 'd5', type: 'dark-trail', pos: 295, rx: 34, ry: 23, skew: 0.72, speed: 0.86, delay: 0.12, dist: 95 },
   { id: 'd6', type: 'dark-trail', pos: 515, rx: 40, ry: 26, skew: 0.68, speed: 0.78, delay: 0.18, dist: 115 },
   { id: 'd7', type: 'dark-trail', pos: 710, rx: 29, ry: 19, skew: 0.75, speed: 0.92, delay: 0.14, dist: 88 }
 ];
 
 /**
- * MOBILE DROPLETS DATA ARRAY (4 irregular droplets for < 768px vertical sweep)
+ * MOBILE GREEN FLUID DROPLETS DATA ARRAY (< 768px vertical sweep)
  */
 const MOBILE_DROPLETS_DATA = [
-  { id: 'm1', type: 'cream-lead', pos: 260, rx: 22, ry: 30, skew: 1.32, speed: 1.18, delay: 0.06, dist: 90 },
-  { id: 'm2', type: 'cream-lead', pos: 710, rx: 26, ry: 34, skew: 1.38, speed: 1.10, delay: 0.12, dist: 105 },
   { id: 'm3', type: 'dark-trail', pos: 380, rx: 28, ry: 36, skew: 0.74, speed: 0.84, delay: 0.14, dist: 95 },
   { id: 'm4', type: 'dark-trail', pos: 640, rx: 24, ry: 32, skew: 0.78, speed: 0.90, delay: 0.18, dist: 85 }
 ];
@@ -596,14 +586,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * ==========================================================================
-   * 3. PHASE 1 & PHASE 3 DYNAMIC WAVE + DROPLET FRAME COMPUTATION
+   * 3. PHASE 1 & PHASE 3 DYNAMIC WAVE FRAME COMPUTATION
    * ==========================================================================
    */
 
   /**
    * Phase 1 (Flood): Computes the advancing Dark Fluid wave edge as it expands
    * across the entire screen (0 -> 1).
-   * - Middle of the curve leads; top and bottom lag behind; continuous wobble.
+   * - Middle of the curve leads; top and bottom corners lag behind; continuous wobble.
    */
   function renderPhase1FloodFrame(progress, toStaff, mobileMode) {
     const weights = WAVE_CONFIG.CENTER_LEAD_WEIGHTS;
@@ -664,37 +654,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Ensures SVG <path> nodes exist inside the droplet groups for Phase 3
+   * Ensures SVG <path> nodes exist inside the green trailing droplet group for Phase 3
    */
   function ensureDropletElements(dropletsArray) {
-    if (!creamDropletsGroup || !darkTrailingBlobsGroup) return { creamEls: [], darkEls: [] };
-    creamDropletsGroup.innerHTML = '';
+    if (!darkTrailingBlobsGroup) return { darkEls: [] };
     darkTrailingBlobsGroup.innerHTML = '';
 
-    const creamEls = [];
     const darkEls = [];
 
     dropletsArray.forEach((d) => {
       const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      if (d.type === 'cream-lead') {
-        pathEl.setAttribute('class', 'droplet-cream');
-        creamDropletsGroup.appendChild(pathEl);
-        creamEls.push({ data: d, el: pathEl });
-      } else {
-        pathEl.setAttribute('class', 'droplet-dark');
-        darkTrailingBlobsGroup.appendChild(pathEl);
-        darkEls.push({ data: d, el: pathEl });
-      }
+      pathEl.setAttribute('class', 'droplet-dark');
+      darkTrailingBlobsGroup.appendChild(pathEl);
+      darkEls.push({ data: d, el: pathEl });
     });
 
-    return { creamEls, darkEls };
+    return { darkEls };
   }
 
   /**
-   * Phase 3 (Cream Returns with Droplets & Settles):
+   * Phase 3 (Cream Returns with Green Trailing Droplets & Settles):
    * - Cream enters from the opposite edge (RIGHT for Guest->Staff; LEFT for Staff->Guest;
    *   TOP for Mobile) and pushes the dark green back to its final resting position.
-   * - Leading cream droplets appear ahead of the cream edge inside the dark area.
    * - Trailing dark green blobs stay inside the cream area for a moment and slowly
    *   shrink and merge back into the dark side via the SVG gooey filter.
    * - Settles with a small overshoot and rest.
@@ -734,23 +715,8 @@ document.addEventListener('DOMContentLoaded', () => {
         waveBoundaryStrokePath.setAttribute('d', buildHorizontalWaveCurve(yVec));
       }
 
-      // Update Mobile Droplets (3-4 droplets)
+      // Update Mobile Green Trailing Droplets
       const midEdgeY = yVec[4];
-      dropletNodes.creamEls.forEach(({ data, el }, idx) => {
-        const localT = Math.max(0, Math.min(1, (progress - data.delay) * data.speed * 1.35));
-        if (localT <= 0 || localT >= 0.92) {
-          el.setAttribute('d', '');
-          return;
-        }
-        const env = Math.sin((localT / 0.92) * Math.PI);
-        const cy = midEdgeY + data.dist * env;
-        const cx = data.pos + Math.sin(localT * Math.PI * 2 + idx) * 14;
-        el.setAttribute(
-          'd',
-          buildIrregularDropletPath(cx, cy, data.rx * env, data.ry * env, data.skew, localT * 6)
-        );
-      });
-
       dropletNodes.darkEls.forEach(({ data, el }, idx) => {
         const localT = Math.max(0, Math.min(1, (progress - data.delay) * data.speed * 1.25));
         if (localT <= 0 || localT >= 0.95) {
@@ -817,36 +783,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return lerp(xVec[idxLow], xVec[idxHigh], idxFloat - idxLow);
     };
 
-    // 1. Update Leading Cream Droplets (ahead of the cream wave inside the dark area)
-    dropletNodes.creamEls.forEach(({ data, el }, idx) => {
-      const localT = Math.max(0, Math.min(1, (progress - data.delay) * data.speed * 1.45));
-      if (localT <= 0 || localT >= 0.88) {
-        el.setAttribute('d', '');
-        return;
-      }
-      // Bell envelope: droplet emerges ahead of wave, stretches, and is absorbed as wave catches up
-      const lifeEnv = Math.sin((localT / 0.88) * Math.PI);
-      const edgeX = sampleWaveXAtY(data.pos);
-      const leadOffset = pushDir * data.dist * lifeEnv * (1 - localT * 0.45);
-      const cx = edgeX + leadOffset;
-      const cy = data.pos + Math.sin(localT * Math.PI * 2.5 + idx) * 16;
-      const rx = data.rx * (0.55 + 0.65 * lifeEnv);
-      const ry = data.ry * (0.5 + 0.55 * lifeEnv);
-
-      el.setAttribute(
-        'd',
-        buildIrregularDropletPath(cx, cy, rx, ry, data.skew, localT * 6 + idx)
-      );
-    });
-
-    // 2. Update Trailing Dark Green Blobs (inside the cream area behind the edge, shrinking & merging back)
+    // Update Trailing Dark Green Blobs (inside the cream area behind the edge, shrinking & merging back)
     dropletNodes.darkEls.forEach(({ data, el }, idx) => {
       const localT = Math.max(0, Math.min(1, (progress - data.delay) * data.speed * 1.32));
       if (localT <= 0 || localT >= 0.94) {
         el.setAttribute('d', '');
         return;
       }
-      // Starts inside the cream zone (opposite of pushDir), lingers, then shrinks & pulls back into dark edge
       const norm = localT / 0.94;
       const sizeScale = Math.sin(norm * Math.PI) * (1 - norm * 0.35);
       const pullBackFactor = Math.sin(norm * Math.PI * 0.85) * (1 - Math.pow(norm, 1.6));
@@ -1277,9 +1220,9 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     // ------------------------------------------------------------------------
-    // PHASE 3: CREAM RETURNS WITH DROPLETS & SETTLES (~1.00s to ~2.10s)
-    // - Cream enters from the opposite edge with leading cream droplets and
-    //   trailing dark green blobs, settling into the final wavy shape.
+    // PHASE 3: CREAM RETURNS & SETTLES (~1.00s to ~2.10s)
+    // - Cream enters from the opposite edge with a wavy leading edge,
+    //   settling into the final wavy shape.
     // - Card and welcome text fade in (0.3s, small upward slide) once settled.
     // ------------------------------------------------------------------------
     const phase3Start = phase2Start + TIMING_PHASE2_HOLD;

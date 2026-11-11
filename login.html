@@ -104,7 +104,7 @@
         </g>
       </svg>
 
-      <!-- LAYER 2: Full-Screen Cream Layer + Leading Cream Droplets + Trailing Dark Blobs -->
+      <!-- LAYER 2: Full-Screen Cream Fluid Layer + Trailing Green Fluid Droplets -->
       <svg
         id="creamFluidSvg"
         class="fullscreen-fluid-svg cream-fluid-svg"
@@ -118,13 +118,12 @@
           </clipPath>
         </defs>
 
-        <!-- Gooey group for the advancing Cream wave & leading Cream droplets -->
-        <g id="creamGooGroup" filter="url(#gooeyLiquidFilter)">
+        <!-- Advancing Cream wave path (no cream droplets) -->
+        <g id="creamGooGroup">
           <path id="creamFluidMainPath" class="cream-fluid-path" d=""></path>
-          <g id="creamDropletsGroup"></g>
         </g>
 
-        <!-- Gooey group for trailing Dark blobs that break off inside the Cream zone & merge back -->
+        <!-- Gooey group for trailing Green fluid blobs that break off inside the Cream zone & merge back -->
         <g id="darkBlobsClipWrapper" clip-path="url(#creamFluidClipPath)">
           <g id="darkBlobsGooGroup" filter="url(#gooeyLiquidFilter)">
             <path id="darkBridgePath" class="dark-fluid-path" d=""></path>
