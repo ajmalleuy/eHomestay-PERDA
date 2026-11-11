@@ -276,7 +276,12 @@ function initBookingFormAndTracker() {
         confirmScreen.scrollIntoView({ behavior: 'smooth' });
       }
 
-      // Auto-populate tracking input with the new reference number
+      // Save latest reference code so landing page tracker can auto-display it
+      try {
+        localStorage.setItem('perda_last_booking_ref', newRef);
+      } catch (e) {}
+
+      // Auto-populate tracking input if present on current page
       const trackInput = document.getElementById('trackRefInput');
       if (trackInput) {
         trackInput.value = newRef;
@@ -302,8 +307,17 @@ function initBookingFormAndTracker() {
       renderTrackingResult(query);
     });
 
-    // Load default tracking sample on initial view
-    renderTrackingResult('PERDA-2026-84920');
+    // Load recent booking reference or default tracking sample on initial view
+    let initialRef = 'PERDA-2026-84920';
+    try {
+      const savedRef = localStorage.getItem('perda_last_booking_ref');
+      if (savedRef) {
+        initialRef = savedRef;
+        const refInput = document.getElementById('trackRefInput');
+        if (refInput) refInput.value = savedRef;
+      }
+    } catch (e) {}
+    renderTrackingResult(initialRef);
   }
 }
 

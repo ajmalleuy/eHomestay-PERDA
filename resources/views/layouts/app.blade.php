@@ -22,7 +22,7 @@
 <body>
   <a href="#mainContent" class="skip-link">Skip to main content</a>
 
-  @include('partials.header')
+  @include('partials.navbar')
 
   <main id="mainContent">
     @yield('content')

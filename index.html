@@ -20,30 +20,40 @@
   <!-- Accessible Skip Navigation Link -->
   <a href="#mainContent" class="skip-link">Skip to main content</a>
 
-  <!-- Shared Public Header / Navbar (Dark Green #283618) -->
-  <header>
+  <!-- Shared Public Header / Navbar (Single Shared Structure) -->
+  <header id="sharedPublicHeader" class="perda-public-header">
     <nav class="navbar navbar-expand-lg perda-navbar" aria-label="Main Navigation">
-      <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="index.html">
+      <div class="perda-navbar-container">
+        <a class="navbar-brand" href="index.html">
           <img src="images/logo.svg" alt="e-Homestay PERDA Homestay Logo">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#publicNavbarCollapse" aria-controls="publicNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation menu">
           <i class="fa-solid fa-bars"></i>
         </button>
         <div class="collapse navbar-collapse" id="publicNavbarCollapse">
-          <ul class="navbar-nav ms-auto align-items-lg-center gap-1 mt-3 mt-lg-0">
+          <ul class="navbar-nav ms-lg-auto">
             <li class="nav-item">
-              <a class="nav-link active" href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+              <a class="nav-link active" data-nav-key="home" href="index.html">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+              </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#homestaysSection"><i class="fa-solid fa-tree-city"></i> Homestays</a>
+              <a class="nav-link" data-nav-key="homestays" href="index.html#homestaysSection">
+                <i class="fa-solid fa-tree-city"></i>
+                <span>Homestays</span>
+              </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="booking.html#trackingSection"><i class="fa-solid fa-magnifying-glass-location"></i> Track Booking</a>
+              <a class="nav-link" data-nav-key="track" href="index.html#trackingSection">
+                <i class="fa-solid fa-magnifying-glass-location"></i>
+                <span>Track Booking</span>
+              </a>
             </li>
-            <li class="nav-item ms-lg-2">
-              <a class="btn btn-sand" href="login.html">
-                <i class="fa-solid fa-right-to-bracket"></i> Login / Portal
+            <li class="nav-item perda-navbar-cta">
+              <a class="btn btn-sand perda-login-btn" href="login.html">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>Login / Portal</span>
               </a>
             </li>
           </ul>
@@ -259,6 +269,53 @@
         </div>
       </div>
     </section>
+
+    <!-- 4. BOOKING STATUS TRACKING SECTION -->
+    <section id="trackingSection" class="py-5" style="background-color: rgba(96, 108, 56, 0.1); border-top: 2px solid var(--sand);">
+      <div class="container">
+        <div class="perda-card p-4 p-md-5">
+          <div class="row g-4 align-items-center mb-4">
+            <div class="col-lg-6">
+              <span class="badge-pill badge-approved mb-2">
+                <i class="fa-solid fa-satellite-dish"></i> Real-Time Status Tracker
+              </span>
+              <h2 class="font-heading mb-1">Track Your Booking Status</h2>
+              <p class="mb-0">
+                Enter your booking reference number to check whether your payment receipt is <strong>Pending</strong>, <strong>Approved</strong>, or <strong>Rejected</strong>.
+              </p>
+            </div>
+            <div class="col-lg-6">
+              <form id="bookingTrackForm" novalidate>
+                <label for="trackRefInput" class="form-label">Booking Reference Number</label>
+                <div class="d-flex flex-wrap flex-sm-nowrap gap-2">
+                  <input type="text" id="trackRefInput" class="form-control" value="PERDA-2026-84920" placeholder="e.g., PERDA-2026-84920">
+                  <button type="submit" class="btn btn-cta flex-shrink-0">
+                    <i class="fa-solid fa-magnifying-glass"></i> Track Status
+                  </button>
+                </div>
+                <div id="trackRefErr" class="invalid-feedback-custom"></div>
+              </form>
+              <!-- Sample Clickable Reference Pills for Pending, Approved, Rejected -->
+              <div class="d-flex flex-wrap align-items-center gap-2 mt-2 small">
+                <span class="fw-semibold">Try sample references:</span>
+                <button type="button" class="badge-pill badge-pending border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-84920')">
+                  PERDA-2026-84920 (Pending)
+                </button>
+                <button type="button" class="badge-pill badge-approved border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-61209')">
+                  PERDA-2026-61209 (Approved)
+                </button>
+                <button type="button" class="badge-pill badge-rejected border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-49012')">
+                  PERDA-2026-49012 (Rejected)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Tracking Result Card populated by js/validation.js -->
+          <div id="trackingResultContainer" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- Shared Footer in Dark Green (#283618) with Cream Text (#FEFAE0) -->
@@ -276,7 +333,7 @@
           <ul class="list-unstyled d-grid gap-2">
             <li><a href="index.html"><i class="fa-solid fa-angle-right me-1"></i> Home &amp; Search</a></li>
             <li><a href="booking.html"><i class="fa-solid fa-angle-right me-1"></i> Book Homestay</a></li>
-            <li><a href="booking.html#trackingSection"><i class="fa-solid fa-angle-right me-1"></i> Track Booking</a></li>
+            <li><a href="index.html#trackingSection"><i class="fa-solid fa-angle-right me-1"></i> Track Booking</a></li>
             <li><a href="login.html"><i class="fa-solid fa-angle-right me-1"></i> Staff &amp; Operator Login</a></li>
           </ul>
         </div>

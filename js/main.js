@@ -479,5 +479,153 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Shared Public Top Navbar Component & Active Pill Sync (Home, Homestays, Track Booking)
+  const sharedHeaderEl =
+    document.getElementById('sharedPublicHeader') ||
+    document.querySelector('header:has(.perda-navbar)');
+
+  if (sharedHeaderEl) {
+    sharedHeaderEl.id = 'sharedPublicHeader';
+    sharedHeaderEl.classList.add('perda-public-header');
+
+    // If running static HTML files (index.html / booking.html), enforce the single shared navbar markup
+    const brandLink = sharedHeaderEl.querySelector('.navbar-brand');
+    const isStaticHtml =
+      !brandLink || (brandLink.getAttribute('href') || '').endsWith('.html');
+
+    if (isStaticHtml) {
+      sharedHeaderEl.innerHTML = `
+        <nav class="navbar navbar-expand-lg perda-navbar" aria-label="Main Navigation">
+          <div class="perda-navbar-container">
+            <a class="navbar-brand" href="index.html">
+              <img src="images/logo.svg" alt="e-Homestay PERDA Homestay Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#publicNavbarCollapse" aria-controls="publicNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation menu">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="publicNavbarCollapse">
+              <ul class="navbar-nav ms-lg-auto">
+                <li class="nav-item">
+                  <a class="nav-link" data-nav-key="home" href="index.html">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" data-nav-key="homestays" href="index.html#homestaysSection">
+                    <i class="fa-solid fa-tree-city"></i>
+                    <span>Homestays</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" data-nav-key="track" href="index.html#trackingSection">
+                    <i class="fa-solid fa-magnifying-glass-location"></i>
+                    <span>Track Booking</span>
+                  </a>
+                </li>
+                <li class="nav-item perda-navbar-cta">
+                  <a class="btn btn-sand perda-login-btn" href="login.html">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Login / Portal</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      `;
+    }
+  }
+
+  const publicNavLinks = document.querySelectorAll('.perda-navbar .nav-link');
+  if (publicNavLinks.length > 0) {
+    const homestaysSection = document.getElementById('homestaysSection');
+    const trackingSection = document.getElementById('trackingSection');
+
+    function setActivePublicNav(activeKey) {
+      publicNavLinks.forEach((link) => {
+        const navKey = link.getAttribute('data-nav-key') || '';
+        const href = link.getAttribute('href') || '';
+        const isMatch =
+          navKey === activeKey ||
+          (activeKey === 'home' && !navKey && href === 'index.html') ||
+          (activeKey === 'homestays' && href.includes('#homestaysSection')) ||
+          (activeKey === 'track' && href.includes('#trackingSection'));
+        link.classList.toggle('active', isMatch);
+      });
+    }
+
+    function updatePublicNavOnScrollOrHash() {
+      const path = window.location.pathname.toLowerCase();
+
+      // On booking page (Book Now), no top navbar item is active
+      if (path.endsWith('booking.html') || path.includes('/booking')) {
+        setActivePublicNav('');
+        return;
+      }
+
+      // On landing page, switch between "Home", "Homestays", and "Track Booking" based on scroll position
+      if (trackingSection && trackingSection.getBoundingClientRect().top <= 240) {
+        setActivePublicNav('track');
+      } else if (homestaysSection && homestaysSection.getBoundingClientRect().top <= 180) {
+        setActivePublicNav('homestays');
+      } else {
+        setActivePublicNav('home');
+      }
+    }
+
+    publicNavLinks.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const navKey = link.getAttribute('data-nav-key') || '';
+        const href = link.getAttribute('href') || '';
+        if (navKey === 'homestays' || href.includes('#homestaysSection')) {
+          if (homestaysSection) {
+            e.preventDefault();
+            if (window.history && window.history.pushState) {
+              window.history.pushState(null, '', '#homestaysSection');
+            }
+            homestaysSection.scrollIntoView({ behavior: 'smooth' });
+          }
+          setActivePublicNav('homestays');
+        } else if (navKey === 'track' || href.includes('#trackingSection')) {
+          if (trackingSection) {
+            e.preventDefault();
+            if (window.history && window.history.pushState) {
+              window.history.pushState(null, '', '#trackingSection');
+            }
+            trackingSection.scrollIntoView({ behavior: 'smooth' });
+          }
+          setActivePublicNav('track');
+        } else if ((navKey === 'home' || href === 'index.html') && homestaysSection) {
+          e.preventDefault();
+          if (window.history && window.history.pushState) {
+            window.history.pushState(null, '', window.location.pathname);
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setActivePublicNav('home');
+        }
+      });
+    });
+
+    window.addEventListener('scroll', updatePublicNavOnScrollOrHash, { passive: true });
+    window.addEventListener('hashchange', () => {
+      if (window.location.hash === '#homestaysSection') {
+        setActivePublicNav('homestays');
+      } else if (window.location.hash === '#trackingSection') {
+        setActivePublicNav('track');
+      } else {
+        updatePublicNavOnScrollOrHash();
+      }
+    });
+
+    if (window.location.hash === '#homestaysSection') {
+      setActivePublicNav('homestays');
+    } else if (window.location.hash === '#trackingSection') {
+      setActivePublicNav('track');
+    } else {
+      updatePublicNavOnScrollOrHash();
+    }
+  }
 });
 

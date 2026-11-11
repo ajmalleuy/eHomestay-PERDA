@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Book Homestay &amp; Track Status — e-Homestay PERDA</title>
+  <title>Book Homestay — e-Homestay PERDA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,23 +15,41 @@
 <body>
   <a href="#mainContent" class="skip-link">Skip to main content</a>
 
-  <!-- Shared Public Header / Navbar -->
-  <header>
+  <!-- Shared Public Header / Navbar (Single Shared Structure) -->
+  <header id="sharedPublicHeader" class="perda-public-header">
     <nav class="navbar navbar-expand-lg perda-navbar" aria-label="Main Navigation">
-      <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="index.html">
-          <img src="images/logo.svg" alt="e-Homestay PERDA Logo">
+      <div class="perda-navbar-container">
+        <a class="navbar-brand" href="index.html">
+          <img src="images/logo.svg" alt="e-Homestay PERDA Homestay Logo">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#publicNavbarCollapse" aria-controls="publicNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation menu">
           <i class="fa-solid fa-bars"></i>
         </button>
         <div class="collapse navbar-collapse" id="publicNavbarCollapse">
-          <ul class="navbar-nav ms-auto align-items-lg-center gap-1 mt-3 mt-lg-0">
-            <li class="nav-item"><a class="nav-link" href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
-            <li class="nav-item"><a class="nav-link active" href="booking.html"><i class="fa-solid fa-calendar-check"></i> Book Now</a></li>
-            <li class="nav-item"><a class="nav-link" href="#trackingSection"><i class="fa-solid fa-magnifying-glass-location"></i> Track Booking</a></li>
-            <li class="nav-item ms-lg-2">
-              <a class="btn btn-sand" href="login.html"><i class="fa-solid fa-right-to-bracket"></i> Login / Portal</a>
+          <ul class="navbar-nav ms-lg-auto">
+            <li class="nav-item">
+              <a class="nav-link" data-nav-key="home" href="index.html">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-nav-key="homestays" href="index.html#homestaysSection">
+                <i class="fa-solid fa-tree-city"></i>
+                <span>Homestays</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-nav-key="track" href="index.html#trackingSection">
+                <i class="fa-solid fa-magnifying-glass-location"></i>
+                <span>Track Booking</span>
+              </a>
+            </li>
+            <li class="nav-item perda-navbar-cta">
+              <a class="btn btn-sand perda-login-btn" href="login.html">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>Login / Portal</span>
+              </a>
             </li>
           </ul>
         </div>
@@ -263,8 +281,8 @@
           </div>
 
           <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
-            <a href="#trackingSection" class="btn btn-olive">
-              <i class="fa-solid fa-magnifying-glass-location"></i> View Live Status Below
+            <a href="index.html#trackingSection" class="btn btn-olive">
+              <i class="fa-solid fa-magnifying-glass-location"></i> Track Booking Status
             </a>
             <a href="verification.html" class="btn btn-cta">
               <i class="fa-solid fa-user-check"></i> Open Operator Verification Page
@@ -273,53 +291,6 @@
               <i class="fa-solid fa-plus"></i> Make Another Booking
             </button>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. BOOKING STATUS TRACKING SECTION -->
-    <section id="trackingSection" class="py-5" style="background-color: rgba(96, 108, 56, 0.1); border-top: 2px solid var(--sand);">
-      <div class="container">
-        <div class="perda-card p-4 p-md-5">
-          <div class="row g-4 align-items-center mb-4">
-            <div class="col-lg-6">
-              <span class="badge-pill badge-approved mb-2">
-                <i class="fa-solid fa-satellite-dish"></i> Real-Time Status Tracker
-              </span>
-              <h2 class="font-heading mb-1">Track Your Booking Status</h2>
-              <p class="mb-0">
-                Enter your booking reference number to check whether your payment receipt is <strong>Pending</strong>, <strong>Approved</strong>, or <strong>Rejected</strong>.
-              </p>
-            </div>
-            <div class="col-lg-6">
-              <form id="bookingTrackForm" novalidate>
-                <label for="trackRefInput" class="form-label">Booking Reference Number</label>
-                <div class="d-flex flex-wrap flex-sm-nowrap gap-2">
-                  <input type="text" id="trackRefInput" class="form-control" value="PERDA-2026-84920" placeholder="e.g., PERDA-2026-84920">
-                  <button type="submit" class="btn btn-cta flex-shrink-0">
-                    <i class="fa-solid fa-magnifying-glass"></i> Track Status
-                  </button>
-                </div>
-                <div id="trackRefErr" class="invalid-feedback-custom"></div>
-              </form>
-              <!-- Sample Clickable Reference Pills for Pending, Approved, Rejected -->
-              <div class="d-flex flex-wrap align-items-center gap-2 mt-2 small">
-                <span class="fw-semibold">Try sample references:</span>
-                <button type="button" class="badge-pill badge-pending border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-84920')">
-                  PERDA-2026-84920 (Pending)
-                </button>
-                <button type="button" class="badge-pill badge-approved border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-61209')">
-                  PERDA-2026-61209 (Approved)
-                </button>
-                <button type="button" class="badge-pill badge-rejected border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-49012')">
-                  PERDA-2026-49012 (Rejected)
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Dynamic Tracking Result Card populated by js/validation.js -->
-          <div id="trackingResultContainer" aria-live="polite"></div>
         </div>
       </div>
     </section>

@@ -16,7 +16,7 @@
         <ul class="list-unstyled d-grid gap-2">
           <li><a href="{{ route('landing') }}"><i class="fa-solid fa-angle-right me-1"></i> Home &amp; Search</a></li>
           <li><a href="{{ route('booking.create') }}"><i class="fa-solid fa-angle-right me-1"></i> Book Homestay</a></li>
-          <li><a href="{{ route('booking.create') }}#trackingSection"><i class="fa-solid fa-angle-right me-1"></i> Track Booking</a></li>
+          <li><a href="{{ route('landing') }}#trackingSection"><i class="fa-solid fa-angle-right me-1"></i> Track Booking</a></li>
           <li><a href="{{ route('login') }}"><i class="fa-solid fa-angle-right me-1"></i> Staff &amp; Operator Login</a></li>
         </ul>
       </div>

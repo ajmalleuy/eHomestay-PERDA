@@ -106,20 +106,11 @@
       <div id="bookingConfirmationScreen" class="confirmation-screen d-none my-4">
         <h2 class="font-heading">Booking Submitted!</h2>
         <div class="reference-code-pill"><span id="confirmedRefCode">PERDA-2026-84920</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Booking Status Tracking Section -->
-  <section id="trackingSection" class="py-5">
-    <div class="container">
-      <div class="perda-card p-4">
-        <h2 class="h4 font-heading mb-3">Track Booking Status by Reference Number</h2>
-        <form id="bookingTrackForm" class="d-flex gap-2 mb-3" novalidate>
-          <input type="text" id="trackRefInput" class="form-control" value="PERDA-2026-84920">
-          <button type="submit" class="btn btn-cta">Track</button>
-        </form>
-        <div id="trackingResultContainer"></div>
+        <div class="mt-3">
+          <a href="{{ route('landing') }}#trackingSection" class="btn btn-olive">
+            <i class="fa-solid fa-magnifying-glass-location"></i> Track Booking Status
+          </a>
+        </div>
       </div>
     </div>
   </section>

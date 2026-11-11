@@ -123,57 +123,47 @@
     </div>
   </section>
 
-  <!-- 4. TOURIST REGISTRATION FORM WITH OPT-IN CHECKBOX -->
-  <section id="registerSection" class="registration-section">
+  <!-- 4. BOOKING STATUS TRACKING SECTION -->
+  <section id="trackingSection" class="py-5" style="background-color: rgba(96, 108, 56, 0.1); border-top: 2px solid var(--sand);">
     <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <div class="perda-card p-4 p-md-5">
-            <h2 class="font-heading text-center mb-3">Create Your Tourist Account</h2>
-            <form id="touristRegisterForm" action="{{ route('tourist.register') }}" method="POST" novalidate>
-              @csrf
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label for="regFullName" class="form-label">Full Name *</label>
-                  <input type="text" id="regFullName" name="name" class="form-control" required>
-                  <div id="regFullNameErr" class="invalid-feedback-custom"></div>
-                </div>
-                <div class="col-md-6">
-                  <label for="regEmail" class="form-label">Email Address *</label>
-                  <input type="email" id="regEmail" name="email" class="form-control" required>
-                  <div id="regEmailErr" class="invalid-feedback-custom"></div>
-                </div>
-                <div class="col-md-6">
-                  <label for="regPhone" class="form-label">Phone Number *</label>
-                  <input type="tel" id="regPhone" name="phone" class="form-control" required>
-                  <div id="regPhoneErr" class="invalid-feedback-custom"></div>
-                </div>
-                <div class="col-md-3">
-                  <label for="regPassword" class="form-label">Password *</label>
-                  <input type="password" id="regPassword" name="password" class="form-control" required>
-                  <div id="regPasswordErr" class="invalid-feedback-custom"></div>
-                </div>
-                <div class="col-md-3">
-                  <label for="regConfirmPassword" class="form-label">Confirm Password *</label>
-                  <input type="password" id="regConfirmPassword" name="password_confirmation" class="form-control" required>
-                  <div id="regConfirmPasswordErr" class="invalid-feedback-custom"></div>
-                </div>
-                <div class="col-12">
-                  <div class="form-check">
-                    <input type="checkbox" id="regPromoOptIn" name="promo_email_opt_in" value="1" class="form-check-input" checked>
-                    <label for="regPromoOptIn" class="form-check-label fw-semibold">
-                      I agree to receive promotional emails from PERDA
-                    </label>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <button type="submit" class="btn btn-olive px-4">Register Tourist Account</button>
-                </div>
+      <div class="perda-card p-4 p-md-5">
+        <div class="row g-4 align-items-center mb-4">
+          <div class="col-lg-6">
+            <span class="badge-pill badge-approved mb-2">
+              <i class="fa-solid fa-satellite-dish"></i> Real-Time Status Tracker
+            </span>
+            <h2 class="font-heading mb-1">Track Your Booking Status</h2>
+            <p class="mb-0">
+              Enter your booking reference number to check whether your payment receipt is <strong>Pending</strong>, <strong>Approved</strong>, or <strong>Rejected</strong>.
+            </p>
+          </div>
+          <div class="col-lg-6">
+            <form id="bookingTrackForm" novalidate>
+              <label for="trackRefInput" class="form-label">Booking Reference Number</label>
+              <div class="d-flex flex-wrap flex-sm-nowrap gap-2">
+                <input type="text" id="trackRefInput" class="form-control" value="PERDA-2026-84920" placeholder="e.g., PERDA-2026-84920">
+                <button type="submit" class="btn btn-cta flex-shrink-0">
+                  <i class="fa-solid fa-magnifying-glass"></i> Track Status
+                </button>
               </div>
-              <div id="regSuccessBanner"></div>
+              <div id="trackRefErr" class="invalid-feedback-custom"></div>
             </form>
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-2 small">
+              <span class="fw-semibold">Try sample references:</span>
+              <button type="button" class="badge-pill badge-pending border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-84920')">
+                PERDA-2026-84920 (Pending)
+              </button>
+              <button type="button" class="badge-pill badge-approved border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-61209')">
+                PERDA-2026-61209 (Approved)
+              </button>
+              <button type="button" class="badge-pill badge-rejected border-0" style="cursor: pointer;" onclick="quickTrackRef('PERDA-2026-49012')">
+                PERDA-2026-49012 (Rejected)
+              </button>
+            </div>
           </div>
         </div>
+
+        <div id="trackingResultContainer" aria-live="polite"></div>
       </div>
     </div>
   </section>

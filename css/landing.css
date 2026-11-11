@@ -256,11 +256,11 @@
   display: inline-block;
 }
 
-/* Tourist Registration Section */
-.registration-section {
-  background: linear-gradient(135deg, rgba(96, 108, 56, 0.12), rgba(221, 161, 94, 0.18));
-  border-top: 2px solid var(--sand);
-  border-bottom: 2px solid var(--sand);
-  padding: 4rem 0;
+/* Booking Status Tracking Section */
+.tracking-result-card {
+  background-color: var(--cream);
+  border: 2px solid var(--sand);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
 }
 

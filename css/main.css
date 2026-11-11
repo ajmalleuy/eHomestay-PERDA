@@ -51,6 +51,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 88px;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -207,64 +208,208 @@ textarea:focus-visible,
   color: var(--dark-green);
 }
 
-/* 4. PUBLIC FIXED TOP NAVBAR (Dark Green #283618 with Cream Text #FEFAE0) */
+/* 4. PUBLIC SHARED TOP NAVBAR (Dark Green #283618 with Cream Text #FEFAE0) */
+.perda-public-header,
 header:has(.perda-navbar) {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
   width: 100%;
   z-index: 1035;
-}
-
-header:has(.perda-navbar) + main {
-  margin-top: 75px;
+  margin: 0;
+  padding: 0;
 }
 
 .perda-navbar {
-  background-color: var(--dark-green);
-  border-bottom: 3px solid var(--sand);
-  padding: 0.75rem 0;
+  background-color: #283618;
+  border-bottom: 3px solid #DDA15E;
+  padding: 0 !important;
+  margin: 0;
+  min-height: 76px;
+  height: 76px;
   width: 100%;
   z-index: 1035;
+  display: flex;
+  align-items: center;
   box-shadow: 0 4px 20px rgba(40, 54, 24, 0.25);
+}
+
+.perda-navbar-container {
+  width: 100%;
+  max-width: 1200px;
+  height: 76px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.perda-navbar .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 46px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .perda-navbar .navbar-brand img {
   height: 46px;
   width: auto;
+  display: block;
+}
+
+.perda-navbar .navbar-collapse {
+  flex-grow: 1;
+  align-items: center;
+}
+
+.perda-navbar .navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0 auto !important;
+  padding: 0 !important;
+  list-style: none;
+}
+
+.perda-navbar .nav-item {
+  display: flex;
+  align-items: center;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.perda-navbar .nav-item.perda-navbar-cta {
+  margin-left: 8px !important;
+}
+
+.perda-navbar .nav-link,
+.perda-navbar .perda-login-btn,
+.perda-navbar .btn-sand {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  height: 42px;
+  min-height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  box-sizing: border-box;
+  margin: 0 !important;
+  border: 0 !important;
+  transform: none !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .perda-navbar .nav-link {
-  color: var(--cream) !important;
-  font-weight: 500;
-  padding: 0.55rem 1.05rem !important;
-  border-radius: var(--radius-pill);
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  transition: var(--transition-base);
+  padding: 0 18px !important;
+  color: #FEFAE0 !important;
+  background-color: transparent;
+}
+
+.perda-navbar .perda-login-btn,
+.perda-navbar .btn-sand {
+  padding: 0 20px !important;
+  background-color: #DDA15E !important;
+  color: #283618 !important;
+  box-shadow: none !important;
+}
+
+.perda-navbar .perda-login-btn:hover,
+.perda-navbar .perda-login-btn:focus,
+.perda-navbar .btn-sand:hover,
+.perda-navbar .btn-sand:focus {
+  background-color: #BC6C25 !important;
+  color: #FEFAE0 !important;
+  transform: none !important;
+}
+
+.perda-navbar .nav-link i,
+.perda-navbar .perda-login-btn i,
+.perda-navbar .btn-sand i {
+  font-size: 14px;
+  line-height: 1;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .perda-navbar .nav-link:hover {
   background-color: rgba(221, 161, 94, 0.2);
-  color: var(--sand) !important;
+  color: #DDA15E !important;
 }
 
 .perda-navbar .nav-link.active {
-  background-color: var(--olive);
-  color: var(--cream) !important;
-  font-weight: 600;
+  background-color: #606C38 !important;
+  color: #FEFAE0 !important;
 }
 
 .perda-navbar .navbar-toggler {
-  border: 2px solid var(--sand);
-  color: var(--cream);
+  border: 2px solid #DDA15E;
+  color: #FEFAE0;
   min-height: 44px;
   min-width: 44px;
   border-radius: var(--radius-sm);
   padding: 0.4rem 0.65rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 991.98px) {
+  .perda-navbar {
+    height: auto;
+    min-height: 76px;
+  }
+
+  .perda-navbar-container {
+    height: auto;
+    min-height: 76px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .perda-navbar .navbar-toggler {
+    display: inline-flex;
+  }
+
+  .perda-navbar .navbar-collapse {
+    flex-basis: 100%;
+    width: 100%;
+  }
+
+  .perda-navbar .navbar-nav {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 6px;
+    margin: 12px 0 4px 0 !important;
+  }
+
+  .perda-navbar .nav-item,
+  .perda-navbar .nav-item.perda-navbar-cta {
+    width: 100%;
+    margin-left: 0 !important;
+  }
+
+  .perda-navbar .nav-link,
+  .perda-navbar .perda-login-btn,
+  .perda-navbar .btn-sand {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0 18px !important;
+  }
 }
 
 /* Quick Page Switcher Strip for Easy Demo Evaluation */
