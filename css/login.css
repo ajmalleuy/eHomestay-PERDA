@@ -763,25 +763,23 @@ body.login-body {
 }
 
 .social-auth-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 }
 
 .social-auth-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.42rem;
-  min-height: 38px;
-  padding: 0.35rem 0.5rem;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   background-color: var(--white);
   border: 1px solid var(--sand);
-  border-radius: 999px;
+  border-radius: 50%;
   color: var(--dark-green);
-  font-family: var(--login-font-body);
-  font-size: 0.78rem;
-  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
   transition: border-color 0.18s ease, transform 0.18s ease;
@@ -789,21 +787,20 @@ body.login-body {
 
 .social-auth-btn:hover {
   border-color: var(--burnt-orange);
-  color: var(--dark-green);
   transform: translateY(-1px);
 }
 
-.social-brand-svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
+.social-auth-btn:focus-visible {
+  outline: 2px solid var(--burnt-orange);
+  outline-offset: 2px;
+  border-color: var(--burnt-orange);
 }
 
-/* On narrow screens, show brand logo only */
-@media (max-width: 480px) {
-  .social-btn-label {
-    display: none;
-  }
+.social-brand-svg {
+  width: 23px;
+  height: 23px;
+  display: block;
+  flex-shrink: 0;
 }
 
 /* Below the Card Prompt */
