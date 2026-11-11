@@ -74,6 +74,7 @@ All 6 pages (index.html, booking.html, login.html, dashboard.html, verification.
 Open a terminal and run:
 powershell
 Start-Process ".\index.html"
+
 (Or simply double-click index.html in Windows File Explorer).
 Use the top navigation bar ("e-Homestay Platform Pages: 1 to 6") at the very top of every page to jump between all 6 pages.
 Option 2: Run with a Local Web Server (http://localhost:3000)

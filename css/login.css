@@ -1,116 +1,545 @@
 /* ==========================================================================
-   Page 3: Unified Internal Login Styles (login.css)
-   Operators & BPE PERDA Officers (Admin) Portal Authentication
+   e-Homestay PERDA (Inap Desa) - Split-Screen Fluid Login Styles (login.css)
+   All colors are controlled via CSS variables below for single-place tuning.
    ========================================================================== */
 
-.login-page-wrapper {
-  min-height: calc(100vh - 140px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1rem;
-  background: linear-gradient(
-      135deg,
-      rgba(40, 54, 24, 0.88) 0%,
-      rgba(96, 108, 56, 0.82) 100%
-    ),
-    url('../images/hero-village.svg') center/cover no-repeat;
+:root {
+  /* Core PERDA Palette Variables */
+  --olive: #606C38;
+  --dark-green: #283618;
+  --cream: #FEFAE0;
+  --sand: #DDA15E;
+  --burnt-orange: #BC6C25;
+  --white: #FFFFFF;
+  --grey-muted: #7A7A72;
+
+  /* Login Page Semantic Theme Variables (Change palette in one place) */
+  --login-offwhite-bg: var(--cream);
+  --login-fluid-user-bg: var(--olive);
+  --login-fluid-staff-bg: var(--dark-green);
+  --login-card-bg: var(--cream);
+  --login-input-bg: var(--white);
+  --login-input-border: var(--sand);
+  --login-input-focus: var(--burnt-orange);
+  --login-heading-color: var(--dark-green);
+  --login-text-color: var(--dark-green);
+  --login-on-fluid-text: var(--cream);
+  --login-btn-bg: var(--burnt-orange);
+  --login-btn-hover-bg: var(--dark-green);
+  --login-btn-text: var(--cream);
+  --login-badge-bg: var(--sand);
+  --login-pattern-color: var(--cream);
 }
 
-.login-shell-card {
-  background-color: var(--cream);
-  border: 2.5px solid var(--sand);
-  border-radius: var(--radius-card);
-  box-shadow: 0 22px 55px rgba(40, 54, 24, 0.45);
-  overflow: hidden;
-  max-width: 960px;
+/* Full-Viewport Split-Screen Stage */
+body.login-body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--login-offwhite-bg);
+  color: var(--login-text-color);
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+}
+
+.login-split-stage {
+  position: relative;
   width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background-color: var(--login-offwhite-bg);
+  overflow: hidden;
 }
 
-.login-brand-panel {
-  background-color: var(--dark-green);
-  color: var(--cream);
-  padding: 2.75rem 2.25rem;
+/* ==========================================================================
+   STATE 1 (DEFAULT = USER MODE):
+   - Off-White Welcome Panel (40%) on LEFT
+   - Coloured Fluid Panel (60%) on RIGHT
+   STATE 2 (STAFF = ADMIN / OPERATOR MODE):
+   - Coloured Fluid Panel (60%) on LEFT
+   - Off-White Welcome Panel (40%) on RIGHT
+   ========================================================================== */
+.login-split-stage.is-staff-mode {
+  flex-direction: row-reverse;
+}
+
+/* 1. OFF-WHITE WELCOME PANEL (~40% Width on Desktop) */
+.login-welcome-panel {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 40%;
+  max-width: 40%;
+  background-color: var(--login-offwhite-bg);
+  padding: 3.5rem 3.25rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  border-right: 2px solid var(--sand);
+  justify-content: center;
 }
 
-.login-form-panel {
-  padding: 2.75rem 2.25rem;
-  background-color: var(--cream);
+.welcome-content-inner {
+  max-width: 390px;
+  margin: 0 auto;
 }
 
-/* Role Switcher Tabs (Operator vs BPE PERDA Officer) */
-.role-selector-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-  background-color: var(--white);
-  padding: 0.4rem;
-  border-radius: var(--radius-pill);
+.welcome-logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+  text-decoration: none;
+}
+
+.welcome-logo-badge {
+  background-color: var(--dark-green);
+  padding: 0.55rem 1rem;
+  border-radius: 16px;
+  border: 2px solid var(--sand);
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(40, 54, 24, 0.12);
+}
+
+.welcome-logo-badge img {
+  height: 40px;
+  width: auto;
+}
+
+.welcome-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: rgba(221, 161, 94, 0.28);
   border: 1.5px solid var(--sand);
-  margin-bottom: 1.5rem;
+  color: var(--login-heading-color);
+  padding: 0.35rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
-.role-tab-btn {
-  min-height: 44px;
+.welcome-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--login-heading-color);
+  font-size: clamp(1.9rem, 2.8vw, 2.55rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.85rem;
+}
+
+.welcome-subtext {
+  color: var(--login-text-color);
+  opacity: 0.86;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  margin-bottom: 2.25rem;
+}
+
+/* Quiet Side-Switch Link under the Welcome Text */
+.side-switch-link {
+  background: none;
   border: none;
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--dark-green);
+  padding: 0.45rem 0;
+  color: var(--olive);
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
   font-weight: 600;
-  font-size: 0.86rem;
-  transition: var(--transition-base);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: left;
+  border-bottom: 1.5px solid transparent;
+  transition: all 0.25s ease;
+}
+
+.side-switch-link:hover {
+  color: var(--burnt-orange);
+  border-bottom-color: var(--burnt-orange);
+  transform: translateX(3px);
+}
+
+.login-split-stage.is-staff-mode .side-switch-link:hover {
+  transform: translateX(-3px);
+}
+
+.welcome-home-return {
+  margin-top: 2.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--sand);
+  font-size: 0.83rem;
+}
+
+/* ==========================================================================
+   2. COLOURED FLUID PANEL (~60% Width on Desktop) WITH HAND-DRAWN WAVY EDGE
+   ========================================================================== */
+.login-fluid-panel {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 60%;
+  max-width: 60%;
+  background-color: var(--login-fluid-user-bg);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  padding: 3rem 2.5rem 3rem 5.5rem;
+  transition: background-color 0.35s ease;
 }
 
-.role-tab-btn.active {
+.login-split-stage.is-staff-mode .login-fluid-panel {
+  background-color: var(--login-fluid-staff-bg);
+  padding: 3rem 5.5rem 3rem 2.5rem;
+}
+
+/* Hand-Drawn Organic Wavy SVG Divider along the Fluid Panel Edge */
+.fluid-wave-divider {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 115px;
+  height: calc(100% + 4px);
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* In USER mode (fluid panel on RIGHT), wave sits on its LEFT edge */
+.fluid-wave-left {
+  left: -1px;
+  display: block;
+}
+
+.fluid-wave-right {
+  right: -1px;
+  display: none;
+}
+
+/* In STAFF mode (fluid panel on LEFT), wave sits on its RIGHT edge */
+.login-split-stage.is-staff-mode .fluid-wave-left {
+  display: none;
+}
+
+.login-split-stage.is-staff-mode .fluid-wave-right {
+  display: block;
+}
+
+.fluid-wave-divider svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.fluid-wave-divider .wave-fill {
+  fill: var(--login-offwhite-bg);
+}
+
+.fluid-wave-divider .wave-accent-stroke {
+  fill: none;
+  stroke: var(--sand);
+  stroke-width: 2.5;
+  stroke-opacity: 0.55;
+}
+
+/* ==========================================================================
+   3. SCATTERED FAINT LINE-ART BACKGROUND ICONS (Very Low Opacity)
+   ========================================================================== */
+.fluid-bg-icons {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fluid-bg-icons .bg-icon {
+  position: absolute;
+  color: var(--login-pattern-color);
+  opacity: 0.075;
+  font-size: 2.8rem;
+  user-select: none;
+}
+
+/* Individual scattered positions & organic rotations */
+.bg-icon.ic-1  { top: 8%;    left: 18%;  transform: rotate(-18deg); font-size: 2.6rem; }
+.bg-icon.ic-2  { top: 14%;   right: 12%; transform: rotate(15deg);  font-size: 3.2rem; }
+.bg-icon.ic-3  { top: 32%;   left: 11%;  transform: rotate(12deg);  font-size: 2.3rem; }
+.bg-icon.ic-4  { top: 28%;   right: 20%; transform: rotate(-22deg); font-size: 2.5rem; }
+.bg-icon.ic-5  { top: 52%;   left: 15%;  transform: rotate(-10deg); font-size: 3.1rem; }
+.bg-icon.ic-6  { top: 56%;   right: 10%; transform: rotate(20deg);  font-size: 2.7rem; }
+.bg-icon.ic-7  { bottom: 18%; left: 22%; transform: rotate(16deg);  font-size: 2.5rem; }
+.bg-icon.ic-8  { bottom: 12%; right: 16%; transform: rotate(-14deg); font-size: 3.3rem; }
+.bg-icon.ic-9  { top: 75%;   left: 44%;  transform: rotate(-8deg);  font-size: 2.2rem; }
+.bg-icon.ic-10 { top: 11%;   left: 52%;  transform: rotate(19deg);  font-size: 2.4rem; }
+
+/* ==========================================================================
+   4. FORM CARD ON THE COLOURED PANEL
+   ========================================================================== */
+.fluid-form-wrapper {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 430px;
+}
+
+.login-form-card {
+  background-color: var(--login-card-bg);
+  border: 2px solid var(--login-input-border);
+  border-radius: 28px;
+  padding: 2.4rem 2.2rem;
+  box-shadow: 0 22px 50px rgba(40, 54, 24, 0.28);
+}
+
+.form-card-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--login-heading-color);
+  font-size: 1.85rem;
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+
+.form-card-subheading {
+  color: var(--olive);
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin-bottom: 1.65rem;
+}
+
+/* Staff Role Sub-Selector (Operator vs PERDA Officer) inside Staff Mode */
+.staff-role-Selector {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  background-color: var(--white);
+  border: 1.5px solid var(--sand);
+  border-radius: 999px;
+  padding: 0.3rem;
+  margin-bottom: 1.25rem;
+}
+
+.login-split-stage.is-staff-mode .staff-role-Selector {
+  display: grid;
+}
+
+.staff-role-pill {
+  min-height: 38px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dark-green);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.staff-role-pill.active {
   background-color: var(--olive);
   color: var(--cream);
-  box-shadow: 0 4px 12px rgba(96, 108, 56, 0.3);
 }
 
-/* Show / Hide Password Toggle */
-.password-input-group {
+/* Pill-Shaped Inputs with Left Icon & Password Toggle */
+.pill-input-group {
   position: relative;
+  margin-bottom: 1.05rem;
 }
 
-.password-toggle-btn {
+.pill-input-icon {
   position: absolute;
-  right: 8px;
+  left: 18px;
   top: 50%;
   transform: translateY(-50%);
-  min-height: 38px;
-  min-width: 44px;
-  border: none;
-  background: transparent;
   color: var(--olive);
-  border-radius: var(--radius-pill);
+  font-size: 0.95rem;
+  pointer-events: none;
+  z-index: 2;
 }
 
-.password-toggle-btn:hover {
+.pill-input-control {
+  width: 100%;
+  min-height: 50px;
+  background-color: var(--login-input-bg);
+  border: 1.8px solid var(--login-input-border);
+  border-radius: 999px;
+  padding: 0.65rem 3rem 0.65rem 2.85rem;
+  color: var(--login-text-color);
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.92rem;
+  transition: all 0.22s ease;
+}
+
+.pill-input-control::placeholder {
+  color: var(--grey-muted);
+}
+
+.pill-input-control:focus {
+  outline: none;
+  border-color: var(--login-input-focus);
+  box-shadow: 0 0 0 3px rgba(188, 108, 37, 0.18);
+}
+
+.pill-password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--olive);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.pill-password-toggle:hover {
   color: var(--burnt-orange);
 }
 
-.login-error-banner {
-  background-color: var(--burnt-orange);
-  color: var(--cream);
-  border-radius: var(--radius-md);
-  padding: 0.9rem 1.15rem;
-  margin-bottom: 1.25rem;
-  font-size: 0.88rem;
-  font-weight: 500;
-  display: none;
-  align-items: flex-start;
-  gap: 0.65rem;
+/* Solid Pill Login Button & Small Underlined Forgot Password Link */
+.login-submit-btn {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 999px;
+  background-color: var(--login-btn-bg);
+  border: 2px solid var(--login-btn-bg);
+  color: var(--login-btn-text);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.96rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  margin-top: 0.35rem;
+  transition: all 0.25s ease;
 }
 
-.login-error-banner.show {
+.login-submit-btn:hover {
+  background-color: var(--login-btn-hover-bg);
+  border-color: var(--login-btn-hover-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(40, 54, 24, 0.22);
+}
+
+.forgot-link-wrap {
+  text-align: center;
+  margin-top: 0.95rem;
+}
+
+.forgot-password-link {
+  color: var(--dark-green);
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+  color: var(--burnt-orange);
+}
+
+/* Below the Card: "New here? Create an account" */
+.below-card-prompt {
+  text-align: center;
+  margin-top: 1.35rem;
+  color: var(--login-on-fluid-text);
+  font-size: 0.9rem;
+}
+
+.below-card-prompt a,
+.below-card-prompt button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--sand);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.below-card-prompt a:hover,
+.below-card-prompt button:hover {
+  color: var(--cream);
+}
+
+/* Error / Feedback Alert Box inside Form Card */
+.login-feedback-alert {
+  background-color: var(--burnt-orange);
+  color: var(--cream);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 1.1rem;
+  display: none;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.login-feedback-alert.show {
   display: flex;
 }
 
+/* Subtle Staff Demo Quick-Fill Helper Strip (Only visible in Staff Mode) */
+.staff-demo-helper {
+  display: none;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--sand);
+}
+
+.login-split-stage.is-staff-mode .staff-demo-helper {
+  display: block;
+}
+
+.demo-chip-btn {
+  background-color: var(--white);
+  border: 1px solid var(--sand);
+  color: var(--dark-green);
+  border-radius: 999px;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-chip-btn:hover {
+  background-color: var(--sand);
+}
+
+/* ==========================================================================
+   5. RESPONSIVE DESIGN (Tablet & Mobile < 992px)
+   ========================================================================== */
+@media (max-width: 991.98px) {
+  .login-split-stage,
+  .login-split-stage.is-staff-mode {
+    flex-direction: column;
+  }
+
+  .login-welcome-panel,
+  .login-fluid-panel {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .login-split-stage.is-staff-mode .login-fluid-panel {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .fluid-wave-divider {
+    display: none !important;
+  }
+}
