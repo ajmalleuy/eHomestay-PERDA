@@ -418,7 +418,7 @@ function initInternalLoginPage() {
       roleOperatorBtn?.classList.add('active');
       roleAdminBtn?.classList.remove('active');
       if (roleHintBox) {
-        roleHintBox.innerHTML = `<i class="fa-solid fa-house-user me-1" style="color: var(--olive);"></i> <strong>Homestay Operator Portal:</strong> Sign in with your registered PERDA Inap Desa operator email to manage units &amp; verify bookings.`;
+        roleHintBox.innerHTML = `<i class="fa-solid fa-house-user me-1" style="color: var(--olive);"></i> <strong>Homestay Operator Portal:</strong> Sign in with your registered PERDA Homestay operator email to manage units &amp; verify bookings.`;
       }
       if (emailInput) emailInput.placeholder = 'operator@homestayperda.my';
     }

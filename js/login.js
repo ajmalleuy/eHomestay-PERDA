@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       loginStage.setAttribute('data-mode', 'user');
       if (welcomeModePill) {
-        welcomeModePill.innerHTML = '<i class="fa-regular fa-compass"></i> PERDA Inap Desa';
+        welcomeModePill.innerHTML = '<i class="fa-regular fa-compass"></i> PERDA Homestay';
       }
       if (welcomeHeading) {
         welcomeHeading.textContent = 'Welcome back';

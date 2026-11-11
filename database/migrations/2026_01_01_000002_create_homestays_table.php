@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Migration 2: Homestays Table (PERDA Inap Desa Units)
+ * Migration 2: Homestays Table (PERDA Homestay Units)
  */
 return new class extends Migration
 {

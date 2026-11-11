@@ -21,7 +21,7 @@
       </div>
       <h1 class="hero-title">Discover Authentic Malaysian Village Hospitality</h1>
       <p class="hero-subtitle">
-        Search, check real-time availability, and book verified PERDA Inap Desa homestays across scenic paddy fields, orchards, and tranquil islands in Penang.
+        Search, check real-time availability, and book verified PERDA Homestay homestays across scenic paddy fields, orchards, and tranquil islands in Penang.
       </p>
 
       <div class="quick-search-card text-start mx-auto" style="max-width: 1080px;">
@@ -76,7 +76,7 @@
       <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
         <div>
           <span class="badge-pill badge-pending mb-2"><i class="fa-solid fa-seedling"></i> Curated Rural Retreats</span>
-          <h2 class="mb-1">Featured PERDA Inap Desa Homestays</h2>
+          <h2 class="mb-1">Featured PERDA Homestay Homestays</h2>
           <p id="searchResultCount" class="mb-0" style="color: var(--olive);">Showing all PERDA Homestays</p>
         </div>
         <button type="button" id="resetSearchBtn" class="btn btn-outline-olive">

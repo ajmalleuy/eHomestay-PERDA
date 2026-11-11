@@ -21,7 +21,7 @@
         </ul>
       </div>
       <div class="col-sm-6 col-lg-3">
-        <h5>PERDA Inap Desa Districts</h5>
+        <h5>PERDA Homestay Districts</h5>
         <ul class="list-unstyled d-grid gap-2">
           <li><i class="fa-solid fa-location-dot me-2" style="color: var(--sand);"></i> Kepala Batas &amp; Tasek Gelugor</li>
           <li><i class="fa-solid fa-location-dot me-2" style="color: var(--sand);"></i> Mengkuang Titi, Bukit Mertajam</li>

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * ============================================================================
  * Homestay Model (app/Models/Homestay.php)
- * Represents a local PERDA Inap Desa homestay unit in Penang.
+ * Represents a local PERDA Homestay unit in Penang.
  * ============================================================================
  */
 class Homestay extends Model

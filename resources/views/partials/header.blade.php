@@ -6,7 +6,7 @@
   <nav class="navbar navbar-expand-lg perda-navbar" aria-label="Main Navigation">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="{{ route('landing') }}">
-        <img src="{{ asset('images/logo.svg') }}" alt="e-Homestay PERDA Inap Desa Logo">
+        <img src="{{ asset('images/logo.svg') }}" alt="e-Homestay PERDA Homestay Logo">
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#publicNavbarCollapse" aria-controls="publicNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation menu">
         <i class="fa-solid fa-bars"></i>
